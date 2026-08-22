@@ -58,14 +58,14 @@ Full architecture: see `context/HeatSentinel_AI_System_Design.md`
 | Phase 1 — Frontend (Step 6) | ✅ Done | Teammate | Full React command center UI complete |
 | Phase 1 — Backend (Steps 2–5) | ✅ Done | AI | FastAPI skeleton, config, logging, routers, db, models, pytest |
 | Phase 2 — FortyGuard client (Steps 7–12) | ✅ Done | AI | Core client, test-scan API, SQLite caching, MapLibre rendering |
-| Phase 3 — Spatial Engine (Steps 13–17) | ❌ Not started | — | |
+| Phase 3 — Spatial Engine (Steps 13–17) | ✅ Done | AI | Tiling, scan orchestration, hotspot detection, refinement |
 | Phase 4 — Analytics (Steps 18–22) | ❌ Not started | — | |
 | Phase 5 — Agent Loop (Steps 23–28) | ❌ Not started | — | |
 | Phase 6 — Vulnerability (Steps 29–33) | ❌ Not started | — | |
 | Phase 7 — NYC Validation | ❌ Not started | — | Non-blocking |
 | Phase 16 — Demo Mode | ❌ Not started | — | |
 
-**Current position: Start of Phase 3 (Spatial Engine)**
+**Current position: Start of Phase 4 (Heat Analytics)**
 
 ---
 
@@ -181,6 +181,15 @@ feature/backend-phase1-foundation
 - Steps 7-12 are complete. Phase 2 is finished!
 - What's next: Start Phase 3 (Spatial Engine) to tile Phoenix.
 
+### Session 2026-08-22 (Phase 3 - Spatial Engine)
+- Built deterministic 10 mi² grid tiling algorithm for the Phoenix target area (`spatial_engine.py`).
+- Built async scan orchestration (`scan_service.py`) to hit FortyGuard API concurrently across multiple tiles.
+- Built hotspot detection logic using DBSCAN clustering (`hotspot_service.py`) to isolate top 20% hot cells.
+- Implemented hotspot polygon refinement logic with geometric buffers (EPSG:6933).
+- Added `scikit-learn` to backend dependencies for clustering.
+- All Phase 3 steps (13-16) are complete and unit tested.
+- What's next: Start Phase 4 (Heat Analytics).
+
 ### Open Items Before Coding Starts
 1. ❓ **LLM choice:** Gemini (`.env.example` has key slot) or Anthropic (roadmap says this)? — User to decide
 2. ❓ **FortyGuard API key:** User has it — will add to `.env` when backend config is ready
@@ -193,8 +202,8 @@ feature/backend-phase1-foundation
 To resume in a new session:
 ```
 Read .agents/memory/heatsentinel-project.md first.
-We are on branch feature/backend-phase2-fortyguard.
-Phase 2 (FortyGuard Integration) is 100% complete.
-Next task: Start Phase 3 - Spatial Engine (Step 13).
+We are on branch feature/backend-phase3-spatial (or similar).
+Phase 3 (Spatial Engine) is 100% complete.
+Next task: Start Phase 4 - Heat Analytics (Step 17).
 Context Handoff + System Design + Roadmap are in context/ folder.
 ```

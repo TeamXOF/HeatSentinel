@@ -16,3 +16,9 @@ This specific region was chosen because it represents a high-contrast zone for h
 * South: Baseline Rd (~33.375 N)
 
 The source GeoJSON for this polygon is version-controlled at `/backend/app/data/phoenix_target_area.geojson`.
+
+## Hotspot Detection & Thresholds
+
+HeatSentinel employs a dynamic, relative threshold for identifying hotspots within a given scan area. Rather than using an absolute temperature threshold (which may fluctuate seasonally or daily), the system isolates cells in the top 20th percentile (i.e. >= 80th percentile) of temperature/exceedance for the specific scan being analyzed.
+
+**Important Note:** This 80th percentile threshold is a *project-derived analytical heuristic* designed to guide the AI agent toward the most anomalously hot areas within the current target zone. It is **not** an official public health, meteorological, or municipal standard for heat stress.

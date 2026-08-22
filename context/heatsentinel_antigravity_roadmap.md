@@ -582,9 +582,9 @@ Report: files changed, confirmation of visual rendering (describe what you see),
 
 ---
 
-## [ ] PHASE 3 — SPATIAL ENGINE
+## [X] PHASE 3 — SPATIAL ENGINE
 
-### [ ] STEP 13 — AOI Tiling Engine (10 mi² Constraint)
+### [X] STEP 13 — AOI Tiling Engine (10 mi² Constraint)
 
 **PURPOSE:** Build the core tiling algorithm that divides the Phoenix target area into ≤10 mi² AOIs.
 
@@ -624,7 +624,7 @@ COMPLETION REPORT
 Report: tiling algorithm summary, real tile count/stats for Phoenix target area, test results, and next dependency (multi-AOI scan orchestration).
 ```
 
-### [ ] STEP 14 — Multi-AOI Scan Orchestration
+### [X] STEP 14 — Multi-AOI Scan Orchestration
 
 **PURPOSE:** Run FortyGuard across all tiles of the target area and combine results.
 
@@ -663,7 +663,7 @@ COMPLETION REPORT
 Report: scan orchestration behavior, real Phoenix scan results (tile count, cell count, duration, any failures), test results, and next dependency (hotspot detection).
 ```
 
-### [ ] STEP 15 — Hotspot Detection
+### [X] STEP 15 — Hotspot Detection
 
 **PURPOSE:** Identify candidate high-interest zones from the combined scan.
 
@@ -700,7 +700,7 @@ COMPLETION REPORT
 Report: detection algorithm summary, threshold/clustering choices and rationale, real Phoenix hotspot results, test results, and next dependency (polygon refinement for selected hotspots).
 ```
 
-### [ ] STEP 16 — Hotspot Polygon Refinement
+### [X] STEP 16 — Hotspot Polygon Refinement
 
 **PURPOSE:** Allow the agent to "zoom in" on a selected hotspot with a smaller, more precise AOI.
 

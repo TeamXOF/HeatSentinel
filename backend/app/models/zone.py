@@ -4,6 +4,7 @@ Pydantic models for Heat Zones, evidence, and spatial geometry.
 
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
+from datetime import datetime
 
 
 class LatLng(BaseModel):
@@ -32,3 +33,13 @@ class HeatZone(BaseModel):
     response_gap_score: float
     priority_level: str = "medium"  # critical, high, medium, low
     evidence: Optional[ZoneEvidence] = None
+
+class HeatMetrics(BaseModel):
+    current_temp_c: float
+    persistence_hours: float
+    exceedance_hours: float
+    anomaly_c: Optional[float]
+    baseline_available: bool
+    data_sources: List[str]
+    computed_at: datetime
+    mode: str = "live"

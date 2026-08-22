@@ -59,13 +59,13 @@ Full architecture: see `context/HeatSentinel_AI_System_Design.md`
 | Phase 1 — Backend (Steps 2–5) | ✅ Done | AI | FastAPI skeleton, config, logging, routers, db, models, pytest |
 | Phase 2 — FortyGuard client (Steps 7–12) | ✅ Done | AI | Core client, test-scan API, SQLite caching, MapLibre rendering |
 | Phase 3 — Spatial Engine (Steps 13–17) | ✅ Done | AI | Tiling, scan orchestration, hotspot detection, refinement |
-| Phase 4 — Analytics (Steps 18–22) | ❌ Not started | — | |
+| Phase 4 — Analytics (Steps 17–19) | ✅ Done | AI | Persistence, Exceedance, Baseline, HeatMetrics, Caching |
 | Phase 5 — Agent Loop (Steps 23–28) | ❌ Not started | — | |
 | Phase 6 — Vulnerability (Steps 29–33) | ❌ Not started | — | |
 | Phase 7 — NYC Validation | ❌ Not started | — | Non-blocking |
 | Phase 16 — Demo Mode | ❌ Not started | — | |
 
-**Current position: Start of Phase 4 (Heat Analytics)**
+**Current position: Start of Phase 5 (Agent Loop)**
 
 ---
 
@@ -190,6 +190,16 @@ feature/backend-phase1-foundation
 - All Phase 3 steps (13-16) are complete and unit tested.
 - What's next: Start Phase 4 (Heat Analytics).
 
+### Session 2026-08-22 (Phase 4 - Heat Analytics)
+- Built Native Persistence & Exceedance Analytics wrapper in `analytics_engine.py` (Step 17).
+- Replaced hardcoded threshold assumptions with a dynamic, climate-aware threshold.
+- Built Historical Baseline constructor (`get_historical_baseline`) using a 5-day concurrent lookback on `tcm` endpoint (Step 18).
+- Implemented robust `calculate_anomaly` fallback to prevent fabricating data if the baseline is unavailable.
+- Created `HeatMetrics` unified model in `zone.py` and implemented `compute_zone_heat_metrics` caching (Step 19).
+- Documented methodology in `docs/methodology.md`.
+- All Phase 4 steps are complete and unit tested.
+- What's next: Start Phase 5 (Agent Loop).
+
 ### Open Items Before Coding Starts
 1. ❓ **LLM choice:** Gemini (`.env.example` has key slot) or Anthropic (roadmap says this)? — User to decide
 2. ❓ **FortyGuard API key:** User has it — will add to `.env` when backend config is ready
@@ -202,8 +212,8 @@ feature/backend-phase1-foundation
 To resume in a new session:
 ```
 Read .agents/memory/heatsentinel-project.md first.
-We are on branch feature/backend-phase3-spatial (or similar).
-Phase 3 (Spatial Engine) is 100% complete.
-Next task: Start Phase 4 - Heat Analytics (Step 17).
+We are on branch phase-4.
+Phase 4 (Heat Analytics) is 100% complete.
+Next task: Start Phase 5 - Agent Loop.
 Context Handoff + System Design + Roadmap are in context/ folder.
 ```

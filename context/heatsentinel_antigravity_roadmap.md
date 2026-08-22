@@ -739,9 +739,9 @@ Report: refinement logic summary, real refined-polygon result, test results, exp
 
 ---
 
-## [ ] PHASE 4 — HEAT ANALYTICS
+## [X] PHASE 4 — HEAT ANALYTICS
 
-### [ ] STEP 17 — Native Persistence & Exceedance Analytics
+### [X] STEP 17 — Native Persistence & Exceedance Analytics
 
 **PURPOSE:** Use FortyGuard's native persistence/exceedance analytic types rather than recreating them.
 
@@ -780,7 +780,7 @@ COMPLETION REPORT
 Report: documented threshold and rationale, real Phoenix persistence/exceedance sample results, test results, and next dependency (historical baseline / heat anomaly calculation).
 ```
 
-### [ ] STEP 18 — Historical Baseline & Heat Anomaly
+### [X] STEP 18 — Historical Baseline & Heat Anomaly
 
 **PURPOSE:** Build a documented, non-fabricated historical baseline and anomaly calculation.
 
@@ -819,7 +819,7 @@ COMPLETION REPORT
 Report: baseline methodology as implemented, real empirical finding on FortyGuard historical data depth for Phoenix, test results, and next dependency (normalized zone-level metric aggregation).
 ```
 
-### [ ] STEP 19 — Zone-Level Metric Normalization & Caching
+### [X] STEP 19 — Zone-Level Metric Normalization & Caching
 
 **PURPOSE:** Combine tcm, persistence, exceedance, and anomaly into one normalized per-zone metrics object; add caching.
 

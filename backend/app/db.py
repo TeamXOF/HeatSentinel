@@ -68,4 +68,11 @@ def init_db():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS zone_heat_metrics_cache (
+                cache_key TEXT PRIMARY KEY,
+                response_json TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
     logger.info("Database initialized successfully.")

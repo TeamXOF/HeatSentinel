@@ -1,0 +1,60 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Production build outputs
+dist/
+build/
+coverage/
+scratch/
+
+# Environment files & Secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*
+!.env.example
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+
+# Editor & OS files
+.DS_Store
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+Thumbs.db
+
+# AG Kit — Agents / Skills / Workflows (private, do not push)
+# Ignore all .agents subfolders EXCEPT memory/ (project conventions)
+.agents/.ag-kit/
+.agents/.agents/
+.agents/agent/
+.agents/hooks/
+.agents/manifest.json
+.agents/manifest.lock.json
+.agents/mcp_config.json
+.agents/antigravity.json
+.agents/rules/
+.agents/schemas/
+.agents/scripts/
+.agents/skills/
+.agents/workflows/
+.agents/ARCHITECTURE.md
+.agents/CHANGELOG.md
+.agents/DEPENDENCY_GRAPH.md
+.agents/README.md
+.agents/VERSION
+.agents/hooks.json

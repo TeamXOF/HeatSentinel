@@ -129,8 +129,8 @@ All in `context/` folder:
 - In-process dict job store initially, Redis only if needed Day 5-6
 - No GeoPandas at Phase 1 (defer to Phase 3 when AOI math needs it)
 
-### Open Question (Blocking Phase 5)
-- ❓ **LLM for agent layer:** `.env.example` has `GEMINI_API_KEY` but roadmap says Anthropic. Team must decide before Phase 5.
+### Resolved Questions
+- ✅ **LLM choice:** Gemini for now. Will migrate to Anthropic later when the API key is available.
 
 ---
 

@@ -114,9 +114,9 @@ Report: (1) full discovery findings as listed above, (2) whether this is a green
 
 ---
 
-## [ ] PHASE 1 — FOUNDATION
+## [x] PHASE 1 — FOUNDATION
 
-### [ ] STEP 2 — Monorepo Structure & Tooling Baseline
+### [x] STEP 2 — Monorepo Structure & Tooling Baseline
 
 **PURPOSE:** Create the backend/frontend skeleton and dependency baseline.
 
@@ -163,7 +163,7 @@ COMPLETION REPORT
 Report: files changed, commands run, whether backend/frontend both start cleanly, whether the frontend successfully calls `/health`, any dependency install issues, and confirm next step (env/secrets configuration) is unblocked.
 ```
 
-### [ ] STEP 3 — Environment Configuration & Secrets Handling
+### [x] STEP 3 — Environment Configuration & Secrets Handling
 
 **PURPOSE:** Set up `.env`-based configuration for FortyGuard and Anthropic keys, safely.
 
@@ -205,7 +205,7 @@ COMPLETION REPORT
 Report: files changed, exact env var names defined, test/validation results, confirmation that no secret leakage exists in logs or responses, and next dependency (logging setup).
 ```
 
-### [ ] STEP 4 — Structured Logging & Error Handling Baseline
+### [x] STEP 4 — Structured Logging & Error Handling Baseline
 
 **PURPOSE:** Establish consistent logging/error conventions used by every later service.
 
@@ -245,7 +245,7 @@ COMPLETION REPORT
 Report: files changed, sample of log output format, confirmation error responses don't leak secrets/stack traces, and next dependency (backend app skeleton / router structure).
 ```
 
-### [ ] STEP 5 — Backend Application Structure (Routers, Services, Models)
+### [x] STEP 5 — Backend Application Structure (Routers, Services, Models)
 
 **PURPOSE:** Establish the modular backend package layout the rest of the roadmap will fill in.
 

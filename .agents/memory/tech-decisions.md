@@ -16,7 +16,7 @@ updated: 2026-07-18
 - Backend: Python 3.11+ + FastAPI + Uvicorn (modular monolith — no microservices)
 - Geospatial: Shapely only at Phase 1; defer GeoPandas decision to Phase 3
 - Storage: SQLite file-based; no PostgreSQL for 6-day MVP
-- LLM: **TBD** — .env.example has GEMINI_API_KEY; roadmap says Anthropic. Decision blocking Phase 5.
+- LLM: **Gemini** (currently configured in `.env.example`). Will migrate to Anthropic later when the API key is available.
 - Testing: pytest + pytest-asyncio (backend); Vitest (frontend, future)
 
 ### FortyGuard API Decisions

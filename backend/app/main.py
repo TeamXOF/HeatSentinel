@@ -6,15 +6,25 @@ from contextlib import asynccontextmanager
 from app.errors import HeatSentinelError
 from app.logging_config import logger
 from app.db import init_db
-from app.routers import health, heat_hunt
+from app.routers import health, heat_hunt, fortyguard
 
+
+import httpx
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting HeatSentinel AI backend...")
     init_db()
+    
+    # Initialize global httpx AsyncClient for connection pooling
+    app.state.http_client = httpx.AsyncClient(timeout=30.0)
+    logger.info("Global HTTP client initialized.")
+    
     yield
+    
     logger.info("Shutting down HeatSentinel AI backend...")
+    await app.state.http_client.aclose()
+    logger.info("Global HTTP client closed.")
 
 
 app = FastAPI(
@@ -45,3 +55,4 @@ app.add_middleware(
 # Include routers
 app.include_router(health.router)
 app.include_router(heat_hunt.router)
+app.include_router(fortyguard.router)

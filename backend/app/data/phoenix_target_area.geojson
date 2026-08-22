@@ -1,0 +1,42 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Phoenix Demo Target Area (Downtown + South)",
+        "city": "Phoenix",
+        "state": "AZ",
+        "area_mi2": 23.3,
+        "source_note": "Custom bounding polygon roughly following I-10, I-17, and South Mountain boundaries."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -112.095,
+              33.465
+            ],
+            [
+              -112.03,
+              33.465
+            ],
+            [
+              -112.03,
+              33.375
+            ],
+            [
+              -112.095,
+              33.375
+            ],
+            [
+              -112.095,
+              33.465
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

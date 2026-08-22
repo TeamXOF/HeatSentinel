@@ -15,6 +15,8 @@ import {
   mockHeatZoneMarkers,
   mockHeatGeoJSON,
 } from '../data/mockHeatMapData';
+import { useQuery } from '@tanstack/react-query';
+import { fetchTestScan } from '../api/fortyguard';
 
 interface HyperlocalHeatMapCardProps {
   onZoneSelect?: (zoneId: string) => void;
@@ -34,6 +36,13 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
+
+  // 1) React Query for real FortyGuard data
+  const { data: heatResponse, isLoading, isError, error } = useQuery({
+    queryKey: ['fortyguard-test-scan'],
+    queryFn: () => fetchTestScan(false),
+    staleTime: Infinity, // keep it cached
+  });
 
   // Filter tabs config
   const filterTabs: { id: MapFilterTab; label: string }[] = [
@@ -91,17 +100,26 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
       if (!map.getSource('heat-risk-overlay')) {
         map.addSource('heat-risk-overlay', {
           type: 'geojson',
-          data: mockHeatGeoJSON,
+          data: heatResponse?.data || mockHeatGeoJSON,
         });
 
-        // Heat fill layer with soft blur/opacity
+        // Heat fill layer with soft blur/opacity based on real temperature values
         map.addLayer({
           id: 'heat-risk-fill',
           type: 'fill',
           source: 'heat-risk-overlay',
           paint: {
-            'fill-color': ['get', 'color'],
-            'fill-opacity': ['get', 'opacity'],
+            'fill-color': [
+              'interpolate',
+              ['linear'],
+              // Fallback property check in case the API returns 'value', 'temp', or 'tcm'
+              ['coalesce', ['get', 'value'], ['get', 'temp'], ['get', 'tcm'], ['get', 'temperature'], 90],
+              80, '#0D9488', // Teal (Low)
+              95, '#D97706', // Amber (Mod)
+              105, '#EA580C', // Orange (High)
+              115, '#DC2626'  // Red (Critical)
+            ],
+            'fill-opacity': 0.6,
           },
         });
 
@@ -111,9 +129,9 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
           type: 'line',
           source: 'heat-risk-overlay',
           paint: {
-            'line-color': ['get', 'color'],
-            'line-width': 1.5,
-            'line-opacity': 0.6,
+            'line-color': '#000000',
+            'line-width': 1,
+            'line-opacity': 0.1,
           },
         });
       }
@@ -173,6 +191,16 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
     };
   }, []);
 
+  // Update GeoJSON source dynamically when React Query data changes!
+  useEffect(() => {
+    if (mapLoaded && mapInstanceRef.current && heatResponse?.data) {
+      const source = mapInstanceRef.current.getSource('heat-risk-overlay') as maplibregl.GeoJSONSource;
+      if (source) {
+        source.setData(heatResponse.data);
+      }
+    }
+  }, [heatResponse, mapLoaded]);
+
   // Map control handlers
   const handleZoomIn = () => {
     if (mapInstanceRef.current) {
@@ -221,6 +249,11 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
             >
               <Info size={15} strokeWidth={2} />
             </button>
+            {/* Status Badges */}
+            {isLoading && <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded animate-pulse">LOADING</span>}
+            {isError && <span className="text-[10px] font-bold bg-red-100 text-red-700 px-2 py-0.5 rounded" title={(error as Error)?.message}>ERROR</span>}
+            {heatResponse?.mode === "live" && <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">LIVE DATA</span>}
+            {heatResponse?.mode === "cached" && <span className="text-[10px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded">CACHED</span>}
           </div>
 
           {/* Filter Pills - Horizontal scrollable on mobile */}

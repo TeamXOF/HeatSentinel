@@ -70,9 +70,9 @@ FortyGuard-touching prompts additionally carry the FortyGuard special rule.
 
 ---
 
-## [x] PHASE 0 — REPOSITORY DISCOVERY
+## [X] PHASE 0 — REPOSITORY DISCOVERY
 
-### [x] STEP 1 — Repository & Environment Discovery
+### [X] STEP 1 — Repository & Environment Discovery
 
 **PURPOSE:** Establish ground truth on repo state, stack, and environment before any implementation begins.
 
@@ -114,9 +114,9 @@ Report: (1) full discovery findings as listed above, (2) whether this is a green
 
 ---
 
-## [x] PHASE 1 — FOUNDATION
+## [X] PHASE 1 — FOUNDATION
 
-### [x] STEP 2 — Monorepo Structure & Tooling Baseline
+### [X] STEP 2 — Monorepo Structure & Tooling Baseline
 
 **PURPOSE:** Create the backend/frontend skeleton and dependency baseline.
 
@@ -163,7 +163,7 @@ COMPLETION REPORT
 Report: files changed, commands run, whether backend/frontend both start cleanly, whether the frontend successfully calls `/health`, any dependency install issues, and confirm next step (env/secrets configuration) is unblocked.
 ```
 
-### [x] STEP 3 — Environment Configuration & Secrets Handling
+### [X] STEP 3 — Environment Configuration & Secrets Handling
 
 **PURPOSE:** Set up `.env`-based configuration for FortyGuard and Anthropic keys, safely.
 
@@ -205,7 +205,7 @@ COMPLETION REPORT
 Report: files changed, exact env var names defined, test/validation results, confirmation that no secret leakage exists in logs or responses, and next dependency (logging setup).
 ```
 
-### [x] STEP 4 — Structured Logging & Error Handling Baseline
+### [X] STEP 4 — Structured Logging & Error Handling Baseline
 
 **PURPOSE:** Establish consistent logging/error conventions used by every later service.
 
@@ -245,7 +245,7 @@ COMPLETION REPORT
 Report: files changed, sample of log output format, confirmation error responses don't leak secrets/stack traces, and next dependency (backend app skeleton / router structure).
 ```
 
-### [x] STEP 5 — Backend Application Structure (Routers, Services, Models)
+### [X] STEP 5 — Backend Application Structure (Routers, Services, Models)
 
 **PURPOSE:** Establish the modular backend package layout the rest of the roadmap will fill in.
 
@@ -288,7 +288,7 @@ COMPLETION REPORT
 Report: full file tree created, test results, confirmation `/health` still works, and next dependency (frontend app shell / command center layout skeleton).
 ```
 
-### [x] STEP 6 — Frontend Application Shell (Command Center Layout Skeleton)
+### [X] STEP 6 — Frontend Application Shell (Command Center Layout Skeleton)
 
 **PURPOSE:** Lay out the five UI regions (header, map, priority panel, WHY panel, agent activity panel) as empty containers.
 
@@ -333,7 +333,7 @@ Report: files created, screenshot description of the resulting layout, confirmat
 
 ## [ ] PHASE 2 — FORTYGUARD INTEGRATION
 
-### [ ] STEP 7 — FortyGuard API Access Verification
+### [X] STEP 7 — FortyGuard API Access Verification
 
 **PURPOSE:** Confirm the hackathon API key actually works before building the client.
 
@@ -374,7 +374,7 @@ COMPLETION REPORT
 Report exactly what worked, what didn't, the real response schema observed (field names/types), any discrepancies from the assumed spec, and confirm whether Phoenix is confirmed to have usable data coverage at this location. Flag any blockers before proceeding to client abstraction.
 ```
 
-### [ ] STEP 8 — Phoenix Target Area & Demo Sub-Area Selection
+### [X] STEP 8 — Phoenix Target Area & Demo Sub-Area Selection
 
 **PURPOSE:** Lock the exact Phoenix polygon(s) used for the live demo.
 
@@ -414,7 +414,7 @@ COMPLETION REPORT
 Report: chosen area name/boundary reasoning, computed area in mi², confirmation it's tileable into multiple ≤10 mi² AOIs, files created, and next dependency (FortyGuard request/response models).
 ```
 
-### [ ] STEP 9 — FortyGuard Request/Response Pydantic Models
+### [X] STEP 9 — FortyGuard Request/Response Pydantic Models
 
 **PURPOSE:** Formalize typed models based on the real observed schema from Step 7.
 
@@ -455,7 +455,7 @@ COMPLETION REPORT
 Report: models defined, field names and their source (spec vs. observed fixture), test results, and next dependency (FortyGuard client with async polling).
 ```
 
-### [ ] STEP 10 — FortyGuard Client: Submit + Async Polling
+### [X] STEP 10 — FortyGuard Client: Submit + Async Polling
 
 **PURPOSE:** Build the single, centralized FortyGuard client service.
 
@@ -499,7 +499,7 @@ COMPLETION REPORT
 Report: methods implemented, test results (mocked and live), confirmation the 10 mi² validation works, confirmation no scattered FortyGuard calls exist elsewhere in the codebase, and next dependency (heatmap visualization on the map).
 ```
 
-### [ ] STEP 11 — First Real FortyGuard Call Wired to Backend API
+### [X] STEP 11 — First Real FortyGuard Call Wired to Backend API
 
 **PURPOSE:** Expose a real backend endpoint that triggers a FortyGuard call for one AOI.
 
@@ -541,7 +541,7 @@ COMPLETION REPORT
 Report: endpoint behavior confirmed live, caching confirmed working, response shape, test results, and next dependency (map visualization of this data on the frontend).
 ```
 
-### [ ] STEP 12 — Heat Layer Visualization on the Map
+### [X] STEP 12 — Heat Layer Visualization on the Map
 
 **PURPOSE:** Render real FortyGuard heat data on the Command Center map.
 

@@ -57,7 +57,7 @@ Full architecture: see `context/HeatSentinel_AI_System_Design.md`
 | Phase 0 — Discovery | ✅ Done | AI | Context docs analyzed, API docs scraped, PDF converted |
 | Phase 1 — Frontend (Step 6) | ✅ Done | Teammate | Full React command center UI complete |
 | Phase 1 — Backend (Steps 2–5) | ✅ Done | AI | FastAPI skeleton, config, logging, routers, db, models, pytest |
-| Phase 2 — FortyGuard client (Steps 7–12) | ❌ Not started | — | |
+| Phase 2 — FortyGuard client (Steps 7–12) | ✅ Done | AI | Core client, test-scan API, SQLite caching, MapLibre rendering |
 | Phase 3 — Spatial Engine (Steps 13–17) | ❌ Not started | — | |
 | Phase 4 — Analytics (Steps 18–22) | ❌ Not started | — | |
 | Phase 5 — Agent Loop (Steps 23–28) | ❌ Not started | — | |
@@ -65,7 +65,7 @@ Full architecture: see `context/HeatSentinel_AI_System_Design.md`
 | Phase 7 — NYC Validation | ❌ Not started | — | Non-blocking |
 | Phase 16 — Demo Mode | ❌ Not started | — | |
 
-**Current position: Start of Phase 2 (FortyGuard API Client)**
+**Current position: Start of Phase 3 (Spatial Engine)**
 
 ---
 
@@ -169,6 +169,18 @@ feature/backend-phase1-foundation
 - Branched to `feature/backend-phase2-fortyguard`
 - What's next: Build FortyGuard API Client (Step 7)
 
+### Session 2026-08-22 (Phase 2 - FortyGuard Integration)
+- Built `FortyGuardClient` class connecting to the real FortyGuard `/api/v1/scan` and `/api/v1/status` endpoints.
+- Implemented robust `aiohttp`/`httpx` asynchronous fetching with built-in polling and rate limit handling.
+- Defined a deterministic target area (Phoenix Downtown Polygon).
+- Implemented SQLite caching for FortyGuard API responses to minimize API calls using SHA-256 request hashing.
+- Built `POST /api/fortyguard/test-scan` FastAPI route that returns cached or live data.
+- Built integration tests for FortyGuard endpoints (`test_fortyguard_client.py` & `test_fortyguard_api.py`) passing 100%.
+- Wired frontend `HyperlocalHeatMapCard.tsx` to `POST /api/fortyguard/test-scan` using TanStack React Query.
+- Rendered FortyGuard GeoJSON responses as a beautiful MapLibre `fill` layer interpolating temperature dynamically.
+- Steps 7-12 are complete. Phase 2 is finished!
+- What's next: Start Phase 3 (Spatial Engine) to tile Phoenix.
+
 ### Open Items Before Coding Starts
 1. ❓ **LLM choice:** Gemini (`.env.example` has key slot) or Anthropic (roadmap says this)? — User to decide
 2. ❓ **FortyGuard API key:** User has it — will add to `.env` when backend config is ready
@@ -181,8 +193,8 @@ feature/backend-phase1-foundation
 To resume in a new session:
 ```
 Read .agents/memory/heatsentinel-project.md first.
-We are on branch feature/backend-phase1-foundation.
-Next task: Build backend/ FastAPI skeleton (Phase 1, Steps 2-5).
+We are on branch feature/backend-phase2-fortyguard.
+Phase 2 (FortyGuard Integration) is 100% complete.
+Next task: Start Phase 3 - Spatial Engine (Step 13).
 Context Handoff + System Design + Roadmap are in context/ folder.
-API reference is in context/fortyguard-api-reference.md — do not re-scrape.
 ```

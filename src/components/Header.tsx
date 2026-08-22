@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Sun, MapPin, ChevronDown, Bell, Radar, Loader2, CheckCircle2, AlertTriangle, RotateCcw, Menu, User, Shield } from 'lucide-react';
 import { HeaderProps } from '../types';
+import { useQueryClient, useIsFetching } from '@tanstack/react-query';
 import { useHeatHunt } from '../api';
+import { fetchTestScan } from '../api/fortyguard';
 
 export const Header: React.FC<HeaderProps> = ({
   greeting = 'Good Morning, Team HeatSentinel',
@@ -21,6 +23,17 @@ export const Header: React.FC<HeaderProps> = ({
     simulateFailure,
     setSimulateFailure,
   } = useHeatHunt();
+
+  const queryClient = useQueryClient();
+  const isFetchingHeat = useIsFetching({ queryKey: ['fortyguard-test-scan'] }) > 0;
+
+  const handleLoadHeatData = async () => {
+    // Manually trigger the query. Any component listening via useQuery will update.
+    await queryClient.fetchQuery({
+      queryKey: ['fortyguard-test-scan'],
+      queryFn: () => fetchTestScan(),
+    });
+  };
 
   return (
     <header
@@ -112,6 +125,21 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             </div>
           )}
+
+          {/* TEMPORARY STEP 12 BUTTON: Load Heat Data */}
+          <button
+            type="button"
+            onClick={handleLoadHeatData}
+            disabled={isFetchingHeat}
+            className={`min-h-[44px] inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-full font-bold text-xs uppercase tracking-wider transition-all shadow-xs shrink-0 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none ${
+              isFetchingHeat
+                ? 'bg-blue-300 text-white cursor-not-allowed'
+                : 'bg-blue-600 hover:bg-blue-700 active:scale-95 text-white cursor-pointer hover:shadow-md'
+            }`}
+          >
+            {isFetchingHeat ? <Loader2 size={15} className="animate-spin" /> : <Radar size={15} />}
+            <span className="hidden sm:inline">Load Heat Data</span>
+          </button>
 
           {/* Primary RUN HEAT HUNT Button - Min 44px Touch Target */}
           <button

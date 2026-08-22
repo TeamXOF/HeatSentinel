@@ -55,17 +55,19 @@ Full architecture: see `context/HeatSentinel_AI_System_Design.md`
 | Phase | Status | Owner | Notes |
 |-------|--------|-------|-------|
 | Phase 0 — Discovery | ✅ Done | AI | Context docs analyzed, API docs scraped, PDF converted |
-| Phase 1 — Frontend (Step 6) | ✅ Done | Teammate | Full React command center UI complete |
+| Phase 1 — Frontend (Step 6) | ✅ Done | Teammate | Full React command center UI complete (relocated to /frontend) |
 | Phase 1 — Backend (Steps 2–5) | ✅ Done | AI | FastAPI skeleton, config, logging, routers, db, models, pytest |
 | Phase 2 — FortyGuard client (Steps 7–12) | ✅ Done | AI | Core client, test-scan API, SQLite caching, MapLibre rendering |
-| Phase 3 — Spatial Engine (Steps 13–17) | ✅ Done | AI | Tiling, scan orchestration, hotspot detection, refinement |
+| Phase 3 — Spatial Engine (Steps 13–16) | ✅ Done | AI | Tiling, scan orchestration, hotspot detection, refinement |
 | Phase 4 — Analytics (Steps 17–19) | ✅ Done | AI | Persistence, Exceedance, Baseline, HeatMetrics, Caching |
-| Phase 5 — Agent Loop (Steps 23–28) | ❌ Not started | — | |
-| Phase 6 — Vulnerability (Steps 29–33) | ❌ Not started | — | |
+| Phase 5 — Phoenix External Data (Steps 20–23) | ✅ Done | AI | Census ACS 5-Yr demographics, MAG Heat Relief resources, area-weighted joins, proximity |
+| Phase 6 — Response Gap (Steps 24–29) | ⏳ Next | — | Vulnerability & Deficit formulas, Response Gap scoring, basic-scan endpoint & UI slice |
 | Phase 7 — NYC Validation | ❌ Not started | — | Non-blocking |
-| Phase 16 — Demo Mode | ❌ Not started | — | |
+| Phase 8 — WHY Evidence Trail | ❌ Not started | — | |
+| Phase 9 — Interactive UI & Real Heat Hunt | ❌ Not started | — | |
+| Phase 10 — Full Agent Integration & Polish | ❌ Not started | — | |
 
-**Current position: Start of Phase 5 (Agent Loop)**
+**Current position: Start of Phase 6 (Response Gap Engine)**
 
 ---
 
@@ -198,7 +200,17 @@ feature/backend-phase1-foundation
 - Created `HeatMetrics` unified model in `zone.py` and implemented `compute_zone_heat_metrics` caching (Step 19).
 - Documented methodology in `docs/methodology.md`.
 - All Phase 4 steps are complete and unit tested.
-- What's next: Start Phase 5 (Agent Loop).
+
+### Session 2026-08-23 (Phase 5 - Phoenix External Data & Resources)
+- Moved frontend codebase to `/frontend` conforming strictly to project specifications.
+- Ingested real 2022 Census ACS 5-Year demographic tracts for Phoenix corridor (`census_phoenix.geojson`).
+- Ingested 10 verified MAG Heat Relief Network cooling/hydration/respite points (`phoenix_cooling_resources.geojson`).
+- Implemented `vulnerability_service.py` with area-weighted demographic spatial joins via EPSG:2223 projection.
+- Implemented `resource_service.py` with planar proximity analysis (nearest cooling center, 1-mile search buffer).
+- Updated scientific documentation in `docs/methodology.md`.
+- Wrote unit tests for vulnerability and resource services (`test_vulnerability_service.py` & `test_resource_service.py`).
+- All 37 backend tests passing 100%.
+- What's next: Start Phase 6 (Response Gap Engine - Steps 24-29).
 
 ### Open Items Before Coding Starts
 1. ❓ **LLM choice:** Gemini (`.env.example` has key slot) or Anthropic (roadmap says this)? — User to decide
@@ -212,8 +224,9 @@ feature/backend-phase1-foundation
 To resume in a new session:
 ```
 Read .agents/memory/heatsentinel-project.md first.
-We are on branch phase-4.
-Phase 4 (Heat Analytics) is 100% complete.
-Next task: Start Phase 5 - Agent Loop.
+We are on branch feature/phase-5-external-data.
+Phase 5 (Phoenix External Data) is 100% complete.
+Next task: Start Phase 6 - Response Gap Engine (Steps 24-29).
 Context Handoff + System Design + Roadmap are in context/ folder.
 ```
+

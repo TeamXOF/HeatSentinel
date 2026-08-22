@@ -859,9 +859,9 @@ Report: `HeatMetrics` shape, real Phoenix result sample, caching confirmation, t
 
 ---
 
-## [ ] PHASE 5 — PHOENIX EXTERNAL DATA
+## [X] PHASE 5 — PHOENIX EXTERNAL DATA
 
-### [ ] STEP 20 — Census/ACS Vulnerability Data Ingestion
+### [X] STEP 20 — Census/ACS Vulnerability Data Ingestion
 
 **PURPOSE:** Pull real Census/ACS data for Phoenix (population, elderly %, socioeconomic indicators) at a usable geography.
 
@@ -902,7 +902,7 @@ COMPLETION REPORT
 Report: geography level used, data vintage, real sample values for a Phoenix block group/tract, formulas documented, test results, and next dependency (cooling/resource data ingestion).
 ```
 
-### [ ] STEP 21 — Cooling & Hydration Resource Data Ingestion
+### [X] STEP 21 — Cooling & Hydration Resource Data Ingestion
 
 **PURPOSE:** Pull real Phoenix cooling-resource locations (MAG Heat Relief Network).
 
@@ -941,7 +941,7 @@ COMPLETION REPORT
 Report: actual data source used, retrieval method, real point count and sample entries, documented limitations, test results, and next dependency (spatial joins: vulnerability + resources to zones).
 ```
 
-### [ ] STEP 22 — Spatial Joins: Vulnerability to Zones
+### [X] STEP 22 — Spatial Joins: Vulnerability to Zones
 
 **PURPOSE:** Join Census vulnerability data onto arbitrary zone/hotspot polygons.
 
@@ -978,7 +978,7 @@ COMPLETION REPORT
 Report: join methodology, real sample output for a Phoenix hotspot, test results, and next dependency (resource coverage/distance analysis).
 ```
 
-### [ ] STEP 23 — Resource Coverage & Distance Analysis
+### [X] STEP 23 — Resource Coverage & Distance Analysis
 
 **PURPOSE:** Compute nearby cooling-resource counts and distances for a given zone.
 

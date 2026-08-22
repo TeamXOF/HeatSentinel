@@ -58,3 +58,16 @@ Thumbs.db
 .agents/README.md
 .agents/VERSION
 .agents/hooks.json
+
+# Python & Virtualenv
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+*.sqlite3
+*.db
+
+# Playwright MCP & Testing artifacts
+.playwright-mcp/
+

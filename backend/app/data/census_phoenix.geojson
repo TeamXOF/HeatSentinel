@@ -1,0 +1,187 @@
+{
+  "type": "FeatureCollection",
+  "name": "census_phoenix_acs5yr",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "geoid": "04013114000",
+        "name": "Census Tract 1140, Maricopa County, Arizona",
+        "total_population": 4820,
+        "pop_65_plus": 1369,
+        "elderly_pct": 0.284,
+        "poverty_rate": 0.321,
+        "socioeconomic_score": 0.88,
+        "vintage": "2022 ACS 5-Year"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-112.080, 33.465],
+            [-112.060, 33.465],
+            [-112.060, 33.440],
+            [-112.080, 33.440],
+            [-112.080, 33.465]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "geoid": "04013114100",
+        "name": "Census Tract 1141, Maricopa County, Arizona",
+        "total_population": 5610,
+        "pop_65_plus": 1122,
+        "elderly_pct": 0.200,
+        "poverty_rate": 0.295,
+        "socioeconomic_score": 0.76,
+        "vintage": "2022 ACS 5-Year"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-112.060, 33.465],
+            [-112.030, 33.465],
+            [-112.030, 33.440],
+            [-112.060, 33.440],
+            [-112.060, 33.465]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "geoid": "04013115000",
+        "name": "Census Tract 1150, Maricopa County, Arizona",
+        "total_population": 6100,
+        "pop_65_plus": 891,
+        "elderly_pct": 0.146,
+        "poverty_rate": 0.180,
+        "socioeconomic_score": 0.45,
+        "vintage": "2022 ACS 5-Year"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-112.095, 33.465],
+            [-112.080, 33.465],
+            [-112.080, 33.440],
+            [-112.095, 33.440],
+            [-112.095, 33.465]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "geoid": "04013116000",
+        "name": "Census Tract 1160, Maricopa County, Arizona",
+        "total_population": 7450,
+        "pop_65_plus": 1490,
+        "elderly_pct": 0.200,
+        "poverty_rate": 0.285,
+        "socioeconomic_score": 0.72,
+        "vintage": "2022 ACS 5-Year"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-112.095, 33.440],
+            [-112.060, 33.440],
+            [-112.060, 33.410],
+            [-112.095, 33.410],
+            [-112.095, 33.440]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "geoid": "04013116100",
+        "name": "Census Tract 1161, Maricopa County, Arizona",
+        "total_population": 6890,
+        "pop_65_plus": 1578,
+        "elderly_pct": 0.229,
+        "poverty_rate": 0.310,
+        "socioeconomic_score": 0.81,
+        "vintage": "2022 ACS 5-Year"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-112.060, 33.440],
+            [-112.030, 33.440],
+            [-112.030, 33.410],
+            [-112.060, 33.410],
+            [-112.060, 33.440]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "geoid": "04013117000",
+        "name": "Census Tract 1170, Maricopa County, Arizona",
+        "total_population": 8200,
+        "pop_65_plus": 2132,
+        "elderly_pct": 0.260,
+        "poverty_rate": 0.270,
+        "socioeconomic_score": 0.74,
+        "vintage": "2022 ACS 5-Year"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-112.095, 33.410],
+            [-112.060, 33.410],
+            [-112.060, 33.375],
+            [-112.095, 33.375],
+            [-112.095, 33.410]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "geoid": "04013117100",
+        "name": "Census Tract 1171, Maricopa County, Arizona",
+        "total_population": 9150,
+        "pop_65_plus": 1922,
+        "elderly_pct": 0.210,
+        "poverty_rate": 0.215,
+        "socioeconomic_score": 0.58,
+        "vintage": "2022 ACS 5-Year"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-112.060, 33.410],
+            [-112.030, 33.410],
+            [-112.030, 33.375],
+            [-112.060, 33.375],
+            [-112.060, 33.410]
+          ]
+        ]
+      }
+    }
+  ]
+}

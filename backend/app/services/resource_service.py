@@ -37,6 +37,14 @@ def load_cooling_resources() -> Dict[str, Any]:
         return json.load(f)
 
 
+def fetch_cooling_resources() -> Dict[str, Any]:
+    """
+    Retrieves the verified Phoenix cooling/hydration/respite resources dataset.
+    Returns GeoJSON FeatureCollection of active facilities.
+    """
+    return load_cooling_resources()
+
+
 def get_resource_coverage_for_zone(
     zone_polygon: Dict[str, Any], search_radius_m: float = 1600.0
 ) -> Dict[str, Any]:

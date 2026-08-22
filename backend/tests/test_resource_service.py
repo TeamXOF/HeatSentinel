@@ -3,7 +3,7 @@ Unit and integration tests for ResourceService (Steps 21 & 23)
 """
 
 import pytest
-from app.services.resource_service import load_cooling_resources, get_resource_coverage_for_zone
+from app.services.resource_service import load_cooling_resources, fetch_cooling_resources, get_resource_coverage_for_zone
 
 
 def test_load_cooling_resources():
@@ -19,6 +19,13 @@ def test_load_cooling_resources():
     assert "type" in sample
     assert sample["type"] in ["cooling_center", "hydration_station", "respite_center"]
     assert "address" in sample
+
+
+def test_fetch_cooling_resources():
+    """Verify fetch_cooling_resources retrieves the MAG Heat Relief Network dataset."""
+    data = fetch_cooling_resources()
+    assert data.get("type") == "FeatureCollection"
+    assert len(data.get("features", [])) >= 5
 
 
 def test_get_resource_coverage_downtown_corridor():

@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     app_mode: Literal["live", "cached", "demo"] = "demo"
     fortyguard_api_key: str = ""
     gemini_api_key: str = ""
+    census_api_key: str = ""
     database_url: str = "sqlite:///./heatsentinel.db"
     environment: str = "dev"
 

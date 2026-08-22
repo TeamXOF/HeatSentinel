@@ -70,9 +70,9 @@ FortyGuard-touching prompts additionally carry the FortyGuard special rule.
 
 ---
 
-## PHASE 0 — REPOSITORY DISCOVERY
+## [x] PHASE 0 — REPOSITORY DISCOVERY
 
-### STEP 1 — Repository & Environment Discovery
+### [x] STEP 1 — Repository & Environment Discovery
 
 **PURPOSE:** Establish ground truth on repo state, stack, and environment before any implementation begins.
 
@@ -114,9 +114,9 @@ Report: (1) full discovery findings as listed above, (2) whether this is a green
 
 ---
 
-## PHASE 1 — FOUNDATION
+## [ ] PHASE 1 — FOUNDATION
 
-### STEP 2 — Monorepo Structure & Tooling Baseline
+### [ ] STEP 2 — Monorepo Structure & Tooling Baseline
 
 **PURPOSE:** Create the backend/frontend skeleton and dependency baseline.
 
@@ -163,7 +163,7 @@ COMPLETION REPORT
 Report: files changed, commands run, whether backend/frontend both start cleanly, whether the frontend successfully calls `/health`, any dependency install issues, and confirm next step (env/secrets configuration) is unblocked.
 ```
 
-### STEP 3 — Environment Configuration & Secrets Handling
+### [ ] STEP 3 — Environment Configuration & Secrets Handling
 
 **PURPOSE:** Set up `.env`-based configuration for FortyGuard and Anthropic keys, safely.
 
@@ -205,7 +205,7 @@ COMPLETION REPORT
 Report: files changed, exact env var names defined, test/validation results, confirmation that no secret leakage exists in logs or responses, and next dependency (logging setup).
 ```
 
-### STEP 4 — Structured Logging & Error Handling Baseline
+### [ ] STEP 4 — Structured Logging & Error Handling Baseline
 
 **PURPOSE:** Establish consistent logging/error conventions used by every later service.
 
@@ -245,7 +245,7 @@ COMPLETION REPORT
 Report: files changed, sample of log output format, confirmation error responses don't leak secrets/stack traces, and next dependency (backend app skeleton / router structure).
 ```
 
-### STEP 5 — Backend Application Structure (Routers, Services, Models)
+### [ ] STEP 5 — Backend Application Structure (Routers, Services, Models)
 
 **PURPOSE:** Establish the modular backend package layout the rest of the roadmap will fill in.
 
@@ -288,7 +288,7 @@ COMPLETION REPORT
 Report: full file tree created, test results, confirmation `/health` still works, and next dependency (frontend app shell / command center layout skeleton).
 ```
 
-### STEP 6 — Frontend Application Shell (Command Center Layout Skeleton)
+### [x] STEP 6 — Frontend Application Shell (Command Center Layout Skeleton)
 
 **PURPOSE:** Lay out the five UI regions (header, map, priority panel, WHY panel, agent activity panel) as empty containers.
 
@@ -331,9 +331,9 @@ Report: files created, screenshot description of the resulting layout, confirmat
 
 ---
 
-## PHASE 2 — FORTYGUARD INTEGRATION
+## [ ] PHASE 2 — FORTYGUARD INTEGRATION
 
-### STEP 7 — FortyGuard API Access Verification
+### [ ] STEP 7 — FortyGuard API Access Verification
 
 **PURPOSE:** Confirm the hackathon API key actually works before building the client.
 
@@ -374,7 +374,7 @@ COMPLETION REPORT
 Report exactly what worked, what didn't, the real response schema observed (field names/types), any discrepancies from the assumed spec, and confirm whether Phoenix is confirmed to have usable data coverage at this location. Flag any blockers before proceeding to client abstraction.
 ```
 
-### STEP 8 — Phoenix Target Area & Demo Sub-Area Selection
+### [ ] STEP 8 — Phoenix Target Area & Demo Sub-Area Selection
 
 **PURPOSE:** Lock the exact Phoenix polygon(s) used for the live demo.
 
@@ -414,7 +414,7 @@ COMPLETION REPORT
 Report: chosen area name/boundary reasoning, computed area in mi², confirmation it's tileable into multiple ≤10 mi² AOIs, files created, and next dependency (FortyGuard request/response models).
 ```
 
-### STEP 9 — FortyGuard Request/Response Pydantic Models
+### [ ] STEP 9 — FortyGuard Request/Response Pydantic Models
 
 **PURPOSE:** Formalize typed models based on the real observed schema from Step 7.
 
@@ -455,7 +455,7 @@ COMPLETION REPORT
 Report: models defined, field names and their source (spec vs. observed fixture), test results, and next dependency (FortyGuard client with async polling).
 ```
 
-### STEP 10 — FortyGuard Client: Submit + Async Polling
+### [ ] STEP 10 — FortyGuard Client: Submit + Async Polling
 
 **PURPOSE:** Build the single, centralized FortyGuard client service.
 
@@ -499,7 +499,7 @@ COMPLETION REPORT
 Report: methods implemented, test results (mocked and live), confirmation the 10 mi² validation works, confirmation no scattered FortyGuard calls exist elsewhere in the codebase, and next dependency (heatmap visualization on the map).
 ```
 
-### STEP 11 — First Real FortyGuard Call Wired to Backend API
+### [ ] STEP 11 — First Real FortyGuard Call Wired to Backend API
 
 **PURPOSE:** Expose a real backend endpoint that triggers a FortyGuard call for one AOI.
 
@@ -541,7 +541,7 @@ COMPLETION REPORT
 Report: endpoint behavior confirmed live, caching confirmed working, response shape, test results, and next dependency (map visualization of this data on the frontend).
 ```
 
-### STEP 12 — Heat Layer Visualization on the Map
+### [ ] STEP 12 — Heat Layer Visualization on the Map
 
 **PURPOSE:** Render real FortyGuard heat data on the Command Center map.
 
@@ -582,9 +582,9 @@ Report: files changed, confirmation of visual rendering (describe what you see),
 
 ---
 
-## PHASE 3 — SPATIAL ENGINE
+## [ ] PHASE 3 — SPATIAL ENGINE
 
-### STEP 13 — AOI Tiling Engine (10 mi² Constraint)
+### [ ] STEP 13 — AOI Tiling Engine (10 mi² Constraint)
 
 **PURPOSE:** Build the core tiling algorithm that divides the Phoenix target area into ≤10 mi² AOIs.
 
@@ -624,7 +624,7 @@ COMPLETION REPORT
 Report: tiling algorithm summary, real tile count/stats for Phoenix target area, test results, and next dependency (multi-AOI scan orchestration).
 ```
 
-### STEP 14 — Multi-AOI Scan Orchestration
+### [ ] STEP 14 — Multi-AOI Scan Orchestration
 
 **PURPOSE:** Run FortyGuard across all tiles of the target area and combine results.
 
@@ -663,7 +663,7 @@ COMPLETION REPORT
 Report: scan orchestration behavior, real Phoenix scan results (tile count, cell count, duration, any failures), test results, and next dependency (hotspot detection).
 ```
 
-### STEP 15 — Hotspot Detection
+### [ ] STEP 15 — Hotspot Detection
 
 **PURPOSE:** Identify candidate high-interest zones from the combined scan.
 
@@ -700,7 +700,7 @@ COMPLETION REPORT
 Report: detection algorithm summary, threshold/clustering choices and rationale, real Phoenix hotspot results, test results, and next dependency (polygon refinement for selected hotspots).
 ```
 
-### STEP 16 — Hotspot Polygon Refinement
+### [ ] STEP 16 — Hotspot Polygon Refinement
 
 **PURPOSE:** Allow the agent to "zoom in" on a selected hotspot with a smaller, more precise AOI.
 
@@ -739,9 +739,9 @@ Report: refinement logic summary, real refined-polygon result, test results, exp
 
 ---
 
-## PHASE 4 — HEAT ANALYTICS
+## [ ] PHASE 4 — HEAT ANALYTICS
 
-### STEP 17 — Native Persistence & Exceedance Analytics
+### [ ] STEP 17 — Native Persistence & Exceedance Analytics
 
 **PURPOSE:** Use FortyGuard's native persistence/exceedance analytic types rather than recreating them.
 
@@ -780,7 +780,7 @@ COMPLETION REPORT
 Report: documented threshold and rationale, real Phoenix persistence/exceedance sample results, test results, and next dependency (historical baseline / heat anomaly calculation).
 ```
 
-### STEP 18 — Historical Baseline & Heat Anomaly
+### [ ] STEP 18 — Historical Baseline & Heat Anomaly
 
 **PURPOSE:** Build a documented, non-fabricated historical baseline and anomaly calculation.
 
@@ -819,7 +819,7 @@ COMPLETION REPORT
 Report: baseline methodology as implemented, real empirical finding on FortyGuard historical data depth for Phoenix, test results, and next dependency (normalized zone-level metric aggregation).
 ```
 
-### STEP 19 — Zone-Level Metric Normalization & Caching
+### [ ] STEP 19 — Zone-Level Metric Normalization & Caching
 
 **PURPOSE:** Combine tcm, persistence, exceedance, and anomaly into one normalized per-zone metrics object; add caching.
 
@@ -859,9 +859,9 @@ Report: `HeatMetrics` shape, real Phoenix result sample, caching confirmation, t
 
 ---
 
-## PHASE 5 — PHOENIX EXTERNAL DATA
+## [ ] PHASE 5 — PHOENIX EXTERNAL DATA
 
-### STEP 20 — Census/ACS Vulnerability Data Ingestion
+### [ ] STEP 20 — Census/ACS Vulnerability Data Ingestion
 
 **PURPOSE:** Pull real Census/ACS data for Phoenix (population, elderly %, socioeconomic indicators) at a usable geography.
 
@@ -902,7 +902,7 @@ COMPLETION REPORT
 Report: geography level used, data vintage, real sample values for a Phoenix block group/tract, formulas documented, test results, and next dependency (cooling/resource data ingestion).
 ```
 
-### STEP 21 — Cooling & Hydration Resource Data Ingestion
+### [ ] STEP 21 — Cooling & Hydration Resource Data Ingestion
 
 **PURPOSE:** Pull real Phoenix cooling-resource locations (MAG Heat Relief Network).
 
@@ -941,7 +941,7 @@ COMPLETION REPORT
 Report: actual data source used, retrieval method, real point count and sample entries, documented limitations, test results, and next dependency (spatial joins: vulnerability + resources to zones).
 ```
 
-### STEP 22 — Spatial Joins: Vulnerability to Zones
+### [ ] STEP 22 — Spatial Joins: Vulnerability to Zones
 
 **PURPOSE:** Join Census vulnerability data onto arbitrary zone/hotspot polygons.
 
@@ -978,7 +978,7 @@ COMPLETION REPORT
 Report: join methodology, real sample output for a Phoenix hotspot, test results, and next dependency (resource coverage/distance analysis).
 ```
 
-### STEP 23 — Resource Coverage & Distance Analysis
+### [ ] STEP 23 — Resource Coverage & Distance Analysis
 
 **PURPOSE:** Compute nearby cooling-resource counts and distances for a given zone.
 
@@ -1017,9 +1017,9 @@ Report: methodology, real sample output, test results, and next dependency (Resp
 
 ---
 
-## PHASE 6 — RESPONSE GAP
+## [ ] PHASE 6 — RESPONSE GAP
 
-### STEP 24 — Vulnerability Score & Resource Deficit Formulas
+### [ ] STEP 24 — Vulnerability Score & Resource Deficit Formulas
 
 **PURPOSE:** Define the deterministic, documented sub-scores feeding Response Gap.
 
@@ -1060,7 +1060,7 @@ COMPLETION REPORT
 Report: formulas and weights chosen, real sample scores for a Phoenix zone, test results, and next dependency (combined Response Gap + ranking).
 ```
 
-### STEP 25 — Response Gap Formula & Zone Ranking
+### [ ] STEP 25 — Response Gap Formula & Zone Ranking
 
 **PURPOSE:** Combine the three sub-scores into the final Response Gap and rank zones.
 
@@ -1099,7 +1099,7 @@ COMPLETION REPORT
 Report: final formula and rationale, tier thresholds, real Phoenix Response Gap sample, test results, and next dependency (Response Gap validation tests / edge cases before moving to NYC).
 ```
 
-### STEP 26 — Response Gap Edge-Case & Sensitivity Tests
+### [ ] STEP 26 — Response Gap Edge-Case & Sensitivity Tests
 
 **PURPOSE:** Stress-test the formula before building anything on top of it.
 
@@ -1136,7 +1136,7 @@ COMPLETION REPORT
 Report: edge cases tested and results, real Phoenix sample Response Gap values for the detected hotspots so far, confirmation of formula robustness, and note that this marks readiness for the **first working vertical slice** once basic agent ranking + map display are wired (Steps 27–32 below close that loop before Phase 7/NYC work begins).
 ```
 
-### STEP 27 — Vertical Slice: Combine Scan → Metrics → Vulnerability → Resources → Response Gap into One Pipeline Function
+### [ ] STEP 27 — Vertical Slice: Combine Scan → Metrics → Vulnerability → Resources → Response Gap into One Pipeline Function
 
 **PURPOSE:** Assemble everything so far into a single callable pipeline — this directly enables the first working vertical slice.
 
@@ -1174,7 +1174,7 @@ COMPLETION REPORT
 Report: pipeline behavior, real end-to-end Phoenix results (ranked zones with scores), confirmation evidence fields are populated, test results, and confirm this is the backend half of the **first working vertical slice** — next dependency is exposing this via a real API endpoint and rendering it on the map (Steps 28–29).
 ```
 
-### STEP 28 — Expose Pipeline via API Endpoint
+### [ ] STEP 28 — Expose Pipeline via API Endpoint
 
 **PURPOSE:** Give the frontend one endpoint that returns ranked, evidence-rich zones.
 
@@ -1212,7 +1212,7 @@ COMPLETION REPORT
 Report: endpoint behavior, real response sample, test results, and next dependency (rendering this on the Command Center UI).
 ```
 
-### STEP 29 — Wire Ranked Zones into the Command Center UI
+### [ ] STEP 29 — Wire Ranked Zones into the Command Center UI
 
 **PURPOSE:** Complete the first working vertical slice by displaying real ranked zones in the Priority Panel, WHY panel, and map.
 
@@ -1255,9 +1255,9 @@ Report: files changed, confirmation of the full real Phoenix flow working end-to
 
 ---
 
-## PHASE 7 — NYC VALIDATION
+## [ ] PHASE 7 — NYC VALIDATION
 
-### STEP 30 — NYC Heat Vulnerability Index Ingestion
+### [ ] STEP 30 — NYC Heat Vulnerability Index Ingestion
 
 **PURPOSE:** Bring in NYC's published HVI as an external benchmark dataset — validation only, not a second app.
 
@@ -1295,7 +1295,7 @@ COMPLETION REPORT
 Report: real data source and vintage, sample entries, test results, and next dependency (a small NYC AOI Response Gap computation for comparison).
 ```
 
-### STEP 31 — Small NYC AOI Response Gap Computation
+### [ ] STEP 31 — Small NYC AOI Response Gap Computation
 
 **PURPOSE:** Compute HeatSentinel's Response Gap for a small number of real NYC AOIs, reusing the existing pipeline — not a parallel app.
 
@@ -1334,7 +1334,7 @@ COMPLETION REPORT
 Report: AOIs selected and rationale, real FortyGuard NYC coverage findings, real computed Response Gap values vs. published HVI tiers per AOI, any limitations, and next dependency (statistical comparison/correlation analysis).
 ```
 
-### STEP 32 — HVI Comparison & Correlation Analysis
+### [ ] STEP 32 — HVI Comparison & Correlation Analysis
 
 **PURPOSE:** Statistically compare Response Gap against published HVI using careful, non-causal language.
 
@@ -1376,9 +1376,9 @@ Report: real correlation results, honest interpretation text, limitations noted,
 
 ---
 
-## PHASE 8 — AGENT
+## [ ] PHASE 8 — AGENT
 
-### STEP 33 — Agent Tool Schemas
+### [ ] STEP 33 — Agent Tool Schemas
 
 **PURPOSE:** Define the formal tool schemas the LLM orchestrator will call.
 
@@ -1425,7 +1425,7 @@ COMPLETION REPORT
 Report: all 9 tools implemented and their delegation targets, test results, and next dependency (orchestrator loop / agent state machine).
 ```
 
-### STEP 34 — Agent State & Orchestration Loop
+### [ ] STEP 34 — Agent State & Orchestration Loop
 
 **PURPOSE:** Build the core tool-calling loop that lets the LLM drive investigation.
 
@@ -1464,7 +1464,7 @@ COMPLETION REPORT
 Report: orchestration loop design, real live trace summary (steps taken, tools called, final output), test results, and next dependency (target-selection / adaptive refinement logic quality).
 ```
 
-### STEP 35 — Agent Prompt Engineering for Adaptive Investigation
+### [ ] STEP 35 — Agent Prompt Engineering for Adaptive Investigation
 
 **PURPOSE:** Tune the system/task prompt so the agent genuinely performs coarse-scan → select → refine → re-query behavior.
 
@@ -1504,9 +1504,9 @@ Report: final prompt text summary, real run observations across 3 trials, the sa
 
 ---
 
-## PHASE 9 — HEAT HUNT
+## [ ] PHASE 9 — HEAT HUNT
 
-### STEP 36 — Heat Hunt Job Model & Async Execution
+### [ ] STEP 36 — Heat Hunt Job Model & Async Execution
 
 **PURPOSE:** Wrap the orchestrator in a trackable, pollable "Heat Hunt run" job.
 
@@ -1546,9 +1546,9 @@ Report: job model design, real live run trace via polling, test results, and nex
 
 ---
 
-## PHASE 10 — BACKEND API
+## [ ] PHASE 10 — BACKEND API
 
-### STEP 37 — Heat Hunt API Endpoints (Start, Status, Result)
+### [ ] STEP 37 — Heat Hunt API Endpoints (Start, Status, Result)
 
 **PURPOSE:** Expose the Heat Hunt job system as the primary product API.
 
@@ -1589,9 +1589,9 @@ Report: endpoint behavior, real live run confirmed via API polling, test results
 
 ---
 
-## PHASE 11 — COMMAND CENTER (FULL WIRING)
+## [ ] PHASE 11 — COMMAND CENTER (FULL WIRING)
 
-### STEP 38 — Real "RUN HEAT HUNT" Button & Polling Hook
+### [ ] STEP 38 — Real "RUN HEAT HUNT" Button & Polling Hook
 
 **PURPOSE:** Replace the placeholder "RUN ANALYSIS" flow with the real, agent-driven Heat Hunt flow.
 
@@ -1630,7 +1630,7 @@ COMPLETION REPORT
 Report: files changed, confirmation of the real live Heat Hunt flow working in-browser, failure-path confirmation, and next dependency (live Agent Activity Panel wired to real progress events).
 ```
 
-### STEP 39 — Live Agent Activity Panel
+### [ ] STEP 39 — Live Agent Activity Panel
 
 **PURPOSE:** Show the agent's real step-by-step investigation as it happens.
 
@@ -1668,7 +1668,7 @@ COMPLETION REPORT
 Report: mapping table used, confirmation of live real-event rendering, any event-name gaps found and how they were handled, and next dependency (WHY panel evidence completeness pass / recommendation display).
 ```
 
-### STEP 40 — Recommendation Display & Evidence Completeness Pass
+### [ ] STEP 40 — Recommendation Display & Evidence Completeness Pass
 
 **PURPOSE:** Ensure the recommendation and full evidence trail render exactly per the product spec's example.
 
@@ -1708,9 +1708,9 @@ Report: whether tree cover was integrated or honestly omitted (and why), full fi
 
 ---
 
-## PHASE 12 — INTEGRATION
+## [ ] PHASE 12 — INTEGRATION
 
-### STEP 41 — Full End-to-End Integration Test (Real Phoenix Scenario)
+### [ ] STEP 41 — Full End-to-End Integration Test (Real Phoenix Scenario)
 
 **PURPOSE:** Prove the entire Definition-of-Done flow works together, live, start to finish.
 
@@ -1749,9 +1749,9 @@ Report, stage by stage, real evidence that the full Definition-of-Done flow work
 
 ---
 
-## PHASE 13 — RELIABILITY
+## [ ] PHASE 13 — RELIABILITY
 
-### STEP 42 — Retries, Timeouts, and Graceful Degradation
+### [ ] STEP 42 — Retries, Timeouts, and Graceful Degradation
 
 **PURPOSE:** Harden every external call against real-world flakiness before demo day.
 
@@ -1790,7 +1790,7 @@ COMPLETION REPORT
 Report: standardized timeout/retry values, degradation behaviors confirmed, test results, and next dependency (fallback/demo-mode caching layer).
 ```
 
-### STEP 43 — Fallback Mode: Cached → Deterministic Demo Scenario
+### [ ] STEP 43 — Fallback Mode: Cached → Deterministic Demo Scenario
 
 **PURPOSE:** Build the three-tier fallback (live → cached → deterministic demo) as a real, labeled system behavior.
 
@@ -1830,9 +1830,9 @@ Report: fallback tiers implemented, real demo scenario capture confirmed, test r
 
 ---
 
-## PHASE 14 — SECURITY
+## [ ] PHASE 14 — SECURITY
 
-### STEP 44 — Secrets, `.env`, and Dependency Security Audit
+### [ ] STEP 44 — Secrets, `.env`, and Dependency Security Audit
 
 **PURPOSE:** Final security pass before deployment.
 
@@ -1873,9 +1873,9 @@ Report: audit findings, fixes applied, dependency scan results, any deferred ite
 
 ---
 
-## PHASE 15 — PERFORMANCE
+## [ ] PHASE 15 — PERFORMANCE
 
-### STEP 45 — Latency & Caching Optimization Pass
+### [ ] STEP 45 — Latency & Caching Optimization Pass
 
 **PURPOSE:** Get Heat Hunt run time and map responsiveness into demo-acceptable ranges.
 
@@ -1916,9 +1916,9 @@ Report: real before/after timing data, specific optimizations applied and why, c
 
 ---
 
-## PHASE 16 — DEMO MODE
+## [ ] PHASE 16 — DEMO MODE
 
-### STEP 46 — 3–5 Minute Demo Flow Assembly
+### [ ] STEP 46 — 3–5 Minute Demo Flow Assembly
 
 **PURPOSE:** Assemble the actual demo script and ensure the app supports it smoothly.
 
@@ -1959,9 +1959,9 @@ Report: real rehearsal timing, the finalized demo script, rough edges found for 
 
 ---
 
-## PHASE 17 — UI POLISH
+## [ ] PHASE 17 — UI POLISH
 
-### STEP 47 — Visual Hierarchy & Tier Color System
+### [ ] STEP 47 — Visual Hierarchy & Tier Color System
 
 **PURPOSE:** Sharpen the CRITICAL/HIGH/MODERATE/LOW visual language across the whole app.
 
@@ -1999,7 +1999,7 @@ COMPLETION REPORT
 Report: files changed, confirmation of consistent tier system, contrast check results, and next dependency (responsiveness/accessibility pass).
 ```
 
-### STEP 48 — Responsiveness & Accessibility Pass
+### [ ] STEP 48 — Responsiveness & Accessibility Pass
 
 **PURPOSE:** Make sure the demo looks good on the actual presentation screen/resolution and is broadly accessible.
 
@@ -2038,9 +2038,9 @@ Report: resolutions tested, issues found and fixed, accessibility improvements m
 
 ---
 
-## PHASE 18 — FINAL TESTING
+## [ ] PHASE 18 — FINAL TESTING
 
-### STEP 49 — Full Automated Test Suite Pass (Backend)
+### [ ] STEP 49 — Full Automated Test Suite Pass (Backend)
 
 **PURPOSE:** Ensure the entire backend test suite is green and meaningfully covers critical logic.
 
@@ -2077,7 +2077,7 @@ COMPLETION REPORT
 Report: final test count and pass rate, coverage summary, critical-path coverage confirmation, any fixes made, and next dependency (frontend testing pass).
 ```
 
-### STEP 50 — Frontend Test Pass & Failure-Path Testing
+### [ ] STEP 50 — Frontend Test Pass & Failure-Path Testing
 
 **PURPOSE:** Add targeted frontend tests and verify failure paths behave correctly.
 
@@ -2116,9 +2116,9 @@ Report: tests added and results, manual failure-path verification results, bugs 
 
 ---
 
-## PHASE 19 — DEPLOYMENT
+## [ ] PHASE 19 — DEPLOYMENT
 
-### STEP 51 — Production Configuration & Environment Setup
+### [ ] STEP 51 — Production Configuration & Environment Setup
 
 **PURPOSE:** Prepare production-ready config for both backend and frontend.
 
@@ -2157,7 +2157,7 @@ COMPLETION REPORT
 Report: configuration changes made, deployment documentation summary, local production-mode verification results, and next dependency (actual deployment + smoke test).
 ```
 
-### STEP 52 — Deploy & Smoke Test
+### [ ] STEP 52 — Deploy & Smoke Test
 
 **PURPOSE:** Actually deploy to the chosen hosting targets and verify the live URLs work.
 
@@ -2198,9 +2198,9 @@ Report: live URLs, smoke test results (real Heat Hunt confirmed working live), a
 
 ---
 
-## PHASE 20 — FINAL AUDIT
+## [ ] PHASE 20 — FINAL AUDIT
 
-### STEP 53 — Full Specification Audit
+### [ ] STEP 53 — Full Specification Audit
 
 **PURPOSE:** Verify the entire deployed product against the original HeatSentinel specification, line by line.
 

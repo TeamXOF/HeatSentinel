@@ -56,7 +56,7 @@ Full architecture: see `context/HeatSentinel_AI_System_Design.md`
 |-------|--------|-------|-------|
 | Phase 0 — Discovery | ✅ Done | AI | Context docs analyzed, API docs scraped, PDF converted |
 | Phase 1 — Frontend (Step 6) | ✅ Done | Teammate | Full React command center UI complete |
-| Phase 1 — Backend (Steps 2–5) | 🔴 Not started | **Next task** | FastAPI skeleton, config, logging, router stubs |
+| Phase 1 — Backend (Steps 2–5) | ✅ Done | AI | FastAPI skeleton, config, logging, routers, db, models, pytest |
 | Phase 2 — FortyGuard client (Steps 7–12) | ❌ Not started | — | |
 | Phase 3 — Spatial Engine (Steps 13–17) | ❌ Not started | — | |
 | Phase 4 — Analytics (Steps 18–22) | ❌ Not started | — | |
@@ -65,7 +65,7 @@ Full architecture: see `context/HeatSentinel_AI_System_Design.md`
 | Phase 7 — NYC Validation | ❌ Not started | — | Non-blocking |
 | Phase 16 — Demo Mode | ❌ Not started | — | |
 
-**Current position: Start of Step 2 (Monorepo Backend Skeleton)**
+**Current position: Start of Phase 2 (FortyGuard API Client)**
 
 ---
 
@@ -141,7 +141,8 @@ main
 ├── b1d2ffd  chore: move context docs into context/ folder
 └── b0018b4  chore: initial commit — frontend UI + context folder + gitignore setup
 
-feature/backend-phase1-foundation  ← CURRENT BRANCH (local only, not pushed)
+feature/backend-phase2-fortyguard  ← CURRENT BRANCH (local only)
+feature/backend-phase1-foundation
 ```
 
 ### .gitignore — What Gets Tracked
@@ -162,8 +163,11 @@ feature/backend-phase1-foundation  ← CURRENT BRANCH (local only, not pushed)
   - `context/fortyguard-participant-handbook.md` — PDF converted to markdown
 - Corrected a key error: Context Handoff said "no forecast" but API actually supports +12h forecast
 - Created feature branch `feature/backend-phase1-foundation`
-- **No backend code written yet** — plan created, awaiting LLM choice confirmation
-- What's next: Build `/backend/` Python/FastAPI skeleton (Task 1 of plan)
+- Fully implemented Phase 1 Backend Foundation (config, models, db, errors, routers)
+- Verified all endpoints and smoke tests passed successfully (100%)
+- Marked Steps 2-5 as complete in roadmap
+- Branched to `feature/backend-phase2-fortyguard`
+- What's next: Build FortyGuard API Client (Step 7)
 
 ### Open Items Before Coding Starts
 1. ❓ **LLM choice:** Gemini (`.env.example` has key slot) or Anthropic (roadmap says this)? — User to decide

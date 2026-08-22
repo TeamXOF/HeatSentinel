@@ -54,3 +54,29 @@ Protective cooling infrastructure is compiled from the **Maricopa Association of
 ### Search Radius & Distance Metric
 * **Search Buffer:** Fixed at $1,600 \text{ meters}$ ($\approx 1.0 \text{ mile}$), representing the standard safe walking distance under extreme urban heat conditions before heat exhaustion risk spikes.
 * **Planar Distance:** Computed using Euclidean planar distance on `EPSG:2223` State Plane coordinates, calculating exact minimum distance in meters from the zone boundary to the nearest active resource facility.
+
+---
+
+## Response Gap Component Scores (Project-Derived Analytical Choices)
+
+All sub-scores are calculated deterministically on a $0 - 100$ scale using explicit, named parameters and are surfaced in the user interface on a $0.0 - 10.0$ scale.
+
+### 1. Heat Exposure Score ($0 - 100$)
+Combines thermal intensity, acute duration, regional baseline exceedance, and historical anomaly:
+- **Peak Temperature (30% weight):** $\text{normalize}(\text{max\_temp\_c}, 30.0^\circ\text{C}, 50.0^\circ\text{C})$
+- **Persistence (30% weight):** $\text{normalize}(\text{persistence\_hours}, 0.0\text{h}, 8.0\text{h})$
+- **Exceedance (25% weight):** $\text{normalize}(\text{exceedance\_hours}, 0.0\text{h}, 8.0\text{h})$
+- **Historical Anomaly (15% weight):** $\text{normalize}(\text{anomaly\_c}, 0.0^\circ\text{C}, 6.0^\circ\text{C})$
+*Note:* If historical depth is insufficient (`anomaly_c is None`), the 15% weight is redistributed proportionally among the active three parameters.
+
+### 2. Population Vulnerability Score ($0 - 100$)
+Combines physiological sensitivity, socioeconomic barrier, and population concentration:
+- **Elderly Population 65+ (40% weight):** $\text{normalize}(\text{elderly\_pct}, 5\%, 35\%)$
+- **Socioeconomic Vulnerability Index (40% weight):** $\text{normalize}(\text{SVI}, 0.0, 1.0)$
+- **Population Density (20% weight):** $\text{normalize}(\text{density}, 500/\text{mi}^2, 10,000/\text{mi}^2)$
+
+### 3. Protective Resource Deficit Score ($0 - 100$)
+Quantifies facility proximity and scarcity:
+- **Walking Distance Penalty (50% weight):** $\text{normalize}(\text{nearest\_distance\_m}, 0\text{m}, 1600\text{m})$
+- **Scarcity Factor (50% weight):** $\max\left(0, 100 - (\text{facilities\_1mi} \times 20 + \text{facilities\_in\_zone} \times 25)\right)$
+

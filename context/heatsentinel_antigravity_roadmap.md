@@ -1019,7 +1019,7 @@ Report: methodology, real sample output, test results, and next dependency (Resp
 
 ## [ ] PHASE 6 — RESPONSE GAP
 
-### [ ] STEP 24 — Vulnerability Score & Resource Deficit Formulas
+### [X] STEP 24 — Vulnerability Score & Resource Deficit Formulas
 
 **PURPOSE:** Define the deterministic, documented sub-scores feeding Response Gap.
 

@@ -1174,7 +1174,7 @@ COMPLETION REPORT
 Report: pipeline behavior, real end-to-end Phoenix results (ranked zones with scores), confirmation evidence fields are populated, test results, and confirm this is the backend half of the **first working vertical slice** — next dependency is exposing this via a real API endpoint and rendering it on the map (Steps 28–29).
 ```
 
-### [ ] STEP 28 — Expose Pipeline via API Endpoint
+### [X] STEP 28 — Expose Pipeline via API Endpoint
 
 **PURPOSE:** Give the frontend one endpoint that returns ranked, evidence-rich zones.
 

@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 from app.errors import HeatSentinelError
 from app.logging_config import logger
 from app.db import init_db
-from app.routers import health, heat_hunt, fortyguard
+from app.routers import health, heat_hunt, fortyguard, analysis
 
 
 import httpx
@@ -56,3 +56,4 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(heat_hunt.router)
 app.include_router(fortyguard.router)
+app.include_router(analysis.router)

@@ -61,8 +61,9 @@ class HeatmapSubmitResponse(BaseModel):
     data: HeatmapSubmitData
 
 class HeatmapResultStats(BaseModel):
-    activity_id: str
-    n_cells: int
+    activity_id: Optional[str] = None
+    n_cells: Optional[int] = None
+    temperature_stats: Optional[Dict[str, Any]] = None
 
 class HeatmapResult(BaseModel):
     # Using Any for map_data to avoid heavily specifying GeoJSON types if we don't need to parse them strictly yet

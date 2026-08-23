@@ -31,9 +31,18 @@ def detect_hotspots(
     for f in features:
         props = f.get("properties", {})
         val = props.get("value")
+        if val is None:
+            val = (
+                props.get("average_temperature") or
+                props.get("max_temperature") or
+                props.get("temp") or
+                props.get("tcm") or
+                props.get("temperature")
+            )
         if val is not None:
+            f["properties"]["_extracted_temp"] = float(val)
             valid_features.append(f)
-            values.append(val)
+            values.append(float(val))
             
     if not valid_features:
         return []
@@ -41,7 +50,7 @@ def detect_hotspots(
     threshold = np.percentile(values, min_cell_temp_percentile)
     
     # 2. Filter hot cells
-    hot_features = [f for f in valid_features if f["properties"].get("value", 0) >= threshold]
+    hot_features = [f for f in valid_features if f["properties"].get("_extracted_temp", 0) >= threshold]
     if not hot_features:
         return []
         
@@ -70,7 +79,7 @@ def detect_hotspots(
         
     hotspots = []
     for label, cluster_features in clusters.items():
-        cluster_values = [f["properties"]["value"] for f in cluster_features]
+        cluster_values = [f["properties"]["_extracted_temp"] for f in cluster_features]
         mean_val = float(np.mean(cluster_values))
         max_val = float(np.max(cluster_values))
         
@@ -79,9 +88,9 @@ def detect_hotspots(
         union_geom = unary_union(geoms)
         hull = union_geom.convex_hull
         
-        # If it's a line/point (rare if min_samples >=3 but possible if collinear), buffer slightly
+        # If it's a line/point (rare if min_samples >=3 but possible if collinear), buffer to a polygon
         if hull.geom_type != "Polygon":
-            hull = hull.buffer(0.0001)
+            hull = hull.buffer(0.005)
             
         hull_geojson = mapping(hull)
         

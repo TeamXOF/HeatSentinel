@@ -211,7 +211,12 @@ async def compute_zone_heat_metrics(
     
     # Extract current_temp
     tcm_features = tcm_res.get("data", {}).get("features", [])
-    temps = [f.get("properties", {}).get("value") for f in tcm_features if f.get("properties", {}).get("value") is not None]
+    temps = []
+    for f in tcm_features:
+        p = f.get("properties", {})
+        v = p.get("value") or p.get("average_temperature") or p.get("max_temperature") or p.get("temp")
+        if v is not None:
+            temps.append(float(v))
     current_temp_c = round(statistics.mean(temps), 2) if temps else 0.0
     
     # 2. Calculate anomaly

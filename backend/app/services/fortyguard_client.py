@@ -1,6 +1,6 @@
 import asyncio
 import httpx
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 from app.config import get_settings
 from app.models.fortyguard import HeatmapRequest, StatusResponse
@@ -12,8 +12,8 @@ class FortyGuardClient:
     Centralized client for interacting with the FortyGuard API.
     Handles the asynchronous submit -> poll -> result workflow.
     """
-    def __init__(self, http_client: httpx.AsyncClient):
-        self.http_client = http_client
+    def __init__(self, http_client: Optional[httpx.AsyncClient] = None):
+        self.http_client = http_client or httpx.AsyncClient()
         self.settings = get_settings()
         self.base_url = "https://api.fortyguard.com"
         

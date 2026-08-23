@@ -1136,7 +1136,7 @@ COMPLETION REPORT
 Report: edge cases tested and results, real Phoenix sample Response Gap values for the detected hotspots so far, confirmation of formula robustness, and note that this marks readiness for the **first working vertical slice** once basic agent ranking + map display are wired (Steps 27–32 below close that loop before Phase 7/NYC work begins).
 ```
 
-### [ ] STEP 27 — Vertical Slice: Combine Scan → Metrics → Vulnerability → Resources → Response Gap into One Pipeline Function
+### [X] STEP 27 — Vertical Slice: Combine Scan → Metrics → Vulnerability → Resources → Response Gap into One Pipeline Function
 
 **PURPOSE:** Assemble everything so far into a single callable pipeline — this directly enables the first working vertical slice.
 

@@ -80,3 +80,23 @@ Quantifies facility proximity and scarcity:
 - **Walking Distance Penalty (50% weight):** $\text{normalize}(\text{nearest\_distance\_m}, 0\text{m}, 1600\text{m})$
 - **Scarcity Factor (50% weight):** $\max\left(0, 100 - (\text{facilities\_1mi} \times 20 + \text{facilities\_in\_zone} \times 25)\right)$
 
+---
+
+## Combined Response Gap Formula & Risk Tiers (Step 25)
+
+$$\text{Base Score} = 0.40 \times \text{Heat Exposure} + 0.35 \times \text{Vulnerability} + 0.25 \times \text{Resource Deficit}$$
+
+### Compounding Synergy Multiplier
+When an acute crisis manifests across all three dimensions ($\text{Heat} \ge 70.0$, $\text{Vulnerability} \ge 70.0$, and $\text{Deficit} \ge 70.0$), a $+10\%$ compounding synergy bonus is applied:
+$$\text{Response Gap} = \min(100.0, \text{Base Score} \times 1.10)$$
+
+### Decision-Support Risk Tiers
+- **`CRITICAL`:** $\text{Response Gap} \ge 75.0$ ($\ge 7.5$) — Immediate emergency cooling deployment required.
+- **`HIGH`:** $\text{Response Gap} \ge 50.0$ ($\ge 5.0$) — Targeted hydration and outreach staging.
+- **`MODERATE`:** $\text{Response Gap} \ge 25.0$ ($\ge 2.5$) — Active monitoring and civic advisory.
+- **`LOW`:** $\text{Response Gap} < 25.0$ ($< 2.5$) — Normal municipal operations.
+
+### Non-Clinical Disclaimer
+*Response Gap is a project-derived decision-support score for this hackathon prototype. It is not an official public-health index, medical prediction, or mortality forecast.*
+
+

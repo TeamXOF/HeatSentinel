@@ -1060,7 +1060,7 @@ COMPLETION REPORT
 Report: formulas and weights chosen, real sample scores for a Phoenix zone, test results, and next dependency (combined Response Gap + ranking).
 ```
 
-### [ ] STEP 25 — Response Gap Formula & Zone Ranking
+### [X] STEP 25 — Response Gap Formula & Zone Ranking
 
 **PURPOSE:** Combine the three sub-scores into the final Response Gap and rank zones.
 

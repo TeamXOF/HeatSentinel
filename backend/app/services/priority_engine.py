@@ -1,14 +1,15 @@
 """
-HeatSentinel AI - Priority Engine (Phase 6 / Step 24)
-Provides transparent, deterministic sub-scores for Response Gap calculation:
+HeatSentinel AI - Priority Engine (Phase 6 / Steps 24 & 25)
+Provides transparent, deterministic sub-scores and combined Response Gap calculation:
 1. Heat Exposure Score (0–100)
 2. Population Vulnerability Score (0–100)
 3. Resource Deficit Score (0–100)
+4. Combined Response Gap Score & Multi-Zone Ranking
 
 All weights, thresholds, and normalization ranges are named constants.
 """
 
-from typing import Dict, Any, Optional
+from typing import Dict, Any, List, Optional
 from app.models.zone import HeatMetrics
 from app.logging_config import logger
 
@@ -46,6 +47,26 @@ WEIGHT_VULN_DENSITY = 0.20
 RES_SAFE_WALKING_DISTANCE_M = 1600.0  # 1.0 mile (~1600m) safe walking limit
 WEIGHT_RES_DISTANCE = 0.50
 WEIGHT_RES_SCARCITY = 0.50
+
+# Response Gap Combination Weights (Sum = 1.0)
+WEIGHT_COMBINED_HEAT = 0.40
+WEIGHT_COMBINED_VULN = 0.35
+WEIGHT_COMBINED_RES = 0.25
+
+# Synergy Compounding Factor
+SYNERGY_THRESHOLD = 70.0        # Threshold where all 3 pillars trigger acute compound risk
+SYNERGY_MULTIPLIER = 1.10       # 10% compounding synergy boost
+
+# Tier Classification Boundaries (0–100 scale)
+TIER_CRITICAL_MIN = 75.0
+TIER_HIGH_MIN = 50.0
+TIER_MODERATE_MIN = 25.0
+
+# Mandatory Non-Clinical Disclaimer
+DISCLAIMER_TEXT = (
+    "Response Gap is a project-derived decision-support score for this hackathon prototype. "
+    "It is not an official public-health index, medical prediction, or mortality forecast."
+)
 
 
 # ==========================================
@@ -166,3 +187,100 @@ def resource_deficit_score(resource_data: Dict[str, Any]) -> float:
     )
     
     return round(max(0.0, min(100.0, final_score)), 2)
+
+
+# ==========================================
+# 4. RESPONSE GAP & ZONE RANKING (STEP 25)
+# ==========================================
+
+def classify_zone(response_gap: float) -> str:
+    """
+    Classifies a Response Gap score into priority risk tiers:
+    - CRITICAL: >= 75.0
+    - HIGH:     >= 50.0
+    - MODERATE: >= 25.0
+    - LOW:      < 25.0
+    """
+    if response_gap >= TIER_CRITICAL_MIN:
+        return "CRITICAL"
+    elif response_gap >= TIER_HIGH_MIN:
+        return "HIGH"
+    elif response_gap >= TIER_MODERATE_MIN:
+        return "MODERATE"
+    else:
+        return "LOW"
+
+
+def calculate_response_gap(
+    heat_score: float,
+    vulnerability_score: float,
+    resource_deficit_score: float
+) -> Dict[str, Any]:
+    """
+    Combines the three sub-scores into the final Response Gap score (0–100).
+    Applies compounding synergy bonus if all 3 pillars exceed threshold.
+    Returns complete breakdown with display scores and disclaimer.
+    """
+    h = max(0.0, min(100.0, heat_score))
+    v = max(0.0, min(100.0, vulnerability_score))
+    d = max(0.0, min(100.0, resource_deficit_score))
+    
+    base_score = (
+        h * WEIGHT_COMBINED_HEAT +
+        v * WEIGHT_COMBINED_VULN +
+        d * WEIGHT_COMBINED_RES
+    )
+    
+    # Check for acute synergy compounding across all 3 pillars
+    if h >= SYNERGY_THRESHOLD and v >= SYNERGY_THRESHOLD and d >= SYNERGY_THRESHOLD:
+        final_score = min(100.0, base_score * SYNERGY_MULTIPLIER)
+    else:
+        final_score = base_score
+        
+    final_score = round(final_score, 2)
+    tier = classify_zone(final_score)
+    
+    return {
+        "response_gap_score": final_score,
+        "display_score": format_display_score(final_score),
+        "tier": tier,
+        "components": {
+            "heat_exposure": format_display_score(h),
+            "vulnerability": format_display_score(v),
+            "resource_deficit": format_display_score(d),
+            "raw_heat_score": h,
+            "raw_vulnerability_score": v,
+            "raw_resource_deficit_score": d
+        },
+        "disclaimer": DISCLAIMER_TEXT
+    }
+
+
+def rank_zones(zones: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Sorts a list of evaluated zone dictionaries descending by Response Gap score.
+    Applies deterministic tie-breaking hierarchy:
+    Response Gap -> Heat Exposure -> Vulnerability -> Resource Deficit.
+    Assigns 1-indexed rank and risk tier.
+    """
+    def sort_key(z: Dict[str, Any]):
+        return (
+            z.get("response_gap_score", 0.0),
+            z.get("heat_exposure_score", 0.0),
+            z.get("vulnerability_score", 0.0),
+            z.get("resource_deficit_score", 0.0)
+        )
+        
+    sorted_zones = sorted(zones, key=sort_key, reverse=True)
+    
+    ranked_results: List[Dict[str, Any]] = []
+    for idx, zone in enumerate(sorted_zones, start=1):
+        zone_copy = dict(zone)
+        rg_score = zone_copy.get("response_gap_score", 0.0)
+        zone_copy["rank"] = idx
+        zone_copy["tier"] = classify_zone(rg_score)
+        zone_copy["display_score"] = format_display_score(rg_score)
+        zone_copy["disclaimer"] = DISCLAIMER_TEXT
+        ranked_results.append(zone_copy)
+        
+    return ranked_results

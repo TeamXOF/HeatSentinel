@@ -1,16 +1,20 @@
 """
-Unit tests for PriorityEngine sub-scores (Step 24)
+Unit tests for PriorityEngine sub-scores, Response Gap, and Zone Ranking (Steps 24 & 25)
 """
 
 import pytest
-from datetime import datetime
+from datetime import datetime, timezone
 from app.models.zone import HeatMetrics
 from app.services.priority_engine import (
     normalize,
     format_display_score,
     heat_exposure_score,
     vulnerability_score,
-    resource_deficit_score
+    resource_deficit_score,
+    calculate_response_gap,
+    classify_zone,
+    rank_zones,
+    DISCLAIMER_TEXT
 )
 
 
@@ -40,7 +44,7 @@ def test_heat_exposure_score():
         anomaly_c=3.5,
         baseline_available=True,
         data_sources=["fortyguard_tcm", "fortyguard_persistence"],
-        computed_at=datetime.utcnow(),
+        computed_at=datetime.now(timezone.utc),
         mode="live"
     )
     score_high = heat_exposure_score(high_heat)
@@ -54,7 +58,7 @@ def test_heat_exposure_score():
         anomaly_c=None,
         baseline_available=False,
         data_sources=["fortyguard_tcm"],
-        computed_at=datetime.utcnow(),
+        computed_at=datetime.now(timezone.utc),
         mode="live"
     )
     score_low = heat_exposure_score(low_heat)
@@ -68,7 +72,7 @@ def test_heat_exposure_score():
         anomaly_c=None,
         baseline_available=False,
         data_sources=["fortyguard_tcm"],
-        computed_at=datetime.utcnow(),
+        computed_at=datetime.now(timezone.utc),
         mode="live"
     )
     score_no_anomaly = heat_exposure_score(heat_no_anomaly)
@@ -123,3 +127,99 @@ def test_resource_deficit_score():
     res_few = {"resources_within_zone_count": 0, "resources_within_radius_count": 1, "nearest_resource_distance_m": 1200.0}
     res_many = {"resources_within_zone_count": 1, "resources_within_radius_count": 3, "nearest_resource_distance_m": 200.0}
     assert resource_deficit_score(res_few) > resource_deficit_score(res_many)
+
+
+def test_calculate_response_gap():
+    """Verify Response Gap combination formula and synergy compounding."""
+    # Scenario 1: Standard combination
+    res_1 = calculate_response_gap(heat_score=80.0, vulnerability_score=60.0, resource_deficit_score=40.0)
+    # Expected: 80*0.4 + 60*0.35 + 40*0.25 = 32 + 21 + 10 = 63.0
+    assert res_1["response_gap_score"] == 63.0
+    assert res_1["display_score"] == 6.3
+    assert res_1["tier"] == "HIGH"
+    assert "disclaimer" in res_1
+    assert res_1["disclaimer"] == DISCLAIMER_TEXT
+    
+    # Scenario 2: Acute triple-pillar synergy compounding (all >= 70.0)
+    # Base: 80*0.4 + 80*0.35 + 80*0.25 = 80.0. Compounded: 80.0 * 1.10 = 88.0
+    res_synergy = calculate_response_gap(heat_score=80.0, vulnerability_score=80.0, resource_deficit_score=80.0)
+    assert res_synergy["response_gap_score"] == 88.0
+    assert res_synergy["display_score"] == 8.8
+    assert res_synergy["tier"] == "CRITICAL"
+    
+    # Scenario 3: Low risk
+    res_low = calculate_response_gap(heat_score=20.0, vulnerability_score=15.0, resource_deficit_score=10.0)
+    assert res_low["response_gap_score"] < 25.0
+    assert res_low["tier"] == "LOW"
+
+
+def test_classify_zone():
+    """Verify threshold classification into risk tiers."""
+    assert classify_zone(90.0) == "CRITICAL"
+    assert classify_zone(75.0) == "CRITICAL"
+    assert classify_zone(74.9) == "HIGH"
+    assert classify_zone(50.0) == "HIGH"
+    assert classify_zone(49.9) == "MODERATE"
+    assert classify_zone(25.0) == "MODERATE"
+    assert classify_zone(24.9) == "LOW"
+    assert classify_zone(0.0) == "LOW"
+
+
+def test_rank_zones():
+    """Verify multi-zone ranking order and deterministic tie-breaking."""
+    zones = [
+        {
+            "zone_id": "zone-b",
+            "name": "Zone B",
+            "response_gap_score": 62.0,
+            "heat_exposure_score": 60.0,
+            "vulnerability_score": 60.0,
+            "resource_deficit_score": 60.0
+        },
+        {
+            "zone_id": "zone-a",
+            "name": "Zone A",
+            "response_gap_score": 85.0,
+            "heat_exposure_score": 90.0,
+            "vulnerability_score": 85.0,
+            "resource_deficit_score": 80.0
+        },
+        {
+            "zone_id": "zone-c-1",
+            "name": "Zone C1",
+            "response_gap_score": 40.0,
+            "heat_exposure_score": 50.0,
+            "vulnerability_score": 30.0,
+            "resource_deficit_score": 40.0
+        },
+        {
+            "zone_id": "zone-c-2",
+            "name": "Zone C2",
+            "response_gap_score": 40.0,
+            "heat_exposure_score": 45.0,
+            "vulnerability_score": 35.0,
+            "resource_deficit_score": 40.0
+        }
+    ]
+    
+    ranked = rank_zones(zones)
+    
+    assert len(ranked) == 4
+    # Highest response gap is Rank 1
+    assert ranked[0]["zone_id"] == "zone-a"
+    assert ranked[0]["rank"] == 1
+    assert ranked[0]["tier"] == "CRITICAL"
+    
+    # Rank 2
+    assert ranked[1]["zone_id"] == "zone-b"
+    assert ranked[1]["rank"] == 2
+    assert ranked[1]["tier"] == "HIGH"
+    
+    # Ties on response_gap (40.0): zone-c-1 has higher heat_exposure (50.0 vs 45.0) -> Rank 3
+    assert ranked[2]["zone_id"] == "zone-c-1"
+    assert ranked[2]["rank"] == 3
+    assert ranked[2]["tier"] == "MODERATE"
+    
+    assert ranked[3]["zone_id"] == "zone-c-2"
+    assert ranked[3]["rank"] == 4
+    assert ranked[3]["tier"] == "MODERATE"

@@ -61,13 +61,13 @@ Full architecture: see `context/HeatSentinel_AI_System_Design.md`
 | Phase 3 — Spatial Engine (Steps 13–16) | ✅ Done | AI | Tiling, scan orchestration, hotspot detection, refinement |
 | Phase 4 — Analytics (Steps 17–19) | ✅ Done | AI | Persistence, Exceedance, Baseline, HeatMetrics, Caching |
 | Phase 5 — Phoenix External Data (Steps 20–23) | ✅ Done | AI | Census ACS 5-Yr demographics, MAG Heat Relief resources, area-weighted joins, proximity |
-| Phase 6 — Response Gap (Steps 24–29) | ⏳ Next | — | Vulnerability & Deficit formulas, Response Gap scoring, basic-scan endpoint & UI slice |
-| Phase 7 — NYC Validation | ❌ Not started | — | Non-blocking |
-| Phase 8 — WHY Evidence Trail | ❌ Not started | — | |
+| Phase 6 — Response Gap (Steps 24–29) | ✅ Done | AI | Vulnerability & Deficit sub-scores, Response Gap formula, basic-scan endpoint, SQLite caching, UI vertical slice & Playwright E2E |
+| Phase 7 — NYC Validation | ⏳ Next | — | Ingest NYC HVI, calculate NYC Response Gap, validate correlation (non-blocking) |
+| Phase 8 — Autonomous Heat Hunt Agent Core | ⏳ Next | — | Agent Architecture, StateGraph orchestration, tools, and prompts |
 | Phase 9 — Interactive UI & Real Heat Hunt | ❌ Not started | — | |
 | Phase 10 — Full Agent Integration & Polish | ❌ Not started | — | |
 
-**Current position: Start of Phase 6 (Response Gap Engine)**
+**Current position: Phase 6 Complete (The First Working Vertical Slice). Next: Phase 7 (NYC Benchmark) or Phase 8 (Agent Core Engine)**
 
 ---
 
@@ -210,11 +210,19 @@ feature/backend-phase1-foundation
 - Updated scientific documentation in `docs/methodology.md`.
 - Wrote unit tests for vulnerability and resource services (`test_vulnerability_service.py` & `test_resource_service.py`).
 - All 37 backend tests passing 100%.
-- What's next: Start Phase 6 (Response Gap Engine - Steps 24-29).
+### Session 2026-08-23 (Phase 6 - Response Gap Engine & Vertical Slice)
+- Implemented `PriorityEngine` in `priority_engine.py` with sub-scores: Vulnerability Sub-Score, Resource Deficit Sub-Score, and Exposure Sub-Score (Step 24).
+- Implemented Response Gap combination formula ($0.4 \times E + 0.35 \times V + 0.25 \times D$), continuous score mapping (0.0 to 10.0), dynamic risk tier thresholds (`CRITICAL`, `HIGH`, `MODERATE`, `LOW`), and multi-zone deterministic ranking (Step 25).
+- Created comprehensive edge-case and sensitivity pytest suite with 14 parameterized fixtures (`test_response_gap_edge_cases.py`, Step 26).
+- Built unified end-to-end orchestration service `pipeline_service.py` executing the complete Phoenix target area scan -> DBSCAN clustering -> Census vulnerability -> MAG resources -> Response Gap ranking (Step 27).
+- Created `POST /api/analysis/basic-scan` API router with SHA-256 SQLite response caching in `backend/app/routers/analysis.py` (Step 28).
+- Wired live backend pipeline into frontend Command Center UI (`analysis.ts`, `HyperlocalHeatMapCard.tsx`, `WhyPanel.tsx`, `Header.tsx`), eliminating mock data from active user flows (Step 29).
+- Verified full vertical slice end-to-end with **Playwright E2E automation** (all 56 unit/integration tests + Playwright browser suite passing 100%).
+- What's next: Phase 7 (NYC Validation Benchmark) or Phase 8 (Autonomous Heat Hunt Agent Core Engine).
 
 ### Open Items Before Coding Starts
 1. ❓ **LLM choice:** Gemini (`.env.example` has key slot) or Anthropic (roadmap says this)? — User to decide
-2. ❓ **FortyGuard API key:** User has it — will add to `.env` when backend config is ready
+2. ❓ **FortyGuard API key:** User has it — configured in `.env`
 3. ❓ **Deployment target:** Render/Railway for backend? Vercel for frontend?
 
 ---
@@ -224,9 +232,9 @@ feature/backend-phase1-foundation
 To resume in a new session:
 ```
 Read .agents/memory/heatsentinel-project.md first.
-We are on branch feature/phase-5-external-data.
-Phase 5 (Phoenix External Data) is 100% complete.
-Next task: Start Phase 6 - Response Gap Engine (Steps 24-29).
+We are on branch main (all branches up to Phase 6 merged).
+Phase 6 (Response Gap & Vertical Slice) is 100% complete and verified.
+Next task: Phase 7 (NYC Validation) or Phase 8 (Autonomous Agent Core Engine).
 Context Handoff + System Design + Roadmap are in context/ folder.
 ```
 

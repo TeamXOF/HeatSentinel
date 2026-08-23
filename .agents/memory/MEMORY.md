@@ -13,7 +13,8 @@
 - [status] Phase 3 Spatial Engine COMPLETE. Tiling, scan orchestration, hotspot detection, and refinement verified. → heatsentinel-project.md
 - [status] Phase 4 Heat Analytics COMPLETE. Native persistence/exceedance, historical baseline logic, HeatMetrics unified model, and caching verified. → heatsentinel-project.md
 - [status] Phase 5 Phoenix External Data COMPLETE. Census ACS tracts, MAG Heat Relief cooling resources, area-weighted joins, and proximity tests verified. → heatsentinel-project.md
-- [status] Next step: Build Response Gap Engine (Phase 6, Steps 24–29) → heatsentinel-project.md
+- [status] Phase 6 Response Gap & Vertical Slice COMPLETE. PriorityEngine sub-scores, Response Gap formula, basic-scan caching endpoint, and UI Command Center verified via Playwright E2E. → heatsentinel-project.md
+- [status] Next step: Phase 7 (NYC Validation) or Phase 8 (Autonomous Heat Hunt Agent Core Engine) → heatsentinel-project.md
 - [api] FortyGuard API is PREMIUM plan for hackathon — all endpoints available including satellite, streetview, heat_intelligence → heatsentinel-project.md
 - [api] FortyGuard auth is header 'api-key: KEY' (NOT Bearer token) → context/fortyguard-api-reference.md
 - [api] FortyGuard polygon coordinates are [longitude, latitude] — validate before every call → context/fortyguard-api-reference.md

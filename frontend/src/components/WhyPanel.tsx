@@ -266,9 +266,9 @@ export const WhyPanel: React.FC<WhyPanelProps> = ({
                   </span>
                 </div>
                 <div className="p-2.5 rounded-xl bg-white border border-slate-200/60 flex flex-col">
-                  <span className="text-[10px] uppercase font-bold text-slate-400">Chronic Conditions</span>
+                  <span className="text-[10px] uppercase font-bold text-slate-400">Socioeconomic (SVI)</span>
                   <span className="text-sm font-bold text-slate-900 mt-0.5">
-                    {evidence.vulnerability.chronicConditionsPercent || <em className="text-slate-400 font-normal">Not available in this analysis</em>}
+                    {evidence.vulnerability.povertyRate || evidence.vulnerability.chronicConditionsPercent || <em className="text-slate-400 font-normal">Not available</em>}
                   </span>
                 </div>
               </div>

@@ -10,13 +10,10 @@ import {
   Maximize2,
 } from 'lucide-react';
 import { MapFilterTab, HeatZoneMarker } from '../types';
-import {
-  PHOENIX_CENTER,
-  mockHeatZoneMarkers,
-  mockHeatGeoJSON,
-} from '../data/mockHeatMapData';
-import { useQuery } from '@tanstack/react-query';
+import { PHOENIX_CENTER } from '../data/mockHeatMapData';
+import { useBasicScan, useHeatGeoJSON, useHeatMapMarkers } from '../api';
 import { fetchTestScan } from '../api/fortyguard';
+import { useQuery } from '@tanstack/react-query';
 
 interface HyperlocalHeatMapCardProps {
   onZoneSelect?: (zoneId: string) => void;
@@ -37,26 +34,30 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
   const mapInstanceRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
 
-  // 1) React Query for real FortyGuard data
-  const { data: heatResponse, isLoading, isError, error } = useQuery({
+  // 1) React Query for Live/Cached Basic Pipeline Scan & GeoJSON
+  const { data: scanResult, isLoading: isScanLoading } = useBasicScan();
+  const { data: geojsonContour } = useHeatGeoJSON();
+  const { data: dynamicMarkers = [] } = useHeatMapMarkers();
+
+  // 2) React Query for FortyGuard thermal grid
+  const { data: heatResponse } = useQuery({
     queryKey: ['fortyguard-test-scan'],
     queryFn: () => fetchTestScan(false),
-    staleTime: Infinity, // keep it cached
+    staleTime: Infinity,
   });
 
   // Filter tabs config
   const filterTabs: { id: MapFilterTab; label: string }[] = [
-    { id: 'risk', label: 'Heat Risk' },
-    { id: 'index', label: 'Heat Index' },
-    { id: 'vulnerability', label: 'Vulnerability' },
-    { id: 'resources', label: 'Resources' },
+    { id: 'risk', label: 'Heat Risk Zones' },
+    { id: 'index', label: 'Thermal Grid (60m)' },
+    { id: 'vulnerability', label: 'Census SVI' },
+    { id: 'resources', label: 'MAG Cooling' },
   ];
 
   // Initialize MapLibre GL instance
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
-    // Free, publicly accessible lightweight Carto / OSM raster basemap style (no API token required)
     const style: maplibregl.StyleSpecification = {
       version: 8,
       sources: {
@@ -86,7 +87,7 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
       container: mapContainerRef.current,
       style,
       center: PHOENIX_CENTER,
-      zoom: 10.3,
+      zoom: 11.2,
       attributionControl: false,
     });
 
@@ -95,83 +96,97 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
     map.on('load', () => {
       setMapLoaded(true);
 
-      // Add Mock Stylized Heat GeoJSON Polygon Source & Layers
-      // NOTE: This represents a stylized GIS mock layer for urban thermal risk visualization.
-      if (!map.getSource('heat-risk-overlay')) {
-        map.addSource('heat-risk-overlay', {
+      // Layer 1: FortyGuard Raw Thermal Cells
+      if (!map.getSource('fortyguard-thermal-grid')) {
+        map.addSource('fortyguard-thermal-grid', {
           type: 'geojson',
-          data: heatResponse?.data || mockHeatGeoJSON,
+          data: heatResponse?.data || { type: 'FeatureCollection', features: [] },
         });
 
-        // Heat fill layer with soft blur/opacity based on real temperature values
         map.addLayer({
-          id: 'heat-risk-fill',
+          id: 'thermal-grid-fill',
           type: 'fill',
-          source: 'heat-risk-overlay',
+          source: 'fortyguard-thermal-grid',
           paint: {
             'fill-color': [
               'interpolate',
               ['linear'],
-              // Fallback property check in case the API returns 'value', 'temp', or 'tcm'
-              ['coalesce', ['get', 'value'], ['get', 'temp'], ['get', 'tcm'], ['get', 'temperature'], 90],
-              80, '#0D9488', // Teal (Low)
-              95, '#D97706', // Amber (Mod)
-              105, '#EA580C', // Orange (High)
-              115, '#DC2626'  // Red (Critical)
+              ['coalesce', ['get', 'value'], ['get', 'temp'], ['get', 'average_temperature'], ['get', 'max_temperature'], 38],
+              35, '#0D9488', // Teal
+              38, '#F59E0B', // Amber
+              40, '#EA580C', // Orange
+              43, '#DC2626', // Red
             ],
-            'fill-opacity': 0.6,
-          },
-        });
-
-        // Delicate contour stroke layer
-        map.addLayer({
-          id: 'heat-risk-line',
-          type: 'line',
-          source: 'heat-risk-overlay',
-          paint: {
-            'line-color': '#000000',
-            'line-width': 1,
-            'line-opacity': 0.1,
+            'fill-opacity': 0.35,
           },
         });
       }
 
-      // Add Custom Numbered Markers
-      mockHeatZoneMarkers.forEach((markerData: HeatZoneMarker) => {
-        const el = document.createElement('div');
-        el.className = 'heat-zone-marker-container group cursor-pointer';
-
-        // Size classes based on severity/importance
-        const sizeClasses =
-          markerData.size === 'lg'
-            ? 'w-10 h-10 text-base font-black shadow-lg ring-4 ring-white/90'
-            : markerData.size === 'md'
-            ? 'w-8 h-8 text-sm font-bold shadow-md ring-3 ring-white/90'
-            : 'w-7 h-7 text-xs font-bold shadow-sm ring-2 ring-white/90';
-
-        el.innerHTML = `
-          <div 
-            class="flex items-center justify-center rounded-full text-white transition-transform duration-200 group-hover:scale-115 active:scale-95 ${sizeClasses}"
-            style="background-color: ${markerData.color};"
-          >
-            <span class="tabular-nums drop-shadow-xs">${markerData.zoneNumber}</span>
-          </div>
-        `;
-
-        el.addEventListener('click', (e) => {
-          e.stopPropagation();
-          onZoneSelect(markerData.id);
+      // Layer 2: Ranked Zone Polygons (DBSCAN Convex Hulls)
+      if (!map.getSource('ranked-zone-polygons')) {
+        map.addSource('ranked-zone-polygons', {
+          type: 'geojson',
+          data: geojsonContour || { type: 'FeatureCollection', features: [] },
         });
 
-        const marker = new maplibregl.Marker({ element: el })
-          .setLngLat(markerData.coordinates)
-          .addTo(map);
+        map.addLayer({
+          id: 'ranked-zone-fill',
+          type: 'fill',
+          source: 'ranked-zone-polygons',
+          paint: {
+            'fill-color': [
+              'match',
+              ['get', 'tier'],
+              'CRITICAL', '#EF4444',
+              'HIGH', '#F97316',
+              'MODERATE', '#F59E0B',
+              'LOW', '#0D9488',
+              '#F59E0B',
+            ],
+            'fill-opacity': 0.5,
+          },
+        });
 
-        markersRef.current.push(marker);
-      });
+        map.addLayer({
+          id: 'ranked-zone-line',
+          type: 'line',
+          source: 'ranked-zone-polygons',
+          paint: {
+            'line-color': [
+              'match',
+              ['get', 'tier'],
+              'CRITICAL', '#B91C1C',
+              'HIGH', '#C2410C',
+              'MODERATE', '#D97706',
+              'LOW', '#0F766E',
+              '#D97706',
+            ],
+            'line-width': 2.5,
+            'line-opacity': 0.9,
+          },
+        });
+
+        // Click listener on zone polygons
+        map.on('click', 'ranked-zone-fill', (e) => {
+          if (e.features && e.features.length > 0) {
+            const props = e.features[0].properties;
+            const zoneId = props?.zone_id || props?.id;
+            if (zoneId) {
+              onZoneSelect(zoneId);
+            }
+          }
+        });
+
+        map.on('mouseenter', 'ranked-zone-fill', () => {
+          map.getCanvas().style.cursor = 'pointer';
+        });
+
+        map.on('mouseleave', 'ranked-zone-fill', () => {
+          map.getCanvas().style.cursor = '';
+        });
+      }
     });
 
-    // Resize observer to ensure map canvas fits container seamlessly
     const resizeObserver = new ResizeObserver(() => {
       if (mapInstanceRef.current) {
         mapInstanceRef.current.resize();
@@ -191,15 +206,62 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
     };
   }, []);
 
-  // Update GeoJSON source dynamically when React Query data changes!
+  // Update GeoJSON polygon sources dynamically
   useEffect(() => {
-    if (mapLoaded && mapInstanceRef.current && heatResponse?.data) {
-      const source = mapInstanceRef.current.getSource('heat-risk-overlay') as maplibregl.GeoJSONSource;
-      if (source) {
-        source.setData(heatResponse.data);
+    if (mapLoaded && mapInstanceRef.current) {
+      const polygonSource = mapInstanceRef.current.getSource('ranked-zone-polygons') as maplibregl.GeoJSONSource;
+      if (polygonSource && geojsonContour) {
+        polygonSource.setData(geojsonContour);
+      }
+
+      const thermalSource = mapInstanceRef.current.getSource('fortyguard-thermal-grid') as maplibregl.GeoJSONSource;
+      if (thermalSource && heatResponse?.data) {
+        thermalSource.setData(heatResponse.data);
       }
     }
-  }, [heatResponse, mapLoaded]);
+  }, [geojsonContour, heatResponse, mapLoaded]);
+
+  // Update dynamic markers on Map
+  useEffect(() => {
+    if (!mapLoaded || !mapInstanceRef.current) return;
+    const map = mapInstanceRef.current;
+
+    // Clear old markers
+    markersRef.current.forEach((m) => m.remove());
+    markersRef.current = [];
+
+    dynamicMarkers.forEach((markerData: HeatZoneMarker) => {
+      const el = document.createElement('div');
+      el.className = 'heat-zone-marker-container group cursor-pointer';
+
+      const sizeClasses =
+        markerData.size === 'lg'
+          ? 'w-10 h-10 text-base font-black shadow-lg ring-4 ring-white/90'
+          : markerData.size === 'md'
+          ? 'w-8 h-8 text-sm font-bold shadow-md ring-3 ring-white/90'
+          : 'w-7 h-7 text-xs font-bold shadow-sm ring-2 ring-white/90';
+
+      el.innerHTML = `
+        <div 
+          class="flex items-center justify-center rounded-full text-white transition-transform duration-200 group-hover:scale-120 active:scale-95 shadow-md ${sizeClasses}"
+          style="background-color: ${markerData.color};"
+        >
+          <span class="tabular-nums drop-shadow-xs">${markerData.zoneNumber}</span>
+        </div>
+      `;
+
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        onZoneSelect(markerData.id);
+      });
+
+      const marker = new maplibregl.Marker({ element: el })
+        .setLngLat(markerData.coordinates)
+        .addTo(map);
+
+      markersRef.current.push(marker);
+    });
+  }, [dynamicMarkers, mapLoaded]);
 
   // Map control handlers
   const handleZoomIn = () => {
@@ -218,7 +280,7 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
     if (mapInstanceRef.current) {
       mapInstanceRef.current.flyTo({
         center: PHOENIX_CENTER,
-        zoom: 10.3,
+        zoom: 11.2,
         essential: true,
         duration: 800,
       });
@@ -250,10 +312,9 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
               <Info size={15} strokeWidth={2} />
             </button>
             {/* Status Badges */}
-            {isLoading && <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded animate-pulse">LOADING</span>}
-            {isError && <span className="text-[10px] font-bold bg-red-100 text-red-700 px-2 py-0.5 rounded" title={(error as Error)?.message}>ERROR</span>}
-            {heatResponse?.mode === "live" && <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">LIVE DATA</span>}
-            {heatResponse?.mode === "cached" && <span className="text-[10px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded">CACHED</span>}
+            {isScanLoading && <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded animate-pulse">SCANNING</span>}
+            {scanResult?.mode === 'live' && <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">LIVE PIPELINE</span>}
+            {scanResult?.mode === 'cached' && <span className="text-[10px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded">CACHED ({scanResult.duration_ms}ms)</span>}
           </div>
 
           {/* Filter Pills - Horizontal scrollable on mobile */}
@@ -270,7 +331,7 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
                   onClick={() => setActiveTab(tab.id)}
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-all cursor-pointer whitespace-nowrap min-h-[36px] flex items-center shrink-0 ${
                     isActive
-                      ? 'bg-[#F97316] text-white shadow-2xs'
+                      ? 'bg-[#0D9488] text-white shadow-2xs'
                       : 'bg-white text-[#64748B] hover:text-[#0F172A] border border-slate-200/80 hover:bg-slate-50'
                   }`}
                 >
@@ -340,15 +401,15 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
                 </div>
                 <label className="flex items-center gap-2 px-2 py-2 text-xs text-slate-700 hover:bg-slate-50 rounded-lg cursor-pointer">
                   <input type="checkbox" defaultChecked className="accent-[#0D9488] rounded w-4 h-4" />
-                  <span>Thermal Contours</span>
+                  <span>Ranked Hotspot Hulls</span>
                 </label>
                 <label className="flex items-center gap-2 px-2 py-2 text-xs text-slate-700 hover:bg-slate-50 rounded-lg cursor-pointer">
                   <input type="checkbox" defaultChecked className="accent-[#0D9488] rounded w-4 h-4" />
-                  <span>Risk Zone Clusters</span>
+                  <span>Thermal Grid (60m)</span>
                 </label>
                 <label className="flex items-center gap-2 px-2 py-2 text-xs text-slate-700 hover:bg-slate-50 rounded-lg cursor-pointer">
-                  <input type="checkbox" className="accent-[#0D9488] rounded w-4 h-4" />
-                  <span>Cooling Outposts</span>
+                  <input type="checkbox" defaultChecked className="accent-[#0D9488] rounded w-4 h-4" />
+                  <span>MAG Cooling Network</span>
                 </label>
               </div>
             )}
@@ -357,11 +418,11 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
       </div>
 
       {/* MAP CONTAINER */}
-      <div className="relative w-full h-[300px] sm:h-[460px] lg:h-[500px] bg-[#F1F5F9] overflow-hidden">
+      <div className="relative w-full h-[320px] sm:h-[480px] lg:h-[520px] bg-[#F1F5F9] overflow-hidden">
         {/* MapLibre Container */}
         <div ref={mapContainerRef} className="w-full h-full" />
 
-        {/* Top-Left Stacked Controls - Touch friendly min size */}
+        {/* Top-Left Stacked Controls */}
         <div
           id="map-navigation-controls"
           className="absolute top-3 left-3 sm:top-4 sm:left-4 flex flex-col bg-white/95 backdrop-blur-xs rounded-xl shadow-md border border-slate-200/80 overflow-hidden z-10"
@@ -399,18 +460,16 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
           className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 bg-white/95 backdrop-blur-xs rounded-xl p-2.5 sm:p-3 shadow-md border border-slate-200/80 z-10 flex flex-col gap-1 sm:gap-1.5 min-w-[150px] sm:min-w-[200px]"
         >
           <span className="text-[10px] sm:text-[11px] font-bold text-[#0F172A] tracking-tight">
-            Heat Risk Level
+            Priority Risk Tier
           </span>
 
-          {/* 4-Stop Gradient Bar (Teal -> Amber -> Orange -> Red) */}
-          <div className="w-full h-2 sm:h-2.5 rounded-full bg-gradient-to-r from-[#0D9488] via-[#D97706] via-[#EA580C] to-[#DC2626] shadow-inner" />
+          <div className="w-full h-2 sm:h-2.5 rounded-full bg-gradient-to-r from-[#0D9488] via-[#F59E0B] via-[#F97316] to-[#EF4444] shadow-inner" />
 
-          {/* Legend Labels */}
           <div className="flex items-center justify-between text-[9px] sm:text-[10px] font-semibold text-[#64748B] pt-0.5">
             <span>Low</span>
             <span>Mod</span>
             <span>High</span>
-            <span className="text-[#DC2626] font-bold">Critical</span>
+            <span className="text-[#EF4444] font-bold">Critical</span>
           </div>
         </div>
 
@@ -419,11 +478,11 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
           <button
             type="button"
             aria-label="Expand map view"
-            onClick={() => console.log('Expand map modal / view requested')}
+            onClick={handleRecenter}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-white/95 backdrop-blur-xs hover:bg-white text-[#0F172A] rounded-full shadow-md border border-slate-200/80 text-[11px] sm:text-xs font-semibold focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-all cursor-pointer hover:shadow-lg min-h-[34px]"
           >
             <Maximize2 size={13} strokeWidth={2} />
-            <span className="hidden xs:inline">Expand Map</span>
+            <span className="hidden xs:inline">Reset Extent</span>
           </button>
         </div>
       </div>

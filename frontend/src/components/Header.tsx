@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { Sun, MapPin, ChevronDown, Bell, Radar, Loader2, CheckCircle2, AlertTriangle, RotateCcw, Menu, User, Shield } from 'lucide-react';
+import { Sun, MapPin, ChevronDown, Bell, Radar, Loader2, CheckCircle2, AlertTriangle, RotateCcw, Menu, User, Shield, Sparkles } from 'lucide-react';
 import { HeaderProps } from '../types';
 import { useQueryClient, useIsFetching } from '@tanstack/react-query';
-import { useHeatHunt } from '../api';
-import { fetchTestScan } from '../api/fortyguard';
+import { useHeatHunt, useBasicScan, fetchBasicScan } from '../api';
 
 export const Header: React.FC<HeaderProps> = ({
   greeting = 'Good Morning, Team HeatSentinel',
@@ -16,6 +15,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isRefreshingScan, setIsRefreshingScan] = useState(false);
 
   const {
     status,
@@ -25,15 +25,28 @@ export const Header: React.FC<HeaderProps> = ({
   } = useHeatHunt();
 
   const queryClient = useQueryClient();
-  const isFetchingHeat = useIsFetching({ queryKey: ['fortyguard-test-scan'] }) > 0;
+  const { data: basicScan, isFetching: isFetchingScan } = useBasicScan();
 
-  const handleLoadHeatData = async () => {
-    // Manually trigger the query. Any component listening via useQuery will update.
-    await queryClient.fetchQuery({
-      queryKey: ['fortyguard-test-scan'],
-      queryFn: () => fetchTestScan(),
-    });
+  const handleRunAnalysis = async () => {
+    try {
+      setIsRefreshingScan(true);
+      const res = await fetchBasicScan(true);
+      queryClient.setQueryData(['basic-scan', false], res);
+      queryClient.invalidateQueries({ queryKey: ['basic-scan'] });
+      queryClient.invalidateQueries({ queryKey: ['zones'] });
+      queryClient.invalidateQueries({ queryKey: ['heatmapMarkers'] });
+      queryClient.invalidateQueries({ queryKey: ['heatmapGeoJSON'] });
+      queryClient.invalidateQueries({ queryKey: ['kpis'] });
+      queryClient.invalidateQueries({ queryKey: ['riskZoneSummary'] });
+      queryClient.invalidateQueries({ queryKey: ['populationAtRisk'] });
+    } catch (e) {
+      console.error('Failed to run live analysis:', e);
+    } finally {
+      setIsRefreshingScan(false);
+    }
   };
+
+  const isScanning = isFetchingScan || isRefreshingScan;
 
   return (
     <header
@@ -126,19 +139,39 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           )}
 
-          {/* TEMPORARY STEP 12 BUTTON: Load Heat Data */}
+          {/* Mode / Status Tag */}
+          {basicScan && (
+            <div
+              id="pipeline-status-badge"
+              className={`hidden xl:inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border ${
+                basicScan.mode === 'live'
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                  : 'bg-blue-50 text-blue-800 border-blue-200'
+              }`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${basicScan.mode === 'live' ? 'bg-emerald-500 animate-ping' : 'bg-blue-500'}`} />
+              <span>{basicScan.mode === 'live' ? 'Live Telemetry' : 'Cached Grid'}</span>
+              <span className="text-slate-400 font-normal">|</span>
+              <span>{basicScan.ranked_zones.length} Zones</span>
+            </div>
+          )}
+
+          {/* STEP 29 BUTTON: RUN ANALYSIS */}
           <button
+            id="run-analysis-btn"
             type="button"
-            onClick={handleLoadHeatData}
-            disabled={isFetchingHeat}
-            className={`min-h-[44px] inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-full font-bold text-xs uppercase tracking-wider transition-all shadow-xs shrink-0 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none ${
-              isFetchingHeat
-                ? 'bg-blue-300 text-white cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700 active:scale-95 text-white cursor-pointer hover:shadow-md'
+            onClick={handleRunAnalysis}
+            disabled={isScanning}
+            title="Execute live FortyGuard + Census + MAG pipeline scan"
+            className={`min-h-[44px] inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-full font-bold text-xs uppercase tracking-wider transition-all shadow-xs shrink-0 focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:outline-none ${
+              isScanning
+                ? 'bg-teal-300 text-white cursor-not-allowed'
+                : 'bg-[#0D9488] hover:bg-[#0f766e] active:scale-95 text-white cursor-pointer hover:shadow-md'
             }`}
           >
-            {isFetchingHeat ? <Loader2 size={15} className="animate-spin" /> : <Radar size={15} />}
-            <span className="hidden sm:inline">Load Heat Data</span>
+            {isScanning ? <Loader2 size={15} className="animate-spin" /> : <Sparkles size={15} />}
+            <span className="hidden sm:inline">{isScanning ? 'Scanning City...' : 'Run Analysis'}</span>
+            <span className="sm:hidden text-[11px]">{isScanning ? 'Scan...' : 'Analyze'}</span>
           </button>
 
           {/* Primary RUN HEAT HUNT Button - Min 44px Touch Target */}

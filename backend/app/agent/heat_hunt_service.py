@@ -169,6 +169,18 @@ async def _execute_heat_hunt_background(
 
         completed_at = datetime.now(timezone.utc).isoformat()
 
+        # ── Post-process: lift recommend_action into each ranked zone so the frontend
+        # can display real agent-sourced recommendation text rather than a fallback.
+        if isinstance(final_result, dict):
+            ranked = final_result.get("ranked_zones", [])
+            dispatches = final_result.get("recommended_dispatches", [])
+            # Build a zone_id → dispatch lookup (dispatches list parallels ranked_zones)
+            for i, zone in enumerate(ranked):
+                dispatch = dispatches[i] if i < len(dispatches) else {}
+                if dispatch:
+                    zone["recommend_action"] = dispatch.get("rationale") or dispatch.get("title") or None
+                    zone["recommend_action_category"] = dispatch.get("action_type") or dispatch.get("title") or None
+
         # Update SQLite with success and full result
         with get_db_connection() as conn:
             cursor = conn.cursor()

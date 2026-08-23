@@ -9,6 +9,8 @@ import {
   Info,
   Clock,
   Layers,
+  TreePine,
+  Database,
 } from 'lucide-react';
 import { ZoneEvidenceDetail, DataMode } from '../types';
 import { getTierConfig } from '../theme/tiers';
@@ -245,6 +247,20 @@ export const WhyPanel: React.FC<WhyPanelProps> = ({
                   </span>
                 </div>
               </div>
+
+              {/* Tree Canopy Cover — full-width, honest null state */}
+              <div className="p-2.5 rounded-xl bg-white border border-slate-200/60 flex flex-col col-span-2">
+                <div className="flex items-center gap-1.5">
+                  <TreePine size={11} className="text-emerald-500 shrink-0" />
+                  <span className="text-[10px] uppercase font-bold text-slate-400">Tree Canopy Cover</span>
+                </div>
+                <span className="text-xs font-bold text-slate-900 mt-0.5">
+                  {evidence.treeCoverPct != null
+                    ? `${evidence.treeCoverPct.toFixed(1)}%`
+                    : <em className="text-slate-400 font-normal text-[11px]">Not available in this analysis</em>
+                  }
+                </span>
+              </div>
             </div>
 
             {/* B. Vulnerability Sources */}
@@ -308,7 +324,25 @@ export const WhyPanel: React.FC<WhyPanelProps> = ({
             </div>
           </div>
 
-          {/* SECTION 3: RECOMMENDED ACTION CALLOUT BOX */}
+          {/* SECTION 2.5: DATA SOURCES AUDIT TRAIL */}
+          {evidence.dataSources && evidence.dataSources.length > 0 && (
+            <details
+              id="why-panel-data-sources"
+              className="bg-slate-50/70 border border-slate-200/70 rounded-2xl overflow-hidden"
+            >
+              <summary className="p-3.5 cursor-pointer text-xs font-bold text-slate-600 flex items-center gap-2 select-none list-none hover:bg-slate-100/60 transition-colors">
+                <Database size={13} className="text-slate-400 shrink-0" />
+                Evidence Sources &amp; Audit Trail
+                <span className="ml-auto text-[10px] font-medium text-slate-400">▸</span>
+              </summary>
+              <div className="px-4 pb-3 space-y-1 border-t border-slate-200/60 pt-2">
+                {evidence.dataSources.map((src, i) => (
+                  <p key={i} className="text-[11px] text-slate-500 leading-snug font-mono">{src}</p>
+                ))}
+              </div>
+            </details>
+          )}
+
           <div
             id="why-panel-recommended-action"
             className="bg-gradient-to-br from-teal-50/90 to-emerald-50/70 border border-teal-200/70 rounded-2xl p-5 shadow-xs space-y-3"

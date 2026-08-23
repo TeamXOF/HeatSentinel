@@ -44,6 +44,13 @@ class ZoneEvidence(BaseModel):
     data_sources: List[str] = Field(default_factory=list)
     sources: Dict[str, Any] = Field(default_factory=dict)
 
+    # Tree Canopy — no dataset integrated in this analysis; always None
+    tree_cover_pct: Optional[float] = None
+
+    # Recommendation from recommend_action tool (populated by Heat Hunt, null for basic scan)
+    recommend_action: Optional[str] = None
+    recommend_action_category: Optional[str] = None
+
 
 class HeatZone(BaseModel):
     zone_id: str
@@ -64,6 +71,9 @@ class HeatZone(BaseModel):
     rank: int = 1
     evidence: Optional[ZoneEvidence] = None
     disclaimer: Optional[str] = None
+    # Convenience accessor mirroring evidence.recommend_action (populated by Heat Hunt)
+    recommend_action: Optional[str] = None
+    recommend_action_category: Optional[str] = None
 
 
 class HeatMetrics(BaseModel):

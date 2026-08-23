@@ -42,6 +42,11 @@ export interface BackendZoneEvidence {
   nearest_resource_type?: string | null;
   total_cooling_capacity?: number | null;
   data_sources: string[];
+  // Tree canopy — no dataset integrated; always null
+  tree_cover_pct?: number | null;
+  // Recommendation fields — populated by Heat Hunt agent, null for basic scan
+  recommend_action?: string | null;
+  recommend_action_category?: string | null;
 }
 
 export interface BackendZone {
@@ -64,6 +69,9 @@ export interface BackendZone {
   rank: number;
   evidence: BackendZoneEvidence;
   disclaimer: string;
+  // Agent-sourced recommendation (populated after Heat Hunt; null for basic scan)
+  recommend_action?: string | null;
+  recommend_action_category?: string | null;
 }
 
 export interface BasicScanApiResponse {
@@ -156,6 +164,8 @@ export function transformBackendZoneToZoneData(
       exceedanceThreshold: `${bz.exceedance_hours.toFixed(1)} hrs threshold exceedance`,
       historicalAnomaly: bz.anomaly_c != null ? `${bz.anomaly_c > 0 ? '+' : ''}${bz.anomaly_c.toFixed(1)}°C vs 5-day baseline` : 'Baseline comparison',
     },
+    // Tree canopy — not integrated in this analysis; null until a canopy dataset is added
+    treeCoverPct: ev.tree_cover_pct ?? null,
     vulnerability: {
       elderlyPercent: `${(ev.elderly_pct * 100).toFixed(1)}%`,
       povertyRate: `SVI ${(ev.socioeconomic_vulnerability * 100).toFixed(0)}th percentile`,
@@ -169,17 +179,22 @@ export function transformBackendZoneToZoneData(
       source: 'MAG Heat Relief Network Directory',
     },
     recommendedAction: {
-      category: bz.priority_level === 'CRITICAL'
-        ? 'Immediate Tactical Response'
-        : bz.priority_level === 'HIGH'
-        ? 'Targeted Resource Expansion'
-        : 'Active Telemetry Patrol',
-      actionText: ev.cooling_resources_in_1mi === 0
-        ? `Deploy Mobile Hydration & Cooling Unit to ${bz.name}`
-        : `Expand operational capacity at ${ev.nearest_resource_name || 'Nearest Cooling Center'} and dispatch community heat navigators`,
+      // Prefer real agent tool output; fall back to deterministic string for basic scan zones
+      category: bz.recommend_action_category
+        || (bz.priority_level === 'CRITICAL'
+          ? 'Immediate Tactical Response'
+          : bz.priority_level === 'HIGH'
+          ? 'Targeted Resource Expansion'
+          : 'Active Telemetry Patrol'),
+      actionText: bz.recommend_action
+        || (ev.cooling_resources_in_1mi === 0
+          ? `Deploy Mobile Hydration & Cooling Unit to ${bz.name}`
+          : `Expand operational capacity at ${ev.nearest_resource_name || 'Nearest Cooling Center'} and dispatch community heat navigators`),
       priority: bz.priority_level === 'CRITICAL' ? 'HIGH' : bz.priority_level === 'HIGH' ? 'MEDIUM' : 'LOW',
       eta: bz.priority_level === 'CRITICAL' ? 'Immediate (< 30 min)' : 'Within 2 hours',
     },
+    // Audit trail: real data source citations from pipeline
+    dataSources: ev.data_sources || [],
   };
 
   return {
@@ -194,7 +209,7 @@ export function transformBackendZoneToZoneData(
     exceedance: `${bz.exceedance_hours.toFixed(1)} hrs threshold exceedance`,
     anomaly: bz.anomaly_c != null ? `${bz.anomaly_c > 0 ? '+' : ''}${bz.anomaly_c.toFixed(1)}°C` : undefined,
     elderlyPct: `${(ev.elderly_pct * 100).toFixed(1)}%`,
-    treeCoverPct: 6.5,
+    treeCoverPct: ev.tree_cover_pct ?? null,
     coolingResourceCount: ev.cooling_resources_in_1mi,
     recommendedAction: evidenceDetail.recommendedAction.actionText,
     population: ev.population_estimate.toLocaleString(),

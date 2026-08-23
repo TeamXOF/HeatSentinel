@@ -166,6 +166,10 @@ export interface ZoneEvidenceDetail {
     priority: 'HIGH' | 'MEDIUM' | 'LOW';
     eta: string;
   };
+  // Tree canopy cover — null means "not available in this analysis"
+  treeCoverPct?: number | null;
+  // Empirical data source citations from the pipeline
+  dataSources?: string[];
 }
 
 export type HeatHuntStatus = 'idle' | 'running' | 'completed' | 'failed';

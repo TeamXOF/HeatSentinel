@@ -253,6 +253,9 @@ export const AgentInsightsPage: React.FC = () => {
                 <span>Launch Response Planner</span>
                 <ArrowRight size={13} strokeWidth={2.2} />
               </Link>
+              <p className="text-[10px] text-slate-400 italic text-center mt-2 leading-snug">
+                Response Gap is a composite risk indicator, not an official public-health index.
+              </p>
             </div>
           </div>
         </div>

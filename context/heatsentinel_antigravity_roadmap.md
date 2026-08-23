@@ -1504,9 +1504,9 @@ Report: final prompt text summary, real run observations across 3 trials, the sa
 
 ---
 
-## [ ] PHASE 9 — HEAT HUNT
+## [X] PHASE 9 — HEAT HUNT
 
-### [ ] STEP 36 — Heat Hunt Job Model & Async Execution
+### [X] STEP 36 — Heat Hunt Job Model & Async Execution
 
 **PURPOSE:** Wrap the orchestrator in a trackable, pollable "Heat Hunt run" job.
 
@@ -1546,9 +1546,9 @@ Report: job model design, real live run trace via polling, test results, and nex
 
 ---
 
-## [ ] PHASE 10 — BACKEND API
+## [X] PHASE 10 — BACKEND API
 
-### [ ] STEP 37 — Heat Hunt API Endpoints (Start, Status, Result)
+### [X] STEP 37 — Heat Hunt API Endpoints (Start, Status, Result)
 
 **PURPOSE:** Expose the Heat Hunt job system as the primary product API.
 

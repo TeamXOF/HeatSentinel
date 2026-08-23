@@ -5,7 +5,7 @@
     "benchmark_index": "NYC DOHMH Heat Vulnerability Index (HVI)",
     "evaluated_aois_count": 8,
     "formula": "R = 0.40 * E + 0.35 * V + 0.25 * D",
-    "timestamp": "2026-08-23T21:56:38.157903Z",
+    "timestamp": "2026-08-23T22:26:49.137443Z",
     "disclaimer": "Response Gap is a project-derived decision-support score for this hackathon prototype. It is not an official public-health index, medical prediction, or mortality forecast."
   },
   "validation_results": [

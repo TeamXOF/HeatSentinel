@@ -42,6 +42,20 @@ def init_db():
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("""
+            CREATE TABLE IF NOT EXISTS heat_hunt_jobs (
+                job_id TEXT PRIMARY KEY,
+                status TEXT NOT NULL,
+                mode TEXT NOT NULL,
+                provider TEXT NOT NULL,
+                model_name TEXT NOT NULL,
+                progress_events_json TEXT NOT NULL DEFAULT '[]',
+                result_json TEXT,
+                error TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                completed_at TIMESTAMP
+            )
+        """)
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS heat_hunt_runs (
                 job_id TEXT PRIMARY KEY,
                 mode TEXT NOT NULL,

@@ -4,8 +4,8 @@
     "provider": "deterministic",
     "model_name": "deterministic-agent-pipeline",
     "total_steps": 21,
-    "generated_at": "2026-08-23T21:56:24.703704Z",
-    "total_elapsed_ms": 97116.9
+    "generated_at": "2026-08-23T22:26:12.187221Z",
+    "total_elapsed_ms": 63839.7
   },
   "step_events": [
     {
@@ -13,7 +13,7 @@
       "tool_name": "orchestrator_init",
       "status": "Initializing HeatSentinel autonomous agent (deterministic-agent-pipeline)...",
       "details": {},
-      "timestamp": "2026-08-23T21:54:47.586823Z",
+      "timestamp": "2026-08-23T22:25:08.347490Z",
       "elapsed_ms": 0.0
     },
     {
@@ -21,160 +21,160 @@
       "tool_name": "scan_city",
       "status": "Tiling target urban corridor and scanning FortyGuard thermal grid layers...",
       "details": {},
-      "timestamp": "2026-08-23T21:54:47.586855Z",
+      "timestamp": "2026-08-23T22:25:08.347509Z",
       "elapsed_ms": 0.0
     },
     {
       "step_number": 2,
       "tool_name": "scan_city_completed",
-      "status": "Ingested 1,620 thermal grid cells across 0 tiles. Identified 2 candidate hotspot clusters.",
+      "status": "Ingested 3,400 thermal grid cells across 0 tiles. Identified 2 candidate hotspot clusters.",
       "details": {},
-      "timestamp": "2026-08-23T21:56:19.331318Z",
-      "elapsed_ms": 91744.5
+      "timestamp": "2026-08-23T22:26:09.326621Z",
+      "elapsed_ms": 60979.2
     },
     {
       "step_number": 3,
       "tool_name": "refine_hotspot",
       "status": "Applying DBSCAN planar boundary refinement for candidate Zone 1...",
       "details": {},
-      "timestamp": "2026-08-23T21:56:19.331338Z",
-      "elapsed_ms": 91744.5
+      "timestamp": "2026-08-23T22:26:09.326759Z",
+      "elapsed_ms": 60979.3
     },
     {
       "step_number": 4,
       "tool_name": "query_fortyguard_heat",
       "status": "Querying localized FortyGuard thermal layers for refined Zone 1...",
       "details": {},
-      "timestamp": "2026-08-23T21:56:19.332445Z",
-      "elapsed_ms": 91745.6
+      "timestamp": "2026-08-23T22:26:09.334728Z",
+      "elapsed_ms": 60987.3
     },
     {
       "step_number": 5,
       "tool_name": "get_vulnerability_data",
       "status": "Performing area-weighted US Census ACS join for Zone 1...",
       "details": {},
-      "timestamp": "2026-08-23T21:56:20.712120Z",
-      "elapsed_ms": 93125.3
+      "timestamp": "2026-08-23T22:26:10.226135Z",
+      "elapsed_ms": 61878.7
     },
     {
       "step_number": 6,
       "tool_name": "get_resources",
       "status": "Analyzing 1-mile protective cooling resource proximity for Zone 1...",
       "details": {},
-      "timestamp": "2026-08-23T21:56:20.721401Z",
-      "elapsed_ms": 93134.6
+      "timestamp": "2026-08-23T22:26:10.235191Z",
+      "elapsed_ms": 61887.7
     },
     {
       "step_number": 7,
       "tool_name": "calculate_risk_metrics",
       "status": "Computing thermal persistence and threshold exceedance for Zone 1...",
       "details": {},
-      "timestamp": "2026-08-23T21:56:20.729811Z",
-      "elapsed_ms": 93143.0
+      "timestamp": "2026-08-23T22:26:10.239555Z",
+      "elapsed_ms": 61892.1
     },
     {
       "step_number": 8,
       "tool_name": "calculate_response_gap",
       "status": "Computing Response Gap (0.40E + 0.35V + 0.25D) for Zone 1...",
       "details": {},
-      "timestamp": "2026-08-23T21:56:22.076410Z",
-      "elapsed_ms": 94489.6
+      "timestamp": "2026-08-23T22:26:11.242189Z",
+      "elapsed_ms": 62894.7
     },
     {
       "step_number": 9,
       "tool_name": "recommend_action",
       "status": "Evaluating deterministic tactical action recommendation for Zone 1 (MODERATE)...",
       "details": {},
-      "timestamp": "2026-08-23T21:56:22.076520Z",
-      "elapsed_ms": 94489.7
+      "timestamp": "2026-08-23T22:26:11.242306Z",
+      "elapsed_ms": 62894.8
     },
     {
       "step_number": 10,
       "tool_name": "explain_priority",
       "status": "Assembling empirical audit trail for Zone 1...",
       "details": {},
-      "timestamp": "2026-08-23T21:56:22.076579Z",
-      "elapsed_ms": 94489.8
+      "timestamp": "2026-08-23T22:26:11.242363Z",
+      "elapsed_ms": 62894.9
     },
     {
       "step_number": 11,
       "tool_name": "refine_hotspot",
       "status": "Applying DBSCAN planar boundary refinement for candidate Zone 2...",
       "details": {},
-      "timestamp": "2026-08-23T21:56:22.076628Z",
-      "elapsed_ms": 94489.8
+      "timestamp": "2026-08-23T22:26:11.242434Z",
+      "elapsed_ms": 62895.0
     },
     {
       "step_number": 12,
       "tool_name": "query_fortyguard_heat",
       "status": "Querying localized FortyGuard thermal layers for refined Zone 2...",
       "details": {},
-      "timestamp": "2026-08-23T21:56:22.079249Z",
-      "elapsed_ms": 94492.4
+      "timestamp": "2026-08-23T22:26:11.247166Z",
+      "elapsed_ms": 62899.7
     },
     {
       "step_number": 13,
       "tool_name": "get_vulnerability_data",
       "status": "Performing area-weighted US Census ACS join for Zone 2...",
       "details": {},
-      "timestamp": "2026-08-23T21:56:23.863179Z",
-      "elapsed_ms": 96276.4
+      "timestamp": "2026-08-23T22:26:11.889475Z",
+      "elapsed_ms": 63542.0
     },
     {
       "step_number": 14,
       "tool_name": "get_resources",
       "status": "Analyzing 1-mile protective cooling resource proximity for Zone 2...",
       "details": {},
-      "timestamp": "2026-08-23T21:56:23.868370Z",
-      "elapsed_ms": 96281.6
+      "timestamp": "2026-08-23T22:26:11.891569Z",
+      "elapsed_ms": 63544.1
     },
     {
       "step_number": 15,
       "tool_name": "calculate_risk_metrics",
       "status": "Computing thermal persistence and threshold exceedance for Zone 2...",
       "details": {},
-      "timestamp": "2026-08-23T21:56:23.872307Z",
-      "elapsed_ms": 96285.5
+      "timestamp": "2026-08-23T22:26:11.892993Z",
+      "elapsed_ms": 63545.5
     },
     {
       "step_number": 16,
       "tool_name": "calculate_response_gap",
       "status": "Computing Response Gap (0.40E + 0.35V + 0.25D) for Zone 2...",
       "details": {},
-      "timestamp": "2026-08-23T21:56:24.703588Z",
-      "elapsed_ms": 97116.8
+      "timestamp": "2026-08-23T22:26:12.187108Z",
+      "elapsed_ms": 63839.6
     },
     {
       "step_number": 17,
       "tool_name": "recommend_action",
       "status": "Evaluating deterministic tactical action recommendation for Zone 2 (MODERATE)...",
       "details": {},
-      "timestamp": "2026-08-23T21:56:24.703638Z",
-      "elapsed_ms": 97116.8
+      "timestamp": "2026-08-23T22:26:12.187158Z",
+      "elapsed_ms": 63839.7
     },
     {
       "step_number": 18,
       "tool_name": "explain_priority",
       "status": "Assembling empirical audit trail for Zone 2...",
       "details": {},
-      "timestamp": "2026-08-23T21:56:24.703658Z",
-      "elapsed_ms": 97116.8
+      "timestamp": "2026-08-23T22:26:12.187178Z",
+      "elapsed_ms": 63839.7
     },
     {
       "step_number": 19,
       "tool_name": "finalize_heat_hunt",
       "status": "Finalizing structured Heat Hunt report and dispatch recommendations...",
       "details": {},
-      "timestamp": "2026-08-23T21:56:24.703688Z",
-      "elapsed_ms": 97116.9
+      "timestamp": "2026-08-23T22:26:12.187204Z",
+      "elapsed_ms": 63839.7
     },
     {
       "step_number": 20,
       "tool_name": "agent_completed",
       "status": "Autonomous Heat Hunt run successfully completed.",
       "details": {},
-      "timestamp": "2026-08-23T21:56:24.703704Z",
-      "elapsed_ms": 97116.9
+      "timestamp": "2026-08-23T22:26:12.187221Z",
+      "elapsed_ms": 63839.7
     }
   ],
   "final_result": {
@@ -290,7 +290,7 @@
           "priority_urgency": "HIGH_PRIORITY",
           "target_capacity_people": 300,
           "rationale": "Elevated demographic sensitivity (high senior concentration / socioeconomic vulnerability). Deploy neighborhood health ambassadors for direct wellness check-ins.",
-          "recommended_at": "2026-08-23T21:56:22.076563Z"
+          "recommended_at": "2026-08-23T22:26:11.242348Z"
         },
         "disclaimer": "Response Gap is a project-derived decision-support score for this hackathon prototype. It is not an official public-health index, medical prediction, or mortality forecast."
       },
@@ -402,7 +402,7 @@
           "priority_urgency": "HIGH_PRIORITY",
           "target_capacity_people": 300,
           "rationale": "Elevated demographic sensitivity (high senior concentration / socioeconomic vulnerability). Deploy neighborhood health ambassadors for direct wellness check-ins.",
-          "recommended_at": "2026-08-23T21:56:24.703653Z"
+          "recommended_at": "2026-08-23T22:26:12.187173Z"
         },
         "disclaimer": "Response Gap is a project-derived decision-support score for this hackathon prototype. It is not an official public-health index, medical prediction, or mortality forecast."
       }
@@ -414,7 +414,7 @@
         "priority_urgency": "HIGH_PRIORITY",
         "target_capacity_people": 300,
         "rationale": "Elevated demographic sensitivity (high senior concentration / socioeconomic vulnerability). Deploy neighborhood health ambassadors for direct wellness check-ins.",
-        "recommended_at": "2026-08-23T21:56:22.076563Z"
+        "recommended_at": "2026-08-23T22:26:11.242348Z"
       },
       {
         "action_type": "SENIOR_WELLNESS_CANVASSING",
@@ -422,11 +422,11 @@
         "priority_urgency": "HIGH_PRIORITY",
         "target_capacity_people": 300,
         "rationale": "Elevated demographic sensitivity (high senior concentration / socioeconomic vulnerability). Deploy neighborhood health ambassadors for direct wellness check-ins.",
-        "recommended_at": "2026-08-23T21:56:24.703653Z"
+        "recommended_at": "2026-08-23T22:26:12.187173Z"
       }
     ],
-    "executive_briefing": "HeatSentinel autonomous agent completed a comprehensive thermal investigation across Phoenix. Analyzed 1,620 thermal sensor cells across 0 tiles, identifying 2 primary hotspot clusters. Highest priority zone registered Response Gap 3.8/10 (MODERATE). Recommended immediate tactical dispatch: Senior Wellness Outreach & Door-to-Door Canvassing.",
+    "executive_briefing": "HeatSentinel autonomous agent completed a comprehensive thermal investigation across Phoenix. Analyzed 3,400 thermal sensor cells across 0 tiles, identifying 2 primary hotspot clusters. Highest priority zone registered Response Gap 3.8/10 (MODERATE). Recommended immediate tactical dispatch: Senior Wellness Outreach & Door-to-Door Canvassing.",
     "disclaimer": "Response Gap is a project-derived decision-support score for this hackathon prototype. It is not an official public-health index, medical prediction, or mortality forecast.",
-    "finalized_at": "2026-08-23T21:56:24.703700Z"
+    "finalized_at": "2026-08-23T22:26:12.187217Z"
   }
 }

@@ -66,10 +66,11 @@ Full architecture: see `context/HeatSentinel_AI_System_Design.md`
 | Phase 6 — Response Gap (Steps 24–29) | ✅ Done | AI | Vulnerability & Deficit sub-scores, Response Gap formula, basic-scan endpoint, SQLite caching, UI vertical slice & Playwright E2E |
 | Phase 7 — NYC Validation (Steps 30–32) | ✅ Done | AI | Ingested NYC HVI & Cooling Resources, calculated NYC Response Gap, verified Spearman rank correlation benchmark |
 | Phase 8 — Autonomous Heat Hunt Agent Core (Steps 33–35) | ✅ Done | AI | 10 tool schemas with multi-provider export, HeatHuntOrchestrator async loop, 7-phase adaptive investigation prompt & Gemini catalogue |
-| Phase 9 — Interactive UI & Real Heat Hunt (Steps 36–38) | ⏳ Next | — | HeatHuntJob SQLite model, background asyncio orchestration service, and status/results streaming endpoints |
-| Phase 10 — Full Agent Integration & Polish (Steps 39–45) | ❌ Not started | — | Real /v1/satellite greenery, /v1/env_params, correlation charts, PDF report export |
+| Phase 9 — Heat Hunt Job Model & Async Execution (Step 36) | ✅ Done | AI | HeatHuntJob SQLite model, non-blocking asyncio background worker, durable incremental event persistence, in-memory SSE queue |
+| Phase 10 — Heat Hunt API Endpoints (Step 37) | ✅ Done | AI | POST /start (<5ms), GET /status (polling), GET /results (409/200), GET /stream (SSE), GET /history |
+| Phase 11 — Command Center Full Wiring (Steps 38–40) | ⏳ Next | — | Real "RUN HEAT HUNT" button & live agent streaming activity feed in frontend Command Center |
 
-**Current position: Phase 8 Complete (Agent Core Engine & NYC Validation Done). Next: Phase 9 (Step 36 — Heat Hunt Job Model & Async Execution)**
+**Current position: Phase 10 Complete (Backend API & Async Engine 100% Ready). Next: Phase 11 (Step 38 — Real "RUN HEAT HUNT" Button & Polling Hook)**
 
 ---
 
@@ -243,6 +244,15 @@ feature/backend-phase1-foundation
 - Updated `AgentInsightsPage.tsx` right rail hotspot list to consume real live zones via `useZones()`.
 - Verified live end-to-end rendering on localhost:3000 via Playwright browser tool.
 
+### Session 2026-08-23 (Phase 9 & 10 - Heat Hunt Job Model & REST/SSE Endpoints)
+- Implemented `HeatHuntJob` SQLite storage schema and async background worker in `backend/app/agent/heat_hunt_service.py` (Step 36).
+- Built dual-write event bus (durable SQLite incremental persistence + in-memory `asyncio.Queue` pub/sub broker).
+- Implemented production API router in `backend/app/routers/heat_hunt.py` exposing `POST /start` (<5ms start), `GET /{job_id}/status`, `GET /{job_id}/results` (with 409 conflict while in progress), `GET /{job_id}/stream` (Server-Sent Events), and `GET /history` (Step 37).
+- Added dual case aliases (`job_id` and `jobId`) for zero-friction frontend integration.
+- Wrote integration test suites `test_heat_hunt_service.py` (4/4 passed) and `test_heat_hunt_router.py` (5/5 passed).
+- Verified live endpoints against running Uvicorn server.
+- All 95 backend unit/integration tests passing 100%.
+
 ---
 
 ## Resume Instructions
@@ -250,10 +260,9 @@ feature/backend-phase1-foundation
 To resume in a new session:
 ```
 Read .agents/memory/heatsentinel-project.md first.
-We are on branch main (all branches up to Phase 8 merged cleanly).
-Phase 7 (NYC Validation) and Phase 8 (Agent Core Engine) are 100% complete and tested (91/91 passing).
-All mock data in active frontend flows has been replaced with live FortyGuard + Census + MAG pipeline data.
-Next task: Phase 9 (Step 36 — Heat Hunt Job Model & Async Execution in backend/app/services/heat_hunt_service.py).
+We are on branch main (all branches up to Phase 10 merged cleanly).
+Phase 9 (Job Model & Background Service) and Phase 10 (Backend API Endpoints) are 100% complete and tested (95/95 passing).
+Next task: Phase 11 (Step 38 — Real "RUN HEAT HUNT" Button & Polling Hook in frontend/src/api/heatHunt.tsx).
 Context Handoff + System Design + Roadmap are in context/ folder.
 ```
 

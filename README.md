@@ -2,7 +2,10 @@
 
 > **FortyGuard Hackathon '26** — *Agentic AI & Data Analysis / Correlation Tracks*  
 > **Target Cities:** Phoenix, AZ (Primary Deployment & Live Demo) · New York City (Secondary Validation Track)  
-> **Author:** Waleed Khalid ([@Waleed-Khalid-dev](https://github.com/Waleed-Khalid-dev))
+> **Team XOF:**  
+> - **Waleed Khalid** ([@Waleed-Khalid-dev](https://github.com/Waleed-Khalid-dev))  
+> - **Nafees Aftab** ([@justnefo-debug](https://github.com/justnefo-debug))  
+> - **Muhammad Ali** ([@ali38958](https://github.com/ali38958))  
 
 ---
 

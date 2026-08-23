@@ -16,8 +16,10 @@ updated: 2026-08-22
 - **Name:** HeatSentinel AI
 - **Subtitle:** Autonomous Hyperlocal Heat Response Intelligence
 - **Hackathon:** FortyGuard Hackathon '26
-- **Tracks:** Agentic AI (Track 1) + Data Analysis & Correlation (Track 2)
-- **Team:** 3 members — AI/LLM engineer, backend developer, frontend/data-viz developer
+- **Team:** Team XOF (3 members):
+  - **Waleed Khalid** ([@Waleed-Khalid-dev](https://github.com/Waleed-Khalid-dev))
+  - **Nafees Aftab** ([@justnefo-debug](https://github.com/justnefo-debug))
+  - **Muhammad Ali** ([@ali38958](https://github.com/ali38958))
 - **Demo Cities:** Phoenix, AZ (primary) — NYC (secondary/validation only)
 - **Deadline:** 6-day build window from hackathon start
 

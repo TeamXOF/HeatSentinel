@@ -1589,9 +1589,9 @@ Report: endpoint behavior, real live run confirmed via API polling, test results
 
 ---
 
-## [ ] PHASE 11 — COMMAND CENTER (FULL WIRING)
+## [/] PHASE 11 — COMMAND CENTER (FULL WIRING)
 
-### [ ] STEP 38 — Real "RUN HEAT HUNT" Button & Polling Hook
+### [X] STEP 38 — Real "RUN HEAT HUNT" Button & Polling Hook
 
 **PURPOSE:** Replace the placeholder "RUN ANALYSIS" flow with the real, agent-driven Heat Hunt flow.
 
@@ -1630,7 +1630,7 @@ COMPLETION REPORT
 Report: files changed, confirmation of the real live Heat Hunt flow working in-browser, failure-path confirmation, and next dependency (live Agent Activity Panel wired to real progress events).
 ```
 
-### [ ] STEP 39 — Live Agent Activity Panel
+### [X] STEP 39 — Live Agent Activity Panel
 
 **PURPOSE:** Show the agent's real step-by-step investigation as it happens.
 

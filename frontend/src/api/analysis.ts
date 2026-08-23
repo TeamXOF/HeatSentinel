@@ -1,3 +1,4 @@
+import React, { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { USE_MOCK_DATA, apiFetch, API_BASE_URL } from './config';
 import {
@@ -241,20 +242,20 @@ export function useBasicScan(options: { forceRefresh?: boolean; enabled?: boolea
  * Hook to retrieve all monitored vulnerability zones (derived from live basic scan)
  */
 export function useZones() {
-  const { data: scanResult, isLoading, isError } = useBasicScan();
+  const query = useBasicScan();
+  const zones: ZoneData[] = useMemo(() => {
+    if (query.data && query.data.ranked_zones && query.data.ranked_zones.length > 0) {
+      return query.data.ranked_zones.map((bz) =>
+        transformBackendZoneToZoneData(bz, query.data.mode)
+      );
+    }
+    return [];
+  }, [query.data]);
 
-  return useQuery<ZoneData[]>({
-    queryKey: ['zones', scanResult?.cache_key, scanResult?.mode],
-    queryFn: async () => {
-      if (scanResult && scanResult.ranked_zones) {
-        return scanResult.ranked_zones.map((bz) =>
-          transformBackendZoneToZoneData(bz, scanResult.mode)
-        );
-      }
-      return [];
-    },
-    enabled: Boolean(scanResult) && !isLoading,
-  });
+  return {
+    ...query,
+    data: zones,
+  };
 }
 
 /**

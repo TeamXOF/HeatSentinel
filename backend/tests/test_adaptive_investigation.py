@@ -85,7 +85,7 @@ async def test_adaptive_investigation_trace_generation_and_schema():
 
     result = await orch.run(
         target_area_geojson=None,
-        date_str="2026-08-23",
+        date_str="2024-08-01",
         time_str="14:00",
         on_step=step_listener,
     )

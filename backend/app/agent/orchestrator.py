@@ -460,7 +460,7 @@ class HeatHuntOrchestrator:
                         tool_results.append({
                             "type": "tool_result",
                             "tool_use_id": tool_id,
-                            "content": json.dumps(res),
+                            "content": json.dumps(res, default=str),
                         })
                         step += 1
 

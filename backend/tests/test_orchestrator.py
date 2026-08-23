@@ -30,7 +30,7 @@ async def test_orchestrator_run_deterministic_sequence():
     async def step_listener(event: Dict[str, Any]):
         events.append(event)
 
-    result = await orch.run(on_step=step_listener)
+    result = await orch.run(date_str="2024-08-01", on_step=step_listener)
 
     # 1. Verify on_step events
     assert len(events) >= 5, f"Expected at least 5 step events, got {len(events)}"

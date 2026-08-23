@@ -4,7 +4,7 @@
     "sample_size_n": 8,
     "evaluation_target": "New York City (Secondary Validation Track)",
     "benchmark_source": "NYC Department of Health and Mental Hygiene (DOHMH)",
-    "timestamp": "2026-08-23T22:28:22.895521Z"
+    "timestamp": "2026-08-24T00:19:58.342875Z"
   },
   "statistical_metrics": {
     "spearman_rank_correlation_rs": 0.982,

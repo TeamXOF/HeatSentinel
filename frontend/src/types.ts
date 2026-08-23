@@ -173,6 +173,7 @@ export type HeatHuntStatus = 'idle' | 'running' | 'completed' | 'failed';
 export interface HeatHuntProgressEvent {
   id: string;
   message: string;
+  display_name?: string; // Human-readable label from backend TOOL_DISPLAY_NAMES; prefer over message when present
   timestamp: string;
   stepNumber: number;
   totalSteps: number;

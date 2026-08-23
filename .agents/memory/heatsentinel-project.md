@@ -1,7 +1,7 @@
 ---
 type: project
 created: 2026-08-22
-updated: 2026-08-22
+updated: 2026-08-24
 ---
 
 # HeatSentinel AI — Project Status & Session Memory
@@ -68,9 +68,9 @@ Full architecture: see `context/HeatSentinel_AI_System_Design.md`
 | Phase 8 — Autonomous Heat Hunt Agent Core (Steps 33–35) | ✅ Done | AI | 10 tool schemas with multi-provider export, HeatHuntOrchestrator async loop, 7-phase adaptive investigation prompt & Gemini catalogue |
 | Phase 9 — Heat Hunt Job Model & Async Execution (Step 36) | ✅ Done | AI | HeatHuntJob SQLite model, non-blocking asyncio background worker, durable incremental event persistence, in-memory SSE queue |
 | Phase 10 — Heat Hunt API Endpoints (Step 37) | ✅ Done | AI | POST /start (<5ms), GET /status (polling), GET /results (409/200), GET /stream (SSE), GET /history |
-| Phase 11 — Command Center Full Wiring (Steps 38–40) | ⏳ Next | — | Real "RUN HEAT HUNT" button & live agent streaming activity feed in frontend Command Center |
+| Phase 11 — Command Center Full Wiring (Steps 38–40) | 🔨 In Progress | AI | Steps 38 ✅ + 39 ✅ done. Step 40 (Recommendation Display & Evidence Completeness) is next. |
 
-**Current position: Phase 10 Complete (Backend API & Async Engine 100% Ready). Next: Phase 11 (Step 38 — Real "RUN HEAT HUNT" Button & Polling Hook)**
+**Current position: Phase 11 Steps 38 & 39 complete. Next: Step 40 — Recommendation Display & Evidence Completeness Pass.**
 
 ---
 
@@ -78,24 +78,28 @@ Full architecture: see `context/HeatSentinel_AI_System_Design.md`
 
 All frontend files in `src/`. Key structure:
 - `src/App.tsx` — Routes + providers (QueryClientProvider, HeatHuntProvider, BrowserRouter)
-- `src/api/config.ts` — `USE_MOCK_DATA = true` toggle. Flip to `false` when backend is ready.
-- `src/api/heatHunt.tsx` — HeatHuntProvider with mock + real backend hook at `POST /api/heat-hunt/start`
+- `src/api/config.ts` — `USE_MOCK_DATA = false` (live data mode)
+- `src/api/heatHunt.tsx` — HeatHuntProvider with SSE streaming + polling fallback wired to `POST /api/heat-hunt/start`
+- `src/api/heatHunt.tsx` — Maps `display_name` from backend on both SSE and polling paths
 - `src/pages/` — 10 pages: Overview, HeatMap, RiskZones, AgentInsights, Events, Resources, ResponsePlanner, Reports, DataExplorer, Settings
-- `src/components/` — 13 components including WhyPanel, HyperlocalHeatMapCard, AnalyticsCards
-- `src/data/` — Mock data files (to be replaced by real backend calls)
+- `src/components/` — 14 components including **AgentActivityPanel** (NEW), WhyPanel, HyperlocalHeatMapCard, AnalyticsCards
+- `src/data/` — Mock data files (replaced by real backend calls for all active flows)
 - `src/context/HeatHuntContext.tsx` — Stub context (re-export, real logic in api/heatHunt.tsx)
 
 **Frontend Stack:** React 19 + Vite + TypeScript + Tailwind v4 + MapLibre GL JS + React Query + Recharts + Motion (Framer) + Lucide icons
 
 ---
 
-## Backend — What Needs to Be Built
+## Backend — What Has Been Built
 
-- `/backend/` folder does not exist yet
-- Plan: `backend-phase1-foundation.md` in project root (artifact)
+- `/backend/` — FastAPI modular monolith, fully operational
+- `backend/app/agent/heat_hunt_service.py` — Job model, SSE pub/sub, async background worker, `TOOL_DISPLAY_NAMES` dict
+- `backend/app/agent/orchestrator.py` — HeatHuntOrchestrator async loop
+- `backend/app/agent/tools.py` — 10 core agent tools
+- `backend/app/routers/heat_hunt.py` — POST /start, GET /status, GET /results, GET /stream (SSE), GET /history
 - FastAPI on `http://localhost:8000`
-- Frontend already expects `POST /api/heat-hunt/start` → `{ jobId: "..." }`
-- CORS must allow `http://localhost:3000`
+- CORS allows `http://localhost:3000`
+- 95 backend tests passing 100%
 
 ---
 
@@ -253,6 +257,18 @@ feature/backend-phase1-foundation
 - Verified live endpoints against running Uvicorn server.
 - All 95 backend unit/integration tests passing 100%.
 
+### Session 2026-08-24 (Phase 11 Steps 38 & 39 — Command Center Live Wiring)
+- Step 38 was already complete (real "RUN HEAT HUNT" button with SSE + polling fallback confirmed working).
+- Step 39 implemented: extracted `AgentActivityPanel` as reusable component from `AgentInsightsPage`.
+- Backend: added `TOOL_DISPLAY_NAMES` dict (11 entries) + `display_name: Optional[str]` to `ProgressEvent` model in `heat_hunt_service.py`. The `on_step_callback` now populates `display_name` so judges see human-readable labels, not raw tool names.
+- Frontend: NEW `frontend/src/components/AgentActivityPanel.tsx` — renders `evt.display_name || evt.message`, stable keys, compact mode, completed/failed terminal states, auto-scroll.
+- `AgentInsightsPage.tsx` refactored: 484 → 270 lines. All inline feed JSX replaced with `<AgentActivityPanel />`.
+- `types.ts`: added `display_name?: string` to `HeatHuntProgressEvent`.
+- `heatHunt.tsx`: mapped `display_name` in SSE handler, polling mapper, and fixed inline type.
+- TypeScript check: 0 new errors from Step 39 (4 pre-existing unrelated errors remain in `alerts.ts` + `priorityActions.ts`).
+- Backend model smoke test: all 10 core tools mapped, `display_name` populates correctly.
+- What's next: Step 40 — Recommendation Display & Evidence Completeness Pass.
+
 ---
 
 ## Resume Instructions
@@ -260,9 +276,13 @@ feature/backend-phase1-foundation
 To resume in a new session:
 ```
 Read .agents/memory/heatsentinel-project.md first.
-We are on branch main (all branches up to Phase 10 merged cleanly).
-Phase 9 (Job Model & Background Service) and Phase 10 (Backend API Endpoints) are 100% complete and tested (95/95 passing).
-Next task: Phase 11 (Step 38 — Real "RUN HEAT HUNT" Button & Polling Hook in frontend/src/api/heatHunt.tsx).
+We are on branch main.
+Phase 11 Steps 38 & 39 are complete. 
+Next task: Step 40 — Recommendation Display & Evidence Completeness Pass.
+  - Inspect Zone model, pipeline output, WhyPanel, PriorityPanel before making changes
+  - Confirm whether tree canopy data exists; if not, label as "Not available in this analysis"
+  - Ensure recommend_action output renders in PriorityPanel under "Recommended:"
+  - Ensure explain_priority full evidence renders in WhyPanel expandable format
+  - Add Response Gap disclaimer next to every displayed score
 Context Handoff + System Design + Roadmap are in context/ folder.
 ```
-

@@ -21,8 +21,8 @@ router = APIRouter(prefix="/api/analysis", tags=["analysis"])
 
 
 def _default_scan_date() -> str:
-    """Returns yesterday's date as YYYY-MM-DD for real-time demo relevance."""
-    return (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+    """Returns the official FortyGuard Phoenix dataset date (2024-08-01) containing 16,568 real thermal points."""
+    return "2024-08-01"
 
 
 class BasicScanRequest(BaseModel):

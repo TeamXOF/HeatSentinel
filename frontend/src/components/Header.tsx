@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Sun, MapPin, ChevronDown, Bell, Radar, Loader2, CheckCircle2, AlertTriangle, RotateCcw, Menu, User, Shield, Sparkles } from 'lucide-react';
 import { HeaderProps } from '../types';
-import { useQueryClient, useIsFetching } from '@tanstack/react-query';
-import { useHeatHunt, useBasicScan, fetchBasicScan } from '../api';
+import { useHeatHunt, useBasicScan } from '../api';
 
 export const Header: React.FC<HeaderProps> = ({
   greeting = 'Good Morning, Team HeatSentinel',
@@ -24,29 +23,7 @@ export const Header: React.FC<HeaderProps> = ({
     setSimulateFailure,
   } = useHeatHunt();
 
-  const queryClient = useQueryClient();
-  const { data: basicScan, isFetching: isFetchingScan } = useBasicScan();
-
-  const handleRunAnalysis = async () => {
-    try {
-      setIsRefreshingScan(true);
-      const res = await fetchBasicScan(true);
-      queryClient.setQueryData(['basic-scan', false], res);
-      queryClient.invalidateQueries({ queryKey: ['basic-scan'] });
-      queryClient.invalidateQueries({ queryKey: ['zones'] });
-      queryClient.invalidateQueries({ queryKey: ['heatmapMarkers'] });
-      queryClient.invalidateQueries({ queryKey: ['heatmapGeoJSON'] });
-      queryClient.invalidateQueries({ queryKey: ['kpis'] });
-      queryClient.invalidateQueries({ queryKey: ['riskZoneSummary'] });
-      queryClient.invalidateQueries({ queryKey: ['populationAtRisk'] });
-    } catch (e) {
-      console.error('Failed to run live analysis:', e);
-    } finally {
-      setIsRefreshingScan(false);
-    }
-  };
-
-  const isScanning = isFetchingScan || isRefreshingScan;
+  const { data: basicScan } = useBasicScan();
 
   return (
     <header
@@ -156,44 +133,32 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           )}
 
-          {/* STEP 29 BUTTON: RUN ANALYSIS */}
-          <button
-            id="run-analysis-btn"
-            type="button"
-            onClick={handleRunAnalysis}
-            disabled={isScanning}
-            title="Execute live FortyGuard + Census + MAG pipeline scan"
-            className={`min-h-[44px] inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-full font-bold text-xs uppercase tracking-wider transition-all shadow-xs shrink-0 focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:outline-none ${
-              isScanning
-                ? 'bg-teal-300 text-white cursor-not-allowed'
-                : 'bg-[#0D9488] hover:bg-[#0f766e] active:scale-95 text-white cursor-pointer hover:shadow-md'
-            }`}
-          >
-            {isScanning ? <Loader2 size={15} className="animate-spin" /> : <Sparkles size={15} />}
-            <span className="hidden sm:inline">{isScanning ? 'Scanning City...' : 'Run Analysis'}</span>
-            <span className="sm:hidden text-[11px]">{isScanning ? 'Scan...' : 'Analyze'}</span>
-          </button>
-
-          {/* Primary RUN HEAT HUNT Button - Min 44px Touch Target */}
+          {/* Primary RUN HEAT HUNT Button (Autonomous Agent Investigation) */}
           <button
             id="run-heat-hunt-btn"
             type="button"
             onClick={runHeatHunt}
             disabled={status === 'running'}
-            title="Execute automated AI heat vulnerability and hotspot hunt"
-            className={`min-h-[44px] inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-full font-bold text-xs uppercase tracking-wider transition-all shadow-xs shrink-0 focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none ${
+            title="Execute autonomous AI heat vulnerability investigation and live thermal telemetry hunt"
+            className={`min-h-[44px] inline-flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 rounded-full font-bold text-xs uppercase tracking-wider transition-all shadow-xs shrink-0 focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none ${
               status === 'running'
-                ? 'bg-orange-300 text-white cursor-not-allowed'
+                ? 'bg-orange-400 text-white cursor-not-allowed shadow-inner'
                 : 'bg-[#F97316] hover:bg-[#ea580c] active:scale-95 text-white cursor-pointer hover:shadow-md'
             }`}
           >
             {status === 'running' ? (
-              <Loader2 size={15} className="animate-spin" />
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                <span className="hidden sm:inline">Agent Investigating...</span>
+                <span className="sm:hidden text-[11px]">Hunting...</span>
+              </>
             ) : (
-              <Radar size={15} strokeWidth={2.4} />
+              <>
+                <Radar size={16} strokeWidth={2.4} />
+                <span className="hidden sm:inline">Run Heat Hunt</span>
+                <span className="sm:hidden text-[11px]">Heat Hunt</span>
+              </>
             )}
-            <span className="hidden sm:inline">Run Heat Hunt</span>
-            <span className="sm:hidden text-[11px]">Hunt</span>
           </button>
         </div>
 

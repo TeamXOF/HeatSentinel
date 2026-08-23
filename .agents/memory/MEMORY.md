@@ -8,18 +8,9 @@
 ## HeatSentinel AI (FortyGuard Hackathon '26)
 - [status] Full project state, phase tracking, resume instructions → heatsentinel-project.md
 - [status] Frontend UI complete (10 pages, 13 components, mock data layer, in /frontend) → heatsentinel-project.md
-- [status] Active branch: main (all phases 1-6 merged cleanly) → heatsentinel-project.md
-- [status] Phase 2 FortyGuard Integration COMPLETE. API client, SQLite caching, MapLibre rendering verified. → heatsentinel-project.md
-- [status] Phase 3 Spatial Engine COMPLETE. Tiling, scan orchestration, hotspot detection, and refinement verified. → heatsentinel-project.md
-- [status] Phase 4 Heat Analytics COMPLETE. Native persistence/exceedance, historical baseline logic, HeatMetrics unified model, and caching verified. → heatsentinel-project.md
-- [status] Phase 5 Phoenix External Data COMPLETE. Census ACS tracts, MAG Heat Relief cooling resources, area-weighted joins, and proximity tests verified. → heatsentinel-project.md
-- [status] Phase 6 Response Gap & Vertical Slice COMPLETE. PriorityEngine sub-scores, Response Gap formula, basic-scan caching endpoint, and UI Command Center verified via Playwright E2E. → heatsentinel-project.md
-- [status] Phase 7 NYC Validation COMPLETE. NYC HVI & Cooling Resources ingested, Spearman rank correlation benchmark verified. → heatsentinel-project.md
-- [status] Phase 8 Autonomous Agent Core COMPLETE. 10 core tools with multi-provider export schemas, HeatHuntOrchestrator loop, 7-phase adaptive investigation prompt & Gemini catalogue. → heatsentinel-project.md
-- [status] Phase 9 Heat Hunt Job Model COMPLETE. SQLite persistence, non-blocking asyncio background worker, dual-write event bus. → heatsentinel-project.md
-- [status] Phase 10 Backend API COMPLETE. POST /start, GET /status, GET /results (409/200), GET /stream (SSE), GET /history. → heatsentinel-project.md
-- [status] Live Data Integration COMPLETE. USE_MOCK_DATA=false, dynamic yesterday scan date, live alerts/actions/resources/hotspots wired. → heatsentinel-project.md
-- [status] Next step: Phase 11 (Step 38 — Real "RUN HEAT HUNT" Button & Polling Hook) → heatsentinel-project.md
+- [status] Phase 11 Steps 38 & 39 COMPLETE. HeatHunt button live, AgentActivityPanel extracted with display_name labels. → heatsentinel-project.md
+- [status] Active branch: main (all phases 1-11 steps 38-39 merged cleanly) → heatsentinel-project.md
+- [status] Next step: Phase 11 Step 40 — Recommendation Display & Evidence Completeness Pass → heatsentinel-project.md
 - [api] FortyGuard API is PREMIUM plan for hackathon — all endpoints available including satellite, streetview, heat_intelligence → heatsentinel-project.md
 - [api] FortyGuard auth is header 'api-key: KEY' (NOT Bearer token) → context/fortyguard-api-reference.md
 - [api] FortyGuard polygon coordinates are [longitude, latitude] — validate before every call → context/fortyguard-api-reference.md

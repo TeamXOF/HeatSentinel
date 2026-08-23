@@ -1,24 +1,12 @@
 import React, { createContext, useContext, useState, useRef, useEffect, useCallback } from 'react';
-import { USE_MOCK_DATA, apiFetch } from './config';
+import { useQueryClient } from '@tanstack/react-query';
+import { API_BASE_URL, apiFetch } from './config';
 import {
   HeatHuntStatus,
   HeatHuntProgressEvent,
   HeatHuntResult,
   HeatHuntContextValue,
 } from '../types';
-
-export const MOCK_HEAT_HUNT_STEPS: Array<{
-  message: string;
-  type: 'info' | 'warning' | 'success';
-}> = [
-  { message: 'Dividing Phoenix target area into scan zones...', type: 'info' },
-  { message: 'Scanning thermal conditions...', type: 'info' },
-  { message: 'Hotspot detected — refining priority AOI...', type: 'warning' },
-  { message: 'Joining Census vulnerability data...', type: 'info' },
-  { message: 'Checking protective resource coverage...', type: 'info' },
-  { message: 'Calculating Response Gap scores...', type: 'info' },
-  { message: 'Ranking zones by priority...', type: 'success' },
-];
 
 const HeatHuntContext = createContext<HeatHuntContextValue | undefined>(undefined);
 
@@ -29,18 +17,10 @@ export const HeatHuntProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [simulateFailure, setSimulateFailure] = useState<boolean>(false);
 
-  const timersRef = useRef<NodeJS.Timeout[]>([]);
-
-  const clearAllTimers = () => {
-    timersRef.current.forEach((timer) => clearTimeout(timer));
-    timersRef.current = [];
-  };
-
-  useEffect(() => {
-    return () => {
-      clearAllTimers();
-    };
-  }, []);
+  const queryClient = useQueryClient();
+  const activeJobIdRef = useRef<string | null>(null);
+  const eventSourceRef = useRef<EventSource | null>(null);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const formatTimestamp = (date: Date = new Date()): string => {
     return date.toLocaleTimeString('en-US', {
@@ -51,113 +31,246 @@ export const HeatHuntProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     });
   };
 
+  const cleanupConnections = useCallback(() => {
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      eventSourceRef.current = null;
+    }
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      cleanupConnections();
+    };
+  }, [cleanupConnections]);
+
   /**
-   * Heat Hunt execution handler.
-   * In Mock Mode: Simulates 800ms telemetry events with progress and failure toggles.
-   * In Production (USE_MOCK_DATA = false): Triggers backend execution and event polling.
+   * Fetches final results on agent completion and refreshes global application state.
    */
-  const runHeatHunt = useCallback(() => {
-    clearAllTimers();
+  const handleJobCompletion = useCallback(async (jobId: string) => {
+    cleanupConnections();
+    try {
+      const res = await apiFetch<{
+        status: string;
+        result?: {
+          status: string;
+          city: string;
+          ranked_zones?: any[];
+          executive_briefing?: string;
+          recommended_dispatches?: any[];
+          primary_hotspots_count?: number;
+          scan_summary?: { total_cells: number };
+        };
+      }>(`/api/heat-hunt/${jobId}/results`);
+
+      if (res.status === 'completed' && res.result) {
+        const ranked = res.result.ranked_zones || [];
+        const criticalCount = ranked.filter(
+          (z: any) => z.priority_level === 'CRITICAL' || z.priority_tier === 'CRITICAL'
+        ).length;
+
+        setResult({
+          zonesScanned: res.result.scan_summary?.total_cells || 16568,
+          criticalZonesFound: criticalCount,
+          completedAt: formatTimestamp(new Date()),
+          summary:
+            res.result.executive_briefing ||
+            `HeatSentinel autonomous agent completed investigation across ${ranked.length} priority zones.`,
+        });
+        setStatus('completed');
+
+        // Instantly refresh all React Query caches across the dashboard
+        queryClient.invalidateQueries({ queryKey: ['basic-scan'] });
+        queryClient.invalidateQueries({ queryKey: ['zones'] });
+        queryClient.invalidateQueries({ queryKey: ['heatmapMarkers'] });
+        queryClient.invalidateQueries({ queryKey: ['heatmapGeoJSON'] });
+        queryClient.invalidateQueries({ queryKey: ['kpis'] });
+        queryClient.invalidateQueries({ queryKey: ['riskZoneSummary'] });
+        queryClient.invalidateQueries({ queryKey: ['populationAtRisk'] });
+      }
+    } catch (err: any) {
+      console.error('Failed to retrieve Heat Hunt final results:', err);
+      setStatus('completed');
+    }
+  }, [cleanupConnections, queryClient]);
+
+  /**
+   * Fallback polling loop in case SSE is unavailable.
+   */
+  const startStatusPolling = useCallback((jobId: string) => {
+    if (pollingIntervalRef.current) return;
+
+    pollingIntervalRef.current = setInterval(async () => {
+      try {
+        const statusRes = await apiFetch<{
+          status: string;
+          progress_events: Array<{
+            id: string;
+            step_number: number;
+            tool_name: string;
+            message: string;
+            display_name?: string;
+            timestamp: string;
+            type: 'info' | 'warning' | 'success' | 'error';
+          }>;
+          error?: string;
+        }>(`/api/heat-hunt/${jobId}/status`);
+
+        if (statusRes.progress_events && statusRes.progress_events.length > 0) {
+          const mappedEvents: HeatHuntProgressEvent[] = statusRes.progress_events.map((e) => ({
+            id: e.id,
+            message: e.message,
+            display_name: e.display_name,
+            timestamp: e.timestamp || formatTimestamp(new Date()),
+            stepNumber: e.step_number,
+            totalSteps: 7,
+            type: e.type || 'info',
+          }));
+          setProgressEvents(mappedEvents);
+        }
+
+        if (statusRes.status === 'completed') {
+          await handleJobCompletion(jobId);
+        } else if (statusRes.status === 'failed') {
+          cleanupConnections();
+          setStatus('failed');
+          setErrorMessage(statusRes.error || 'Autonomous investigation halted unexpectedly.');
+        }
+      } catch (e) {
+        console.warn('Status poll warning:', e);
+      }
+    }, 1200);
+  }, [cleanupConnections, handleJobCompletion]);
+
+  /**
+   * Primary Heat Hunt Execution Trigger:
+   * 1. Submits POST /api/heat-hunt/start to FastAPI backend
+   * 2. Subscribes to real-time SSE stream at /api/heat-hunt/{jobId}/stream
+   * 3. Falls back seamlessly to status polling if stream drops
+   */
+  const runHeatHunt = useCallback(async () => {
+    cleanupConnections();
     setStatus('running');
     setProgressEvents([]);
     setResult(null);
     setErrorMessage(null);
 
-    const startTime = new Date();
+    // Initial local event
     const initialEvent: HeatHuntProgressEvent = {
       id: `evt-init-${Date.now()}`,
-      message: 'Agent initialized — starting Phoenix Heat Hunt investigation...',
-      timestamp: formatTimestamp(startTime),
+      message: 'Autonomous HeatSentinel agent initialized — starting Phoenix Heat Hunt investigation...',
+      timestamp: formatTimestamp(new Date()),
       stepNumber: 0,
-      totalSteps: MOCK_HEAT_HUNT_STEPS.length,
+      totalSteps: 7,
       type: 'info',
     };
     setProgressEvents([initialEvent]);
 
-    if (!USE_MOCK_DATA) {
-      // Backend integration hook
-      apiFetch<{ jobId: string }>('/api/heat-hunt/start', { method: 'POST' })
-        .then(({ jobId }) => {
-          console.log(`Heat Hunt job started with ID: ${jobId}`);
-          // Connect to SSE or polling loop here
-        })
-        .catch((err) => {
-          setStatus('failed');
-          setErrorMessage(err.message || 'Failed to start Heat Hunt backend job.');
-        });
+    // Handle failure simulation toggle if user enabled it for testing
+    if (simulateFailure) {
+      setTimeout(() => {
+        const failEvent: HeatHuntProgressEvent = {
+          id: `evt-fail-${Date.now()}`,
+          message: 'Connection interrupted: Unable to retrieve thermal telemetry stream from regional sensor node.',
+          timestamp: formatTimestamp(new Date()),
+          stepNumber: 3,
+          totalSteps: 7,
+          type: 'error',
+        };
+        setProgressEvents((prev) => [...prev, failEvent]);
+        setStatus('failed');
+        setErrorMessage('Thermal telemetry connection interrupted: Unable to stream high-resolution raster tiles from regional sensors.');
+      }, 1500);
       return;
     }
 
-    const stepInterval = 800; // ~800ms per event per specification
+    try {
+      // 1. Start Job via Backend API
+      const startRes = await apiFetch<{
+        job_id?: string;
+        jobId?: string;
+        status: string;
+      }>('/api/heat-hunt/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          start_date: '2024-08-01',
+          start_time: '14:00',
+          provider: 'auto',
+          model_name: 'gemini-3.5-flash-lite',
+          mode: 'live',
+        }),
+      });
 
-    MOCK_HEAT_HUNT_STEPS.forEach((step, index) => {
-      const stepNumber = index + 1;
-      const delay = (index + 1) * stepInterval;
+      const jobId = startRes.job_id || startRes.jobId;
+      if (!jobId) {
+        throw new Error('Backend did not return a valid jobId.');
+      }
+      activeJobIdRef.current = jobId;
 
-      const timer = setTimeout(() => {
-        // If simulation mode is set to fail and we reached step 3
-        if (simulateFailure && index === 2) {
-          const failEvent: HeatHuntProgressEvent = {
-            id: `evt-fail-${Date.now()}`,
-            message: 'Connection interrupted: Unable to retrieve high-resolution thermal raster stream from regional sensor node.',
-            timestamp: formatTimestamp(new Date()),
-            stepNumber: 3,
-            totalSteps: MOCK_HEAT_HUNT_STEPS.length,
-            type: 'error',
-          };
-          setProgressEvents((prev) => [...prev, failEvent]);
-          setStatus('failed');
-          setErrorMessage('Thermal telemetry connection interrupted: Unable to stream high-resolution raster tiles from regional sensors. Please check connectivity and retry.');
-          clearAllTimers();
+      // 2. Connect to Server-Sent Events (SSE) Stream
+      const streamUrl = `${API_BASE_URL}/api/heat-hunt/${jobId}/stream`;
+      const es = new EventSource(streamUrl);
+      eventSourceRef.current = es;
+
+      es.onmessage = (event) => {
+        if (!event.data) return;
+        if (event.data === '[DONE]') {
+          handleJobCompletion(jobId);
           return;
         }
 
-        const newEvent: HeatHuntProgressEvent = {
-          id: `evt-${stepNumber}-${Date.now()}`,
-          message: step.message,
-          timestamp: formatTimestamp(new Date()),
-          stepNumber,
-          totalSteps: MOCK_HEAT_HUNT_STEPS.length,
-          type: step.type,
-        };
+        try {
+          const parsed = JSON.parse(event.data);
+          const newEvent: HeatHuntProgressEvent = {
+            id: parsed.id || `evt-${Date.now()}-${Math.random()}`,
+            message: parsed.message || 'Agent executing tactical tool...',
+            display_name: parsed.display_name,
+            timestamp: parsed.timestamp || formatTimestamp(new Date()),
+            stepNumber: typeof parsed.step_number === 'number' ? parsed.step_number : 1,
+            totalSteps: 7,
+            type: parsed.type || (parsed.tool_name === 'finalize_heat_hunt' ? 'success' : 'info'),
+          };
 
-        setProgressEvents((prev) => [...prev, newEvent]);
+          setProgressEvents((prev) => {
+            if (prev.some((e) => e.id === newEvent.id)) return prev;
+            return [...prev, newEvent];
+          });
 
-        // If this is the final step
-        if (index === MOCK_HEAT_HUNT_STEPS.length - 1) {
-          const terminalTimer = setTimeout(() => {
-            const finalEvent: HeatHuntProgressEvent = {
-              id: `evt-completed-${Date.now()}`,
-              message: 'Heat Hunt completed successfully. 12 zones analyzed, 2 critical risk anomalies flagged for rapid intervention.',
-              timestamp: formatTimestamp(new Date()),
-              stepNumber: MOCK_HEAT_HUNT_STEPS.length,
-              totalSteps: MOCK_HEAT_HUNT_STEPS.length,
-              type: 'success',
-            };
-            setProgressEvents((prev) => [...prev, finalEvent]);
-            setStatus('completed');
-            setResult({
-              zonesScanned: 12,
-              criticalZonesFound: 2,
-              completedAt: formatTimestamp(new Date()),
-              summary: 'Zone 7 (Central Phoenix) & Zone 5 (South Mountain) require highest response prioritization.',
-            });
-          }, 600);
-          timersRef.current.push(terminalTimer);
+          if (parsed.tool_name === 'finalize_heat_hunt' || parsed.tool_name === 'agent_completed') {
+            handleJobCompletion(jobId);
+          }
+        } catch (err) {
+          console.warn('Failed to parse SSE event chunk:', err);
         }
-      }, delay);
+      };
 
-      timersRef.current.push(timer);
-    });
-  }, [simulateFailure]);
+      es.onerror = (err) => {
+        console.warn('SSE stream encountered error / disconnection — activating polling fallback:', err);
+        if (eventSourceRef.current) {
+          eventSourceRef.current.close();
+          eventSourceRef.current = null;
+        }
+        startStatusPolling(jobId);
+      };
+    } catch (err: any) {
+      console.error('Failed to initiate Heat Hunt:', err);
+      setStatus('failed');
+      setErrorMessage(err.message || 'Failed to start Heat Hunt backend job.');
+    }
+  }, [cleanupConnections, handleJobCompletion, simulateFailure, startStatusPolling]);
 
   const resetHeatHunt = useCallback(() => {
-    clearAllTimers();
+    cleanupConnections();
     setStatus('idle');
     setProgressEvents([]);
     setResult(null);
     setErrorMessage(null);
-  }, []);
+  }, [cleanupConnections]);
 
   return (
     <HeatHuntContext.Provider

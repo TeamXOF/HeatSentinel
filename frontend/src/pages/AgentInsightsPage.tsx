@@ -1,23 +1,18 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Radar,
   Loader2,
-  CheckCircle2,
-  AlertTriangle,
-  RotateCcw,
-  Sparkles,
-  Layers,
-  Activity,
-  Cpu,
-  Radio,
-  Terminal,
   Trash2,
   ArrowRight,
-  ShieldAlert,
+  Cpu,
+  Radio,
+  Activity,
+  Layers,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useHeatHunt, useZones } from '../api';
 import { WhyPanel } from '../components/WhyPanel';
+import { AgentActivityPanel } from '../components/AgentActivityPanel';
 import { ZoneEvidenceDetail } from '../types';
 import { getTierConfig } from '../theme/tiers';
 
@@ -36,14 +31,6 @@ export const AgentInsightsPage: React.FC = () => {
   const { data: liveZones = [] } = useZones();
   const [selectedZone, setSelectedZone] = useState<ZoneEvidenceDetail | null>(null);
   const [isWhyPanelOpen, setIsWhyPanelOpen] = useState(false);
-  const eventLogEndRef = useRef<HTMLDivElement>(null);
-
-  // Auto-scroll to latest event
-  useEffect(() => {
-    if (eventLogEndRef.current) {
-      eventLogEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [progressEvents, status]);
 
   const handleOpenZoneEvidence = (zoneId: string) => {
     // Use real zone evidence when available, fall back to nothing
@@ -54,31 +41,7 @@ export const AgentInsightsPage: React.FC = () => {
     }
   };
 
-  const getEventBadge = (type: string) => {
-    switch (type) {
-      case 'error':
-        return {
-          dot: 'bg-[#DC2626] shadow-[0_0_8px_rgba(220,38,38,0.6)]',
-          badge: 'bg-red-50 text-red-800 border-red-200',
-        };
-      case 'warning':
-        return {
-          dot: 'bg-[#D97706] shadow-[0_0_8px_rgba(217,119,6,0.6)]',
-          badge: 'bg-amber-50 text-amber-900 border-amber-200',
-        };
-      case 'success':
-        return {
-          dot: 'bg-[#0D9488] shadow-[0_0_8px_rgba(13,148,136,0.6)]',
-          badge: 'bg-teal-50 text-teal-900 border-teal-200',
-        };
-      case 'info':
-      default:
-        return {
-          dot: 'bg-[#0284C7]',
-          badge: 'bg-sky-50 text-sky-800 border-sky-200',
-        };
-    }
-  };
+
 
   return (
     <div id="agent-insights-page" className="p-4 sm:p-6 lg:p-8 flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-7xl mx-auto">
@@ -170,191 +133,14 @@ export const AgentInsightsPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
         {/* Left 2/3: Live Agent Activity Stream Terminal */}
         <div className="lg:col-span-2 flex flex-col gap-4">
-          <div className="bg-white border border-[#F1F5F9] rounded-3xl p-4 sm:p-6 shadow-xs flex flex-col h-[460px] sm:h-[520px]">
-            {/* Terminal Header */}
-            <div className="flex items-center justify-between border-b border-[#F1F5F9] pb-4 shrink-0">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-slate-900 text-teal-400 flex items-center justify-center">
-                  <Terminal size={16} />
-                </div>
-                <div>
-                  <h2 className="text-sm font-bold text-[#0F172A]">
-                    Live Telemetry & Step Execution Stream
-                  </h2>
-                  <p className="text-[11px] text-[#64748B]">
-                    {status === 'running'
-                      ? 'Investigation in progress...'
-                      : status === 'completed'
-                      ? 'Investigation cycle complete'
-                      : status === 'failed'
-                      ? 'Investigation aborted with error'
-                      : 'Awaiting launch signal'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Status Badge */}
-              <div className="flex items-center gap-2" role="status" aria-live="polite">
-                {status === 'running' && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 border border-orange-200 text-[#C2410C] text-xs font-bold animate-pulse">
-                    <span className="w-2 h-2 rounded-full bg-[#EA580C] animate-ping" />
-                    Live Scanning
-                  </span>
-                )}
-                {status === 'completed' && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">
-                    <CheckCircle2 size={14} className="text-emerald-700" />
-                    Completed
-                  </span>
-                )}
-                {status === 'failed' && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 border border-red-200 text-red-800 text-xs font-bold">
-                    <AlertTriangle size={14} className="text-red-700" />
-                    Failed
-                  </span>
-                )}
-                {status === 'idle' && (
-                  <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wider">
-                    Idle Standby
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Scrollable Event Log */}
-            <div
-              id="agent-activity-event-log"
-              role="log"
-              aria-live="polite"
-              aria-atomic="false"
-              className="flex-1 overflow-y-auto py-4 space-y-3 pr-2 select-text"
-            >
-              {progressEvents.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
-                  <Radar size={40} className="text-slate-300 stroke-1 mb-3 animate-pulse" />
-                  <p className="text-sm font-semibold text-slate-600">
-                    No active scan logs yet
-                  </p>
-                  <p className="text-xs text-slate-400 mt-1 max-w-sm">
-                    Click <strong>"Launch Heat Hunt"</strong> to trigger the automated 7-step telemetry investigation pipeline.
-                  </p>
-                </div>
-              ) : (
-                <>
-                  {progressEvents.map((evt, idx) => {
-                    const { dot } = getEventBadge(evt.type);
-                    return (
-                      <div
-                        key={evt.id}
-                        id={`agent-event-row-${idx}`}
-                        className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-100 flex items-start gap-3 transition-all hover:bg-slate-50"
-                      >
-                        {/* Status Dot */}
-                        <div className="mt-1.5 shrink-0">
-                          <span className={`block w-2.5 h-2.5 rounded-full ${dot}`} />
-                        </div>
-
-                        {/* Event Content */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2 flex-wrap">
-                            <span className="text-xs font-bold text-[#0F172A]">
-                              {evt.stepNumber > 0 ? `Step ${evt.stepNumber} of ${evt.totalSteps}` : 'Initialization'}
-                            </span>
-                            <span className="text-[11px] font-mono text-[#94A3B8] tabular-nums">
-                              {evt.timestamp}
-                            </span>
-                          </div>
-                          <p className="text-xs text-slate-700 mt-1 leading-relaxed font-medium">
-                            {evt.message}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-
-                  {/* Terminal Completed Row */}
-                  {status === 'completed' && result && (
-                    <div
-                      id="agent-event-terminal-completed"
-                      className="p-4 rounded-2xl bg-emerald-50/90 border border-emerald-200 flex items-start gap-3 mt-4"
-                    >
-                      <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 mt-0.5">
-                        <CheckCircle2 size={18} strokeWidth={2.5} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-black uppercase tracking-wider text-emerald-900">
-                            ✓ Investigation Completed
-                          </span>
-                          <span className="text-[11px] font-mono text-emerald-800">
-                            {result.completedAt}
-                          </span>
-                        </div>
-                        <p className="text-xs text-emerald-950 font-bold mt-1">
-                          {result.summary}
-                        </p>
-                        <div className="mt-2.5 pt-2 border-t border-emerald-200/80 flex items-center gap-4 text-[11px] text-emerald-900">
-                          <span>Zones Evaluated: <strong>{result.zonesScanned}</strong></span>
-                          <span>Critical Flags: <strong>{result.criticalZonesFound}</strong></span>
-                          <Link
-                            to="/"
-                            className="ml-auto font-bold underline hover:text-emerald-950 focus-visible:ring-2 focus-visible:ring-emerald-700 rounded flex items-center gap-1"
-                          >
-                            Return to Map <ArrowRight size={12} />
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Terminal Failed Row */}
-                  {status === 'failed' && (
-                    <div
-                      id="agent-event-terminal-failed"
-                      className="p-4 rounded-2xl bg-red-50/90 border border-red-200 flex items-start gap-3 mt-4"
-                    >
-                      <div className="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center shrink-0 mt-0.5">
-                        <AlertTriangle size={18} strokeWidth={2.5} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-black uppercase tracking-wider text-red-900">
-                            ✗ Investigation Interrupted
-                          </span>
-                          <span className="text-[11px] font-bold text-red-700">
-                            Telemetry Error
-                          </span>
-                        </div>
-                        <p className="text-xs text-red-950 font-medium mt-1 leading-relaxed">
-                          {errorMessage || 'An error occurred while streaming raster sensor data.'}
-                        </p>
-                        <div className="mt-3 flex items-center gap-3">
-                          <button
-                            type="button"
-                            id="agent-retry-scan-btn"
-                            onClick={runHeatHunt}
-                            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-red-600 hover:bg-red-700 text-white text-xs font-bold focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none transition-all shadow-2xs cursor-pointer"
-                          >
-                            <RotateCcw size={12} />
-                            Retry Scan
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setSimulateFailure(false)}
-                            className="text-xs text-red-800 font-medium hover:underline focus-visible:ring-2 focus-visible:ring-red-400 rounded cursor-pointer"
-                          >
-                            Disable Error Simulation
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div ref={eventLogEndRef} />
-                </>
-              )}
-            </div>
-          </div>
+          <AgentActivityPanel
+            status={status}
+            progressEvents={progressEvents}
+            result={result}
+            errorMessage={errorMessage}
+            onRetry={runHeatHunt}
+            onDisableSimulation={() => setSimulateFailure(false)}
+          />
         </div>
 
         {/* Right 1/3: Telemetry Summary & Priority Findings Rail */}

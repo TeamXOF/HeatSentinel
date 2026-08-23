@@ -20,11 +20,28 @@ from app.logging_config import logger
 # 1. PYDANTIC DATA MODELS
 # ==========================================
 
+# Human-readable display labels for each agent tool — judges see these in the Activity Panel.
+TOOL_DISPLAY_NAMES: dict[str, str] = {
+    "agent_init":             "Autonomous agent initialized — starting Phoenix Heat Hunt",
+    "scan_city":              "Dividing Phoenix target area / Scanning thermal conditions",
+    "identify_hotspots":      "Identifying heat hotspots from thermal scan",
+    "refine_hotspot":         "Refining priority AOI boundary",
+    "get_vulnerability_data": "Joining Census ACS vulnerability data",
+    "get_resources":          "Checking cooling centers & protective resources",
+    "calculate_response_gap": "Calculating Response Gap score",
+    "recommend_action":       "Generating response recommendation",
+    "explain_priority":       "Composing empirical evidence trail",
+    "finalize_heat_hunt":     "Finalizing Heat Hunt — compiling ranked zones",
+    "agent_completed":        "Investigation complete",
+}
+
+
 class ProgressEvent(BaseModel):
     id: str = Field(default_factory=lambda: f"evt-{uuid.uuid4().hex[:8]}")
     step_number: int
     tool_name: str
     message: str
+    display_name: Optional[str] = None  # Human-readable label; backend populates via TOOL_DISPLAY_NAMES
     timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).strftime("%H:%M:%S"))
     type: str = "info"  # "info" | "warning" | "success" | "error"
 
@@ -113,6 +130,7 @@ async def _execute_heat_hunt_background(
             step_number=step_num,
             tool_name=tool_name,
             message=message,
+            display_name=TOOL_DISPLAY_NAMES.get(tool_name),
             type=evt_type
         )
         events.append(event)
@@ -123,7 +141,7 @@ async def _execute_heat_hunt_background(
                 cursor = conn.cursor()
                 cursor.execute(
                     "UPDATE heat_hunt_jobs SET progress_events_json = ? WHERE job_id = ?",
-                    (json.dumps([e.model_dump() for e in events]), job_id)
+                    (json.dumps([e.model_dump() for e in events], default=str), job_id)
                 )
         except Exception as db_err:
             logger.error(f"HeatHuntService: Failed to persist progress event for job {job_id}: {db_err}")
@@ -164,9 +182,9 @@ async def _execute_heat_hunt_background(
                 WHERE job_id = ?
                 """,
                 (
-                    json.dumps(final_result),
+                    json.dumps(final_result, default=str),
                     completed_at,
-                    json.dumps([e.model_dump() for e in events]),
+                    json.dumps([e.model_dump() for e in events], default=str),
                     job_id
                 )
             )
@@ -202,7 +220,7 @@ async def _execute_heat_hunt_background(
                 (
                     err_msg,
                     completed_at,
-                    json.dumps([e.model_dump() for e in events]),
+                    json.dumps([e.model_dump() for e in events], default=str),
                     job_id
                 )
             )

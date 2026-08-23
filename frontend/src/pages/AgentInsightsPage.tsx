@@ -16,9 +16,8 @@ import {
   ShieldAlert,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useHeatHunt } from '../api';
+import { useHeatHunt, useZones } from '../api';
 import { WhyPanel } from '../components/WhyPanel';
-import { getEvidenceForZone } from '../data/mockZoneEvidenceData';
 import { ZoneEvidenceDetail } from '../types';
 import { getTierConfig } from '../theme/tiers';
 
@@ -34,6 +33,7 @@ export const AgentInsightsPage: React.FC = () => {
     resetHeatHunt,
   } = useHeatHunt();
 
+  const { data: liveZones = [] } = useZones();
   const [selectedZone, setSelectedZone] = useState<ZoneEvidenceDetail | null>(null);
   const [isWhyPanelOpen, setIsWhyPanelOpen] = useState(false);
   const eventLogEndRef = useRef<HTMLDivElement>(null);
@@ -45,10 +45,13 @@ export const AgentInsightsPage: React.FC = () => {
     }
   }, [progressEvents, status]);
 
-  const handleOpenZoneEvidence = (zoneKey: string) => {
-    const evidence = getEvidenceForZone(zoneKey);
-    setSelectedZone(evidence);
-    setIsWhyPanelOpen(true);
+  const handleOpenZoneEvidence = (zoneId: string) => {
+    // Use real zone evidence when available, fall back to nothing
+    const match = liveZones.find((z) => z.id === zoneId || z.id === `zone-${zoneId}`);
+    if (match?.evidence) {
+      setSelectedZone(match.evidence);
+      setIsWhyPanelOpen(true);
+    }
   };
 
   const getEventBadge = (type: string) => {
@@ -404,125 +407,56 @@ export const AgentInsightsPage: React.FC = () => {
             </div>
 
             <div className="space-y-2.5">
-              {/* Zone 7 */}
-              <div
-                id="agent-hotspot-zone-7"
-                tabIndex={0}
-                role="button"
-                aria-label="View empirical evidence for Zone 7 Central Phoenix Corridor"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handleOpenZoneEvidence('zone-7');
-                  }
-                }}
-                onClick={() => handleOpenZoneEvidence('zone-7')}
-                className="p-3 rounded-2xl bg-red-50/60 hover:bg-red-50 border border-red-200/60 flex items-center justify-between cursor-pointer transition-colors group focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-7 h-7 rounded-full bg-[#FEE2E2] text-[#DC2626] font-black text-xs flex items-center justify-center shrink-0">
-                    7
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-xs font-bold text-slate-900 group-hover:text-red-700 transition-colors truncate">
-                      Central Phoenix Corridor
-                    </span>
-                    <span className="text-[11px] text-slate-500">
-                      Peak 114.1°F • Gap 8.7/10
-                    </span>
-                  </div>
-                </div>
-                {(() => {
-                  const cfg = getTierConfig('CRITICAL');
-                  const Icon = cfg.icon;
-                  return (
+              {liveZones.length > 0 ? liveZones.map((zone, i) => {
+                const cfg = getTierConfig(zone.tier);
+                const Icon = cfg.icon;
+                const bgClass = zone.tier === 'CRITICAL'
+                  ? 'bg-red-50/60 hover:bg-red-50 border-red-200/60'
+                  : zone.tier === 'HIGH'
+                  ? 'bg-orange-50/60 hover:bg-orange-50 border-orange-200/60'
+                  : 'bg-amber-50/60 hover:bg-amber-50 border-amber-200/60';
+                const numBg = zone.tier === 'CRITICAL' ? 'bg-[#FEE2E2] text-[#DC2626]'
+                  : zone.tier === 'HIGH' ? 'bg-[#FFEDD5] text-[#EA580C]'
+                  : 'bg-[#FEF3C7] text-[#D97706]';
+                return (
+                  <div
+                    key={zone.id}
+                    id={`agent-hotspot-${zone.id}`}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`View empirical evidence for ${zone.name}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleOpenZoneEvidence(zone.id);
+                      }
+                    }}
+                    onClick={() => handleOpenZoneEvidence(zone.id)}
+                    className={`p-3 rounded-2xl border flex items-center justify-between cursor-pointer transition-colors group focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none ${bgClass}`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`w-7 h-7 rounded-full font-black text-xs flex items-center justify-center shrink-0 ${numBg}`}>
+                        {zone.zoneNumber}
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-xs font-bold text-slate-900 truncate">{zone.name}</span>
+                        <span className="text-[11px] text-slate-500">
+                          Peak {zone.peakTempF} • Gap {zone.responseGapScore.toFixed(1)}/10
+                        </span>
+                      </div>
+                    </div>
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase shrink-0 ${cfg.solidBg} text-white shadow-2xs`}>
                       <Icon size={10} strokeWidth={2.5} />
                       <span>{cfg.shortLabel}</span>
                     </span>
-                  );
-                })()}
-              </div>
-
-              {/* Zone 5 */}
-              <div
-                id="agent-hotspot-zone-5"
-                tabIndex={0}
-                role="button"
-                aria-label="View empirical evidence for Zone 5 South Mountain Area"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handleOpenZoneEvidence('zone-5');
-                  }
-                }}
-                onClick={() => handleOpenZoneEvidence('zone-5')}
-                className="p-3 rounded-2xl bg-orange-50/60 hover:bg-orange-50 border border-orange-200/60 flex items-center justify-between cursor-pointer transition-colors group focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-7 h-7 rounded-full bg-[#FFEDD5] text-[#EA580C] font-black text-xs flex items-center justify-center shrink-0">
-                    5
                   </div>
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-xs font-bold text-slate-900 group-hover:text-[#EA580C] transition-colors truncate">
-                      South Mountain Area
-                    </span>
-                    <span className="text-[11px] text-slate-500">
-                      Peak 111.0°F • Gap 7.4/10
-                    </span>
-                  </div>
+                );
+              }) : (
+                // Skeleton placeholder while zones are loading
+                <div className="text-[11px] text-slate-400 text-center py-4">
+                  Loading live zone data...
                 </div>
-                {(() => {
-                  const cfg = getTierConfig('HIGH');
-                  const Icon = cfg.icon;
-                  return (
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase shrink-0 ${cfg.solidBg} text-white shadow-2xs`}>
-                      <Icon size={10} strokeWidth={2.5} />
-                      <span>{cfg.shortLabel}</span>
-                    </span>
-                  );
-                })()}
-              </div>
-
-              {/* Zone 3 */}
-              <div
-                id="agent-hotspot-zone-3"
-                tabIndex={0}
-                role="button"
-                aria-label="View empirical evidence for Zone 3 Eastlake / Garfield"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handleOpenZoneEvidence('zone-3');
-                  }
-                }}
-                onClick={() => handleOpenZoneEvidence('zone-3')}
-                className="p-3 rounded-2xl bg-amber-50/60 hover:bg-amber-50 border border-amber-200/60 flex items-center justify-between cursor-pointer transition-colors group focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-7 h-7 rounded-full bg-[#FEF3C7] text-[#D97706] font-black text-xs flex items-center justify-center shrink-0">
-                    3
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-xs font-bold text-slate-900 group-hover:text-[#D97706] transition-colors truncate">
-                      Eastlake / Garfield
-                    </span>
-                    <span className="text-[11px] text-slate-500">
-                      Peak 110.0°F • Gap 7.1/10
-                    </span>
-                  </div>
-                </div>
-                {(() => {
-                  const cfg = getTierConfig('HIGH');
-                  const Icon = cfg.icon;
-                  return (
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase shrink-0 ${cfg.solidBg} text-white shadow-2xs`}>
-                      <Icon size={10} strokeWidth={2.5} />
-                      <span>{cfg.shortLabel}</span>
-                    </span>
-                  );
-                })()}
-              </div>
+              )}
             </div>
 
             <div className="pt-1">

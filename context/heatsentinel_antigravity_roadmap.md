@@ -1255,9 +1255,9 @@ Report: files changed, confirmation of the full real Phoenix flow working end-to
 
 ---
 
-## [ ] PHASE 7 — NYC VALIDATION
+## [X] PHASE 7 — NYC VALIDATION
 
-### [ ] STEP 30 — NYC Heat Vulnerability Index Ingestion
+### [X] STEP 30 — NYC Heat Vulnerability Index Ingestion
 
 **PURPOSE:** Bring in NYC's published HVI as an external benchmark dataset — validation only, not a second app.
 
@@ -1295,7 +1295,7 @@ COMPLETION REPORT
 Report: real data source and vintage, sample entries, test results, and next dependency (a small NYC AOI Response Gap computation for comparison).
 ```
 
-### [ ] STEP 31 — Small NYC AOI Response Gap Computation
+### [X] STEP 31 — Small NYC AOI Response Gap Computation
 
 **PURPOSE:** Compute HeatSentinel's Response Gap for a small number of real NYC AOIs, reusing the existing pipeline — not a parallel app.
 
@@ -1334,7 +1334,7 @@ COMPLETION REPORT
 Report: AOIs selected and rationale, real FortyGuard NYC coverage findings, real computed Response Gap values vs. published HVI tiers per AOI, any limitations, and next dependency (statistical comparison/correlation analysis).
 ```
 
-### [ ] STEP 32 — HVI Comparison & Correlation Analysis
+### [X] STEP 32 — HVI Comparison & Correlation Analysis
 
 **PURPOSE:** Statistically compare Response Gap against published HVI using careful, non-causal language.
 
@@ -1378,7 +1378,7 @@ Report: real correlation results, honest interpretation text, limitations noted,
 
 ## [ ] PHASE 8 — AGENT
 
-### [ ] STEP 33 — Agent Tool Schemas
+### [X] STEP 33 — Agent Tool Schemas
 
 **PURPOSE:** Define the formal tool schemas the LLM orchestrator will call.
 
@@ -1425,7 +1425,7 @@ COMPLETION REPORT
 Report: all 9 tools implemented and their delegation targets, test results, and next dependency (orchestrator loop / agent state machine).
 ```
 
-### [ ] STEP 34 — Agent State & Orchestration Loop
+### [X] STEP 34 — Agent State & Orchestration Loop
 
 **PURPOSE:** Build the core tool-calling loop that lets the LLM drive investigation.
 
@@ -1464,7 +1464,7 @@ COMPLETION REPORT
 Report: orchestration loop design, real live trace summary (steps taken, tools called, final output), test results, and next dependency (target-selection / adaptive refinement logic quality).
 ```
 
-### [ ] STEP 35 — Agent Prompt Engineering for Adaptive Investigation
+### [X] STEP 35 — Agent Prompt Engineering for Adaptive Investigation
 
 **PURPOSE:** Tune the system/task prompt so the agent genuinely performs coarse-scan → select → refine → re-query behavior.
 

@@ -7,6 +7,7 @@ ranked heat zones and comprehensive WHY evidence.
 import json
 import hashlib
 import time
+from datetime import datetime, timedelta
 from typing import Dict, Any, Optional
 from fastapi import APIRouter, Request, Query, Body, HTTPException
 from pydantic import BaseModel, Field
@@ -19,9 +20,14 @@ from app.logging_config import logger
 router = APIRouter(prefix="/api/analysis", tags=["analysis"])
 
 
+def _default_scan_date() -> str:
+    """Returns yesterday's date as YYYY-MM-DD for real-time demo relevance."""
+    return (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+
+
 class BasicScanRequest(BaseModel):
     polygon_aoi: Optional[Dict[str, Any]] = Field(default=None, description="GeoJSON polygon geometry override")
-    start_date: Optional[str] = Field(default="2024-08-01", description="Date string YYYY-MM-DD")
+    start_date: Optional[str] = Field(default=None, description="Date string YYYY-MM-DD (defaults to yesterday)")
     start_time: Optional[str] = Field(default="14:00", description="Time string HH:MM")
     top_n_hotspots: int = Field(default=5, ge=1, le=20, description="Max number of ranked hotspots to detect and return")
 
@@ -61,7 +67,7 @@ async def basic_scan(
     # 1. Resolve inputs
     req_body = payload or BasicScanRequest()
     polygon = req_body.polygon_aoi or load_default_phoenix_target_area()
-    start_date = req_body.start_date or "2024-08-01"
+    start_date = req_body.start_date or _default_scan_date()
     start_time = req_body.start_time or "14:00"
     top_n = req_body.top_n_hotspots
     

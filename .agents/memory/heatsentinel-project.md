@@ -64,12 +64,12 @@ Full architecture: see `context/HeatSentinel_AI_System_Design.md`
 | Phase 4 — Analytics (Steps 17–19) | ✅ Done | AI | Persistence, Exceedance, Baseline, HeatMetrics, Caching |
 | Phase 5 — Phoenix External Data (Steps 20–23) | ✅ Done | AI | Census ACS 5-Yr demographics, MAG Heat Relief resources, area-weighted joins, proximity |
 | Phase 6 — Response Gap (Steps 24–29) | ✅ Done | AI | Vulnerability & Deficit sub-scores, Response Gap formula, basic-scan endpoint, SQLite caching, UI vertical slice & Playwright E2E |
-| Phase 7 — NYC Validation | ⏳ Next | — | Ingest NYC HVI, calculate NYC Response Gap, validate correlation (non-blocking) |
-| Phase 8 — Autonomous Heat Hunt Agent Core | ⏳ Next | — | Agent Architecture, StateGraph orchestration, tools, and prompts |
-| Phase 9 — Interactive UI & Real Heat Hunt | ❌ Not started | — | |
-| Phase 10 — Full Agent Integration & Polish | ❌ Not started | — | |
+| Phase 7 — NYC Validation (Steps 30–32) | ✅ Done | AI | Ingested NYC HVI & Cooling Resources, calculated NYC Response Gap, verified Spearman rank correlation benchmark |
+| Phase 8 — Autonomous Heat Hunt Agent Core (Steps 33–35) | ✅ Done | AI | 10 tool schemas with multi-provider export, HeatHuntOrchestrator async loop, 7-phase adaptive investigation prompt & Gemini catalogue |
+| Phase 9 — Interactive UI & Real Heat Hunt (Steps 36–38) | ⏳ Next | — | HeatHuntJob SQLite model, background asyncio orchestration service, and status/results streaming endpoints |
+| Phase 10 — Full Agent Integration & Polish (Steps 39–45) | ❌ Not started | — | Real /v1/satellite greenery, /v1/env_params, correlation charts, PDF report export |
 
-**Current position: Phase 6 Complete (The First Working Vertical Slice). Next: Phase 7 (NYC Benchmark) or Phase 8 (Agent Core Engine)**
+**Current position: Phase 8 Complete (Agent Core Engine & NYC Validation Done). Next: Phase 9 (Step 36 — Heat Hunt Job Model & Async Execution)**
 
 ---
 
@@ -220,12 +220,28 @@ feature/backend-phase1-foundation
 - Created `POST /api/analysis/basic-scan` API router with SHA-256 SQLite response caching in `backend/app/routers/analysis.py` (Step 28).
 - Wired live backend pipeline into frontend Command Center UI (`analysis.ts`, `HyperlocalHeatMapCard.tsx`, `WhyPanel.tsx`, `Header.tsx`), eliminating mock data from active user flows (Step 29).
 - Verified full vertical slice end-to-end with **Playwright E2E automation** (all 56 unit/integration tests + Playwright browser suite passing 100%).
-- What's next: Phase 7 (NYC Validation Benchmark) or Phase 8 (Autonomous Heat Hunt Agent Core Engine).
 
-### Open Items Before Coding Starts
-1. ❓ **LLM choice:** Gemini (`.env.example` has key slot) or Anthropic (roadmap says this)? — User to decide
-2. ❓ **FortyGuard API key:** User has it — configured in `.env`
-3. ❓ **Deployment target:** Render/Railway for backend? Vercel for frontend?
+### Session 2026-08-23 (Phase 7 - NYC Validation Benchmark)
+- Ingested NYC Heat Vulnerability Index (`nyc_hvi.geojson`) and NYC cooling resources (`nyc_cooling_resources.geojson`) (Step 30).
+- Implemented `nyc_vulnerability_service.py` with spatial joins for NYC Community Districts (Step 31).
+- Implemented `validation_service.py` with Spearman rank correlation calculation comparing HeatSentinel Response Gap vs NYC DOHMH HVI benchmark (Step 32).
+- Built validation script `backend/scripts/nyc_validation_scan.py` and test suite (`test_nyc_data.py`, `test_nyc_validation.py`, `test_validation_service.py`).
+- All 74 unit tests passing 100%.
+
+### Session 2026-08-23 (Phase 8 - Autonomous Heat Hunt Agent Core Engine)
+- Defined 10 core agent tools with multi-provider export schemas (Anthropic/Gemini/OpenAI) in `backend/app/agent/tools.py` and `backend/app/agent/tool_registry.py` (Step 33).
+- Built `HeatHuntOrchestrator` async execution loop with `on_step` streaming callbacks, safety bounds, error recovery, and multi-model support in `backend/app/agent/orchestrator.py` (Step 34).
+- Implemented 7-phase system prompt & adaptive investigation strategy with Gemini 3.5-flash-lite default catalogue & 21-step trace fixture `heat_hunt_trace_sample.json` (Step 35).
+- All 91 backend tests passing 100%.
+
+### Session 2026-08-23 (Senior Developer Hackathon Audit & Anti-Mock Live Integration)
+- Conducted deep codebase and documentation audit across Steps 1-35.
+- Set `USE_MOCK_DATA = false` in `frontend/src/api/config.ts` so all UI components hit live backend endpoints.
+- Updated `backend/app/routers/analysis.py` to default `start_date` dynamically to yesterday for real-time demo accuracy.
+- Wired live alerts derivation in `frontend/src/api/alerts.ts` and priority actions in `frontend/src/api/priorityActions.ts` from real ranked zone evidence.
+- Wired live resource readiness in `frontend/src/api/resources.ts`.
+- Updated `AgentInsightsPage.tsx` right rail hotspot list to consume real live zones via `useZones()`.
+- Verified live end-to-end rendering on localhost:3000 via Playwright browser tool.
 
 ---
 
@@ -234,9 +250,10 @@ feature/backend-phase1-foundation
 To resume in a new session:
 ```
 Read .agents/memory/heatsentinel-project.md first.
-We are on branch main (all branches up to Phase 6 merged).
-Phase 6 (Response Gap & Vertical Slice) is 100% complete and verified.
-Next task: Phase 7 (NYC Validation) or Phase 8 (Autonomous Agent Core Engine).
+We are on branch main (all branches up to Phase 8 merged cleanly).
+Phase 7 (NYC Validation) and Phase 8 (Agent Core Engine) are 100% complete and tested (91/91 passing).
+All mock data in active frontend flows has been replaced with live FortyGuard + Census + MAG pipeline data.
+Next task: Phase 9 (Step 36 — Heat Hunt Job Model & Async Execution in backend/app/services/heat_hunt_service.py).
 Context Handoff + System Design + Roadmap are in context/ folder.
 ```
 

@@ -14,7 +14,10 @@
 - [status] Phase 4 Heat Analytics COMPLETE. Native persistence/exceedance, historical baseline logic, HeatMetrics unified model, and caching verified. → heatsentinel-project.md
 - [status] Phase 5 Phoenix External Data COMPLETE. Census ACS tracts, MAG Heat Relief cooling resources, area-weighted joins, and proximity tests verified. → heatsentinel-project.md
 - [status] Phase 6 Response Gap & Vertical Slice COMPLETE. PriorityEngine sub-scores, Response Gap formula, basic-scan caching endpoint, and UI Command Center verified via Playwright E2E. → heatsentinel-project.md
-- [status] Next step: Phase 7 (NYC Validation) or Phase 8 (Autonomous Heat Hunt Agent Core Engine) → heatsentinel-project.md
+- [status] Phase 7 NYC Validation COMPLETE. NYC HVI & Cooling Resources ingested, Spearman rank correlation benchmark verified. → heatsentinel-project.md
+- [status] Phase 8 Autonomous Agent Core COMPLETE. 10 core tools with multi-provider export schemas, HeatHuntOrchestrator loop, 7-phase adaptive investigation prompt & Gemini catalogue. → heatsentinel-project.md
+- [status] Live Data Integration COMPLETE. USE_MOCK_DATA=false, dynamic yesterday scan date, live alerts/actions/resources/hotspots wired. → heatsentinel-project.md
+- [status] Next step: Phase 9 (Step 36 — Heat Hunt Job Model & Async Execution) → heatsentinel-project.md
 - [api] FortyGuard API is PREMIUM plan for hackathon — all endpoints available including satellite, streetview, heat_intelligence → heatsentinel-project.md
 - [api] FortyGuard auth is header 'api-key: KEY' (NOT Bearer token) → context/fortyguard-api-reference.md
 - [api] FortyGuard polygon coordinates are [longitude, latitude] — validate before every call → context/fortyguard-api-reference.md

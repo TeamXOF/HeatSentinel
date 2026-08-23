@@ -1,0 +1,478 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "name": "NYC Heat Vulnerability Index (HVI)",
+    "source": "NYC Department of Health and Mental Hygiene (DOHMH) & US Census ACS 5-Year",
+    "vintage": "2022 / 2023 DOHMH Edition",
+    "geography": "Neighborhood Tabulation Area (NTA)",
+    "citation": "NYC Environment & Health Data Portal / NYC Open Data",
+    "hvi_scale": "1 (Lowest Risk) to 5 (Highest Risk)"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "id": "BX39",
+      "properties": {
+        "nta_code": "BX39",
+        "nta_name": "Mott Haven-Port Morris",
+        "borough": "Bronx",
+        "hvi_score": 5,
+        "surface_temp_rank": 5,
+        "ac_access_deficit_pct": 28.6,
+        "poverty_rate_pct": 39.8,
+        "green_space_pct": 8.4,
+        "black_non_latinx_pct": 31.4,
+        "total_population": 58240,
+        "source": "NYC DOHMH"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-73.9312, 40.8015],
+            [-73.9118, 40.8032],
+            [-73.9064, 40.8145],
+            [-73.9215, 40.8188],
+            [-73.9352, 40.8120],
+            [-73.9312, 40.8015]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BX27",
+      "properties": {
+        "nta_code": "BX27",
+        "nta_name": "Hunts Point",
+        "borough": "Bronx",
+        "hvi_score": 5,
+        "surface_temp_rank": 5,
+        "ac_access_deficit_pct": 29.4,
+        "poverty_rate_pct": 41.2,
+        "green_space_pct": 6.8,
+        "black_non_latinx_pct": 26.8,
+        "total_population": 27280,
+        "source": "NYC DOHMH"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-73.8965, 40.8080],
+            [-73.8732, 40.8055],
+            [-73.8785, 40.8210],
+            [-73.8942, 40.8245],
+            [-73.8965, 40.8080]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BX35",
+      "properties": {
+        "nta_code": "BX35",
+        "nta_name": "Morrisania-Melrose",
+        "borough": "Bronx",
+        "hvi_score": 5,
+        "surface_temp_rank": 4,
+        "ac_access_deficit_pct": 26.2,
+        "poverty_rate_pct": 36.5,
+        "green_space_pct": 11.2,
+        "black_non_latinx_pct": 38.5,
+        "total_population": 41200,
+        "source": "NYC DOHMH"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-73.9180, 40.8190],
+            [-73.8985, 40.8220],
+            [-73.9040, 40.8365],
+            [-73.9195, 40.8320],
+            [-73.9180, 40.8190]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BK81",
+      "properties": {
+        "nta_code": "BK81",
+        "nta_name": "Brownsville",
+        "borough": "Brooklyn",
+        "hvi_score": 5,
+        "surface_temp_rank": 4,
+        "ac_access_deficit_pct": 24.8,
+        "poverty_rate_pct": 35.1,
+        "green_space_pct": 9.5,
+        "black_non_latinx_pct": 72.3,
+        "total_population": 59120,
+        "source": "NYC DOHMH"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-73.9215, 40.6540],
+            [-73.8980, 40.6575],
+            [-73.9055, 40.6750],
+            [-73.9240, 40.6710],
+            [-73.9215, 40.6540]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BK75",
+      "properties": {
+        "nta_code": "BK75",
+        "nta_name": "Bedford",
+        "borough": "Brooklyn",
+        "hvi_score": 4,
+        "surface_temp_rank": 4,
+        "ac_access_deficit_pct": 19.5,
+        "poverty_rate_pct": 28.4,
+        "green_space_pct": 12.8,
+        "black_non_latinx_pct": 49.2,
+        "total_population": 73200,
+        "source": "NYC DOHMH"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-73.9620, 40.6810],
+            [-73.9380, 40.6840],
+            [-73.9440, 40.6990],
+            [-73.9650, 40.6960],
+            [-73.9620, 40.6810]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BK77",
+      "properties": {
+        "nta_code": "BK77",
+        "nta_name": "Bushwick North",
+        "borough": "Brooklyn",
+        "hvi_score": 4,
+        "surface_temp_rank": 5,
+        "ac_access_deficit_pct": 21.0,
+        "poverty_rate_pct": 26.8,
+        "green_space_pct": 7.2,
+        "black_non_latinx_pct": 14.5,
+        "total_population": 57400,
+        "source": "NYC DOHMH"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-73.9380, 40.6940],
+            [-73.9140, 40.6970],
+            [-73.9210, 40.7110],
+            [-73.9410, 40.7080],
+            [-73.9380, 40.6940]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MN34",
+      "properties": {
+        "nta_code": "MN34",
+        "nta_name": "East Harlem North",
+        "borough": "Manhattan",
+        "hvi_score": 4,
+        "surface_temp_rank": 4,
+        "ac_access_deficit_pct": 20.3,
+        "poverty_rate_pct": 31.2,
+        "green_space_pct": 14.1,
+        "black_non_latinx_pct": 33.1,
+        "total_population": 58600,
+        "source": "NYC DOHMH"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-73.9480, 40.7960],
+            [-73.9310, 40.8010],
+            [-73.9360, 40.8140],
+            [-73.9520, 40.8080],
+            [-73.9480, 40.7960]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MN03",
+      "properties": {
+        "nta_code": "MN03",
+        "nta_name": "Central Harlem North-Polo Grounds",
+        "borough": "Manhattan",
+        "hvi_score": 4,
+        "surface_temp_rank": 3,
+        "ac_access_deficit_pct": 18.7,
+        "poverty_rate_pct": 27.9,
+        "green_space_pct": 15.6,
+        "black_non_latinx_pct": 58.4,
+        "total_population": 78900,
+        "source": "NYC DOHMH"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-73.9520, 40.8080],
+            [-73.9340, 40.8150],
+            [-73.9410, 40.8330],
+            [-73.9560, 40.8260],
+            [-73.9520, 40.8080]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "QN29",
+      "properties": {
+        "nta_code": "QN29",
+        "nta_name": "Corona",
+        "borough": "Queens",
+        "hvi_score": 4,
+        "surface_temp_rank": 4,
+        "ac_access_deficit_pct": 18.9,
+        "poverty_rate_pct": 24.3,
+        "green_space_pct": 10.4,
+        "black_non_latinx_pct": 8.2,
+        "total_population": 61200,
+        "source": "NYC DOHMH"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-73.8690, 40.7380],
+            [-73.8450, 40.7420],
+            [-73.8520, 40.7580],
+            [-73.8730, 40.7540],
+            [-73.8690, 40.7380]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "QN28",
+      "properties": {
+        "nta_code": "QN28",
+        "nta_name": "Jackson Heights",
+        "borough": "Queens",
+        "hvi_score": 3,
+        "surface_temp_rank": 4,
+        "ac_access_deficit_pct": 15.2,
+        "poverty_rate_pct": 19.8,
+        "green_space_pct": 9.8,
+        "black_non_latinx_pct": 4.1,
+        "total_population": 68400,
+        "source": "NYC DOHMH"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-73.8950, 40.7480],
+            [-73.8710, 40.7520],
+            [-73.8780, 40.7670],
+            [-73.8990, 40.7630],
+            [-73.8950, 40.7480]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "QN70",
+      "properties": {
+        "nta_code": "QN70",
+        "nta_name": "Astoria",
+        "borough": "Queens",
+        "hvi_score": 3,
+        "surface_temp_rank": 3,
+        "ac_access_deficit_pct": 12.6,
+        "poverty_rate_pct": 15.4,
+        "green_space_pct": 14.5,
+        "black_non_latinx_pct": 5.8,
+        "total_population": 78200,
+        "source": "NYC DOHMH"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-73.9310, 40.7580],
+            [-73.9040, 40.7630],
+            [-73.9120, 40.7810],
+            [-73.9360, 40.7760],
+            [-73.9310, 40.7580]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MN28",
+      "properties": {
+        "nta_code": "MN28",
+        "nta_name": "Lower East Side",
+        "borough": "Manhattan",
+        "hvi_score": 3,
+        "surface_temp_rank": 3,
+        "ac_access_deficit_pct": 14.1,
+        "poverty_rate_pct": 21.0,
+        "green_space_pct": 16.2,
+        "black_non_latinx_pct": 11.2,
+        "total_population": 72400,
+        "source": "NYC DOHMH"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-73.9920, 40.7120],
+            [-73.9720, 40.7160],
+            [-73.9780, 40.7290],
+            [-73.9960, 40.7250],
+            [-73.9920, 40.7120]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BK37",
+      "properties": {
+        "nta_code": "BK37",
+        "nta_name": "Park Slope-Gowanus",
+        "borough": "Brooklyn",
+        "hvi_score": 2,
+        "surface_temp_rank": 2,
+        "ac_access_deficit_pct": 8.4,
+        "poverty_rate_pct": 9.1,
+        "green_space_pct": 24.6,
+        "black_non_latinx_pct": 6.8,
+        "total_population": 69500,
+        "source": "NYC DOHMH"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-73.9950, 40.6650],
+            [-73.9710, 40.6690],
+            [-73.9770, 40.6840],
+            [-73.9990, 40.6800],
+            [-73.9950, 40.6650]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MN40",
+      "properties": {
+        "nta_code": "MN40",
+        "nta_name": "Upper East Side-Carnegie Hill",
+        "borough": "Manhattan",
+        "hvi_score": 1,
+        "surface_temp_rank": 1,
+        "ac_access_deficit_pct": 4.2,
+        "poverty_rate_pct": 6.3,
+        "green_space_pct": 28.5,
+        "black_non_latinx_pct": 3.2,
+        "total_population": 61200,
+        "source": "NYC DOHMH"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-73.9680, 40.7720],
+            [-73.9480, 40.7760],
+            [-73.9540, 40.7910],
+            [-73.9720, 40.7870],
+            [-73.9680, 40.7720]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BX29",
+      "properties": {
+        "nta_code": "BX29",
+        "nta_name": "Riverdale-Spuyten Duyvil",
+        "borough": "Bronx",
+        "hvi_score": 1,
+        "surface_temp_rank": 1,
+        "ac_access_deficit_pct": 5.1,
+        "poverty_rate_pct": 8.7,
+        "green_space_pct": 42.1,
+        "black_non_latinx_pct": 5.6,
+        "total_population": 48200,
+        "source": "NYC DOHMH"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-73.9210, 40.8750],
+            [-73.8960, 40.8790],
+            [-73.9030, 40.9080],
+            [-73.9260, 40.9040],
+            [-73.9210, 40.8750]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "SI22",
+      "properties": {
+        "nta_code": "SI22",
+        "nta_name": "St. George-New Brighton",
+        "borough": "Staten Island",
+        "hvi_score": 3,
+        "surface_temp_rank": 3,
+        "ac_access_deficit_pct": 14.8,
+        "poverty_rate_pct": 18.2,
+        "green_space_pct": 21.0,
+        "black_non_latinx_pct": 29.4,
+        "total_population": 34100,
+        "source": "NYC DOHMH"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-74.1020, 40.6380],
+            [-74.0720, 40.6420],
+            [-74.0780, 40.6550],
+            [-74.1050, 40.6510],
+            [-74.1020, 40.6380]
+          ]
+        ]
+      }
+    }
+  ]
+}

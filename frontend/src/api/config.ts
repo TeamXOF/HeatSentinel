@@ -5,7 +5,7 @@
  * Set USE_MOCK_DATA = false to direct calls to the FastAPI backend at API_BASE_URL.
  */
 
-export const USE_MOCK_DATA = true;
+export const USE_MOCK_DATA = false;
 
 export const API_BASE_URL = 
   (typeof import.meta !== 'undefined' && (import.meta as unknown as { env?: { VITE_API_BASE_URL?: string } }).env?.VITE_API_BASE_URL) || 

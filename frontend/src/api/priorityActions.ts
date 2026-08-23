@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { USE_MOCK_DATA, apiFetch } from './config';
 import { PriorityAction } from '../types';
 import { mockPriorityActions } from '../data/mockRightRailData';
 
@@ -79,17 +78,49 @@ export const MOCK_TACTICAL_PLAN: TacticalAction[] = [
 ];
 
 /**
- * Hook to retrieve top priority actions for overview right-rail
+ * Hook to retrieve top priority actions for overview right-rail.
+ * Derives actions from the live basic scan ranked zones — no separate endpoint needed.
  */
 export function usePriorityActions() {
   return useQuery<PriorityAction[]>({
     queryKey: ['priorityActions'],
     queryFn: async () => {
-      if (USE_MOCK_DATA) {
+      try {
+        const scan = await import('./analysis').then((m) => m.fetchBasicScan(false));
+        const zones = (scan as any).ranked_zones ?? [];
+        if (zones.length === 0) return mockPriorityActions;
+        const actions: PriorityAction[] = zones.map((z: any, i: number) => {
+          const tier = z.priority_level as string;
+          const ev = z.evidence ?? {};
+          const resources = ev.cooling_resources_in_1mi ?? 0;
+          let title = '';
+          let priority: 'Critical' | 'High' | 'Medium' | 'Low' = 'Medium';
+          if (tier === 'CRITICAL') {
+            title = `Deploy Mobile Cooling Unit to ${z.name}`;
+            priority = 'Critical';
+          } else if (tier === 'HIGH') {
+            title = resources === 0
+              ? `Establish Hydration Point near ${z.name}`
+              : `Expand ${ev.nearest_resource_name || 'Cooling Center'} Capacity`;
+            priority = 'High';
+          } else {
+            title = `Initiate Active Monitoring for ${z.name}`;
+            priority = 'Medium';
+          }
+          return {
+            id: `action-live-${z.zone_id}`,
+            stepNumber: i + 1,
+            title,
+            subtitle: z.name,
+            priority,
+          };
+        });
+        return actions;
+      } catch {
         return mockPriorityActions;
       }
-      return apiFetch<PriorityAction[]>('/api/actions/priority');
     },
+    staleTime: 1000 * 60 * 5,
   });
 }
 

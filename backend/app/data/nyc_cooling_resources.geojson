@@ -1,0 +1,271 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "name": "NYC Emergency Management Cooling Centers",
+    "source": "NYC Emergency Management / NYC Department for the Aging & Public Library Systems",
+    "vintage": "2023 / 2024 Operation Season",
+    "citation": "NYC Open Data / NYC Emergency Management Heat Relief Network"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "id": "NYC-CC-001",
+      "properties": {
+        "id": "NYC-CC-001",
+        "name": "Mott Haven NYPL Public Library Cooling Site",
+        "category": "cooling_center",
+        "address": "321 E 140th St, Bronx, NY 10454",
+        "borough": "Bronx",
+        "nta_code": "BX39",
+        "capacity": 120,
+        "operational_hours": "09:00 - 18:00",
+        "ada_compliant": true,
+        "source": "NYC Emergency Management"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9242, 40.8105]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "NYC-CC-002",
+      "properties": {
+        "id": "NYC-CC-002",
+        "name": "Betances Community Center Cooling Site",
+        "category": "respite_center",
+        "address": "547 Brook Ave, Bronx, NY 10455",
+        "borough": "Bronx",
+        "nta_code": "BX39",
+        "capacity": 150,
+        "operational_hours": "08:00 - 20:00",
+        "ada_compliant": true,
+        "source": "NYC Emergency Management"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9168, 40.8142]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "NYC-CC-003",
+      "properties": {
+        "id": "NYC-CC-003",
+        "name": "Brownsville Public Library Cooling Outpost",
+        "category": "cooling_center",
+        "address": "61 Glenmore Ave, Brooklyn, NY 11212",
+        "borough": "Brooklyn",
+        "nta_code": "BK81",
+        "capacity": 110,
+        "operational_hours": "10:00 - 18:00",
+        "ada_compliant": true,
+        "source": "NYC Emergency Management"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9085, 40.6712]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "NYC-CC-004",
+      "properties": {
+        "id": "NYC-CC-004",
+        "name": "Stone Avenue Youth Library Cooling Station",
+        "category": "cooling_center",
+        "address": "581 Mother Gaston Blvd, Brooklyn, NY 11212",
+        "borough": "Brooklyn",
+        "nta_code": "BK81",
+        "capacity": 90,
+        "operational_hours": "10:00 - 17:00",
+        "ada_compliant": true,
+        "source": "NYC Emergency Management"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9042, 40.6635]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "NYC-CC-005",
+      "properties": {
+        "id": "NYC-CC-005",
+        "name": "East Harlem Senior Center Cooling Sanctuary",
+        "category": "respite_center",
+        "address": "150 E 121st St, New York, NY 10035",
+        "borough": "Manhattan",
+        "nta_code": "MN34",
+        "capacity": 180,
+        "operational_hours": "08:30 - 18:30",
+        "ada_compliant": true,
+        "source": "NYC Emergency Management"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9388, 40.8022]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "NYC-CC-006",
+      "properties": {
+        "id": "NYC-CC-006",
+        "name": "115th Street NYPL Cooling Center",
+        "category": "cooling_center",
+        "address": "203 W 115th St, New York, NY 10026",
+        "borough": "Manhattan",
+        "nta_code": "MN34",
+        "capacity": 130,
+        "operational_hours": "09:00 - 17:00",
+        "ada_compliant": true,
+        "source": "NYC Emergency Management"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9515, 40.8038]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "NYC-CC-007",
+      "properties": {
+        "id": "NYC-CC-007",
+        "name": "Corona Queens Public Library Cooling Site",
+        "category": "cooling_center",
+        "address": "38-23 104th St, Corona, NY 11368",
+        "borough": "Queens",
+        "nta_code": "QN29",
+        "capacity": 140,
+        "operational_hours": "10:00 - 18:00",
+        "ada_compliant": true,
+        "source": "NYC Emergency Management"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.8612, 40.7512]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "NYC-CC-008",
+      "properties": {
+        "id": "NYC-CC-008",
+        "name": "Flushing Meadows Corona Aquatic & Recreation Center",
+        "category": "respite_center",
+        "address": "Avery Ave & 131st St, Corona, NY 11368",
+        "borough": "Queens",
+        "nta_code": "QN29",
+        "capacity": 300,
+        "operational_hours": "07:00 - 21:00",
+        "ada_compliant": true,
+        "source": "NYC Emergency Management"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.8480, 40.7485]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "NYC-CC-009",
+      "properties": {
+        "id": "NYC-CC-009",
+        "name": "Seward Park NYPL Cooling Site",
+        "category": "cooling_center",
+        "address": "192 E Broadway, New York, NY 10002",
+        "borough": "Manhattan",
+        "nta_code": "MN28",
+        "capacity": 160,
+        "operational_hours": "09:00 - 18:00",
+        "ada_compliant": true,
+        "source": "NYC Emergency Management"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9875, 40.7145]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "NYC-CC-010",
+      "properties": {
+        "id": "NYC-CC-010",
+        "name": "Manny Cantor Community Center Cooling Post",
+        "category": "respite_center",
+        "address": "197 E Broadway, New York, NY 10002",
+        "borough": "Manhattan",
+        "nta_code": "MN28",
+        "capacity": 220,
+        "operational_hours": "08:00 - 20:00",
+        "ada_compliant": true,
+        "source": "NYC Emergency Management"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9868, 40.7148]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "NYC-CC-011",
+      "properties": {
+        "id": "NYC-CC-011",
+        "name": "St. George Public Library Center",
+        "category": "cooling_center",
+        "address": "5 Central Ave, Staten Island, NY 10301",
+        "borough": "Staten Island",
+        "nta_code": "SI22",
+        "capacity": 130,
+        "operational_hours": "10:00 - 18:00",
+        "ada_compliant": true,
+        "source": "NYC Emergency Management"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.0772, 40.6435]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "NYC-CC-012",
+      "properties": {
+        "id": "NYC-CC-012",
+        "name": "Park Slope Public Library Cooling Site",
+        "category": "cooling_center",
+        "address": "431 6th Ave, Brooklyn, NY 11215",
+        "borough": "Brooklyn",
+        "nta_code": "BK37",
+        "capacity": 150,
+        "operational_hours": "10:00 - 18:00",
+        "ada_compliant": true,
+        "source": "NYC Emergency Management"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9835, 40.6685]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "NYC-CC-013",
+      "properties": {
+        "id": "NYC-CC-013",
+        "name": "96th Street NYPL Cooling Center",
+        "category": "cooling_center",
+        "address": "112 E 96th St, New York, NY 10128",
+        "borough": "Manhattan",
+        "nta_code": "MN40",
+        "capacity": 180,
+        "operational_hours": "09:00 - 18:00",
+        "ada_compliant": true,
+        "source": "NYC Emergency Management"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9535, 40.7858]
+      }
+    }
+  ]
+}

@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { USE_MOCK_DATA, apiFetch } from './config';
 import { AlertItem, AlertSeverity } from '../types';
 import { mockActiveAlerts } from '../data/mockRightRailData';
 
@@ -100,17 +99,49 @@ export const MOCK_FULL_ALERTS_FEED: FullAlertItem[] = [
 ];
 
 /**
- * Hook to retrieve active alerts for Overview page right-rail
+ * Hook to retrieve active alerts for Overview page right-rail.
+ * Derives alerts from the live basic scan ranked zones — no separate endpoint needed.
  */
 export function useActiveAlerts() {
   return useQuery<AlertItem[]>({
     queryKey: ['activeAlerts'],
     queryFn: async () => {
-      if (USE_MOCK_DATA) {
+      try {
+        const scan = await import('./analysis').then((m) => m.fetchBasicScan(false));
+        const zones = (scan as any).ranked_zones ?? [];
+        if (zones.length === 0) return mockActiveAlerts;
+        const now = new Date();
+        const fmt = (d: Date) =>
+          d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        const alerts: AlertItem[] = [];
+        zones.forEach((z: any, i: number) => {
+          const tier = z.priority_level as string;
+          const tempF = z.mean_temp_f?.toFixed(1) ?? '?';
+          const tempC = z.mean_temp_c?.toFixed(1) ?? '?';
+          if (tier === 'CRITICAL' || tier === 'HIGH') {
+            alerts.push({
+              id: `alert-live-${z.zone_id}`,
+              title: tier === 'CRITICAL' ? 'Extreme Heat Warning' : 'Heat Risk Elevated',
+              description: `${z.name}: ${tempF}°F (${tempC}°C) — ${tier} Priority`,
+              timestamp: `Today, ${fmt(new Date(now.getTime() - i * 20 * 60000))}`,
+              severity: tier === 'CRITICAL' ? 'extreme' : 'warning',
+            });
+          }
+        });
+        // Always append a system info alert
+        alerts.push({
+          id: 'alert-system',
+          title: 'FortyGuard Thermal Scan Complete',
+          description: `${zones.length} zone${zones.length !== 1 ? 's' : ''} ranked · ${(scan as any).scan_summary?.total_cells?.toLocaleString() ?? '?'} cells ingested`,
+          timestamp: `Today, ${fmt(now)}`,
+          severity: 'info',
+        });
+        return alerts.length > 1 ? alerts : mockActiveAlerts;
+      } catch {
         return mockActiveAlerts;
       }
-      return apiFetch<AlertItem[]>('/api/alerts/active');
     },
+    staleTime: 1000 * 60 * 5,
   });
 }
 

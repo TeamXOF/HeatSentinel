@@ -1099,7 +1099,7 @@ COMPLETION REPORT
 Report: final formula and rationale, tier thresholds, real Phoenix Response Gap sample, test results, and next dependency (Response Gap validation tests / edge cases before moving to NYC).
 ```
 
-### [ ] STEP 26 — Response Gap Edge-Case & Sensitivity Tests
+### [X] STEP 26 — Response Gap Edge-Case & Sensitivity Tests
 
 **PURPOSE:** Stress-test the formula before building anything on top of it.
 

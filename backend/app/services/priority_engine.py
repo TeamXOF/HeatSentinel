@@ -9,6 +9,7 @@ Provides transparent, deterministic sub-scores and combined Response Gap calcula
 All weights, thresholds, and normalization ranges are named constants.
 """
 
+import math
 from typing import Dict, Any, List, Optional
 from app.models.zone import HeatMetrics
 from app.logging_config import logger
@@ -221,9 +222,24 @@ def calculate_response_gap(
     Applies compounding synergy bonus if all 3 pillars exceed threshold.
     Returns complete breakdown with display scores and disclaimer.
     """
-    h = max(0.0, min(100.0, heat_score))
-    v = max(0.0, min(100.0, vulnerability_score))
-    d = max(0.0, min(100.0, resource_deficit_score))
+    inputs = {
+        "heat_score": heat_score,
+        "vulnerability_score": vulnerability_score,
+        "resource_deficit_score": resource_deficit_score
+    }
+    for name, val in inputs.items():
+        if val is None:
+            raise ValueError(f"Sub-score '{name}' cannot be None.")
+        if not isinstance(val, (int, float)) or isinstance(val, bool):
+            raise TypeError(f"Sub-score '{name}' must be a float or int, got {type(val).__name__}.")
+        if math.isnan(val):
+            raise ValueError(f"Sub-score '{name}' cannot be NaN.")
+        if val < 0.0:
+            raise ValueError(f"Sub-score '{name}' cannot be negative (got {val}).")
+            
+    h = max(0.0, min(100.0, float(heat_score)))
+    v = max(0.0, min(100.0, float(vulnerability_score)))
+    d = max(0.0, min(100.0, float(resource_deficit_score)))
     
     base_score = (
         h * WEIGHT_COMBINED_HEAT +

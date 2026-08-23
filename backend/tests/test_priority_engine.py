@@ -1,8 +1,9 @@
 """
-Unit tests for PriorityEngine sub-scores, Response Gap, and Zone Ranking (Steps 24 & 25)
+Unit tests for PriorityEngine sub-scores, Response Gap, and Zone Ranking (Steps 24, 25, & 26)
 """
 
 import pytest
+import math
 from datetime import datetime, timezone
 from app.models.zone import HeatMetrics
 from app.services.priority_engine import (
@@ -129,28 +130,93 @@ def test_resource_deficit_score():
     assert resource_deficit_score(res_few) > resource_deficit_score(res_many)
 
 
-def test_calculate_response_gap():
-    """Verify Response Gap combination formula and synergy compounding."""
-    # Scenario 1: Standard combination
-    res_1 = calculate_response_gap(heat_score=80.0, vulnerability_score=60.0, resource_deficit_score=40.0)
+def test_calculate_response_gap_standard():
+    """Verify Response Gap combination formula and output payload."""
+    res = calculate_response_gap(heat_score=80.0, vulnerability_score=60.0, resource_deficit_score=40.0)
     # Expected: 80*0.4 + 60*0.35 + 40*0.25 = 32 + 21 + 10 = 63.0
-    assert res_1["response_gap_score"] == 63.0
-    assert res_1["display_score"] == 6.3
-    assert res_1["tier"] == "HIGH"
-    assert "disclaimer" in res_1
-    assert res_1["disclaimer"] == DISCLAIMER_TEXT
+    assert res["response_gap_score"] == 63.0
+    assert res["display_score"] == 6.3
+    assert res["tier"] == "HIGH"
+    assert "disclaimer" in res
+    assert res["disclaimer"] == DISCLAIMER_TEXT
+
+
+def test_calculate_response_gap_edge_cases():
+    """Step 26: Test extreme edge cases (all zeros, all max, single-pillar dominance)."""
+    # All zeros
+    res_zero = calculate_response_gap(0.0, 0.0, 0.0)
+    assert res_zero["response_gap_score"] == 0.0
+    assert res_zero["display_score"] == 0.0
+    assert res_zero["tier"] == "LOW"
     
-    # Scenario 2: Acute triple-pillar synergy compounding (all >= 70.0)
-    # Base: 80*0.4 + 80*0.35 + 80*0.25 = 80.0. Compounded: 80.0 * 1.10 = 88.0
-    res_synergy = calculate_response_gap(heat_score=80.0, vulnerability_score=80.0, resource_deficit_score=80.0)
-    assert res_synergy["response_gap_score"] == 88.0
-    assert res_synergy["display_score"] == 8.8
-    assert res_synergy["tier"] == "CRITICAL"
+    # All maximum (100, 100, 100) -> synergy boosts to 110, clamped to 100.0
+    res_max = calculate_response_gap(100.0, 100.0, 100.0)
+    assert res_max["response_gap_score"] == 100.0
+    assert res_max["display_score"] == 10.0
+    assert res_max["tier"] == "CRITICAL"
     
-    # Scenario 3: Low risk
-    res_low = calculate_response_gap(heat_score=20.0, vulnerability_score=15.0, resource_deficit_score=10.0)
-    assert res_low["response_gap_score"] < 25.0
-    assert res_low["tier"] == "LOW"
+    # Single pillar dominance
+    res_heat_only = calculate_response_gap(100.0, 0.0, 0.0)
+    assert res_heat_only["response_gap_score"] == 40.0  # 40% weight
+    assert res_heat_only["tier"] == "MODERATE"
+    
+    res_vuln_only = calculate_response_gap(0.0, 100.0, 0.0)
+    assert res_vuln_only["response_gap_score"] == 35.0  # 35% weight
+    assert res_vuln_only["tier"] == "MODERATE"
+    
+    res_res_only = calculate_response_gap(0.0, 0.0, 100.0)
+    assert res_res_only["response_gap_score"] == 25.0  # 25% weight
+    assert res_res_only["tier"] == "MODERATE"
+
+
+def test_calculate_response_gap_invalid_inputs():
+    """Step 26: Verify strict input validation throws appropriate errors."""
+    # None input
+    with pytest.raises(ValueError, match="cannot be None"):
+        calculate_response_gap(None, 50.0, 50.0) # type: ignore
+        
+    with pytest.raises(ValueError, match="cannot be None"):
+        calculate_response_gap(50.0, None, 50.0) # type: ignore
+        
+    # NaN input
+    with pytest.raises(ValueError, match="cannot be NaN"):
+        calculate_response_gap(math.nan, 50.0, 50.0)
+        
+    # String input
+    with pytest.raises(TypeError, match="must be a float or int"):
+        calculate_response_gap("80", 50.0, 50.0) # type: ignore
+        
+    # Boolean input (bool is subclass of int in Python, but should be rejected)
+    with pytest.raises(TypeError, match="must be a float or int"):
+        calculate_response_gap(True, 50.0, 50.0) # type: ignore
+        
+    # Negative input
+    with pytest.raises(ValueError, match="cannot be negative"):
+        calculate_response_gap(-10.0, 50.0, 50.0)
+
+
+def test_response_gap_synergy_boundary():
+    """Step 26: Verify synergy compounding activation boundary."""
+    # Just below threshold (69.9, 70.0, 70.0) -> No synergy
+    # Base: 69.9*0.4 + 70*0.35 + 70*0.25 = 27.96 + 24.5 + 17.5 = 69.96
+    res_below = calculate_response_gap(69.9, 70.0, 70.0)
+    assert res_below["response_gap_score"] == 69.96
+    
+    # Exactly at threshold (70.0, 70.0, 70.0) -> Synergy active (+10%)
+    # Base: 70.0. With synergy: 70.0 * 1.10 = 77.0
+    res_at = calculate_response_gap(70.0, 70.0, 70.0)
+    assert res_at["response_gap_score"] == 77.0
+    assert res_at["tier"] == "CRITICAL"
+
+
+def test_response_gap_monotonicity():
+    """Step 26: Verify monotonic behavior across test points."""
+    # Increasing heat increases score
+    assert calculate_response_gap(80.0, 50.0, 50.0)["response_gap_score"] > calculate_response_gap(60.0, 50.0, 50.0)["response_gap_score"]
+    # Increasing vulnerability increases score
+    assert calculate_response_gap(50.0, 80.0, 50.0)["response_gap_score"] > calculate_response_gap(50.0, 60.0, 50.0)["response_gap_score"]
+    # Increasing deficit increases score
+    assert calculate_response_gap(50.0, 50.0, 80.0)["response_gap_score"] > calculate_response_gap(50.0, 50.0, 60.0)["response_gap_score"]
 
 
 def test_classify_zone():

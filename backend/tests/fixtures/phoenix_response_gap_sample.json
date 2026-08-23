@@ -1,0 +1,157 @@
+[
+  {
+    "zone_id": "zone-phx-south-mtn",
+    "name": "South Mountain Desert Fringe",
+    "heat_exposure_score": 81.95,
+    "vulnerability_score": 57.27,
+    "resource_deficit_score": 69.78,
+    "response_gap_score": 70.27,
+    "display_score": 7.0,
+    "tier": "HIGH",
+    "components": {
+      "heat_exposure": 8.2,
+      "vulnerability": 5.7,
+      "resource_deficit": 7.0,
+      "raw_heat_score": 81.95,
+      "raw_vulnerability_score": 57.27,
+      "raw_resource_deficit_score": 69.78
+    },
+    "evidence": {
+      "current_temp_c": 46.8,
+      "current_temp_f": 116.2,
+      "persistence_hours": 6.5,
+      "exceedance_hours": 7.0,
+      "historical_anomaly_c": 4.2,
+      "population_estimate": 3619,
+      "elderly_pct": 0.2239,
+      "socioeconomic_vulnerability": 0.6244,
+      "source_tracts": [
+        "04013117000",
+        "04013117100"
+      ],
+      "cooling_resources_in_1mi": 1,
+      "cooling_resources_in_zone": 0,
+      "nearest_resource_distance_m": 952.9,
+      "nearest_resource_name": "South Mountain Community Center Cooling Facility"
+    },
+    "rank": 1,
+    "disclaimer": "Response Gap is a project-derived decision-support score for this hackathon prototype. It is not an official public-health index, medical prediction, or mortality forecast."
+  },
+  {
+    "zone_id": "zone-phx-central",
+    "name": "Central Phoenix Corridor (Tract 1140/1141)",
+    "heat_exposure_score": 72.9,
+    "vulnerability_score": 67.28,
+    "resource_deficit_score": 0.0,
+    "response_gap_score": 52.71,
+    "display_score": 5.3,
+    "tier": "HIGH",
+    "components": {
+      "heat_exposure": 7.3,
+      "vulnerability": 6.7,
+      "resource_deficit": 0.0,
+      "raw_heat_score": 72.9,
+      "raw_vulnerability_score": 67.28,
+      "raw_resource_deficit_score": 0.0
+    },
+    "evidence": {
+      "current_temp_c": 45.6,
+      "current_temp_f": 114.1,
+      "persistence_hours": 5.5,
+      "exceedance_hours": 6.2,
+      "historical_anomaly_c": 3.8,
+      "population_estimate": 3347,
+      "elderly_pct": 0.2484,
+      "socioeconomic_vulnerability": 0.8122,
+      "source_tracts": [
+        "04013114000",
+        "04013114100",
+        "04013115000",
+        "04013116000",
+        "04013116100"
+      ],
+      "cooling_resources_in_1mi": 7,
+      "cooling_resources_in_zone": 1,
+      "nearest_resource_distance_m": 0.0,
+      "nearest_resource_name": "Phoenix City Hall Heat Respite Pavilion"
+    },
+    "rank": 2,
+    "disclaimer": "Response Gap is a project-derived decision-support score for this hackathon prototype. It is not an official public-health index, medical prediction, or mortality forecast."
+  },
+  {
+    "zone_id": "zone-phx-eastlake",
+    "name": "Eastlake / Garfield Residential",
+    "heat_exposure_score": 51.5,
+    "vulnerability_score": 55.65,
+    "resource_deficit_score": 17.5,
+    "response_gap_score": 44.45,
+    "display_score": 4.4,
+    "tier": "MODERATE",
+    "components": {
+      "heat_exposure": 5.2,
+      "vulnerability": 5.6,
+      "resource_deficit": 1.8,
+      "raw_heat_score": 51.5,
+      "raw_vulnerability_score": 55.65,
+      "raw_resource_deficit_score": 17.5
+    },
+    "evidence": {
+      "current_temp_c": 43.5,
+      "current_temp_f": 110.3,
+      "persistence_hours": 3.8,
+      "exceedance_hours": 4.0,
+      "historical_anomaly_c": 1.8,
+      "population_estimate": 2244,
+      "elderly_pct": 0.2,
+      "socioeconomic_vulnerability": 0.76,
+      "source_tracts": [
+        "04013114100",
+        "04013116100"
+      ],
+      "cooling_resources_in_1mi": 2,
+      "cooling_resources_in_zone": 1,
+      "nearest_resource_distance_m": 0.0,
+      "nearest_resource_name": "Eastlake Community Center Hydration Outpost"
+    },
+    "rank": 3,
+    "disclaimer": "Response Gap is a project-derived decision-support score for this hackathon prototype. It is not an official public-health index, medical prediction, or mortality forecast."
+  },
+  {
+    "zone_id": "zone-phx-downtown",
+    "name": "Downtown Government Center",
+    "heat_exposure_score": 55.61,
+    "vulnerability_score": 55.53,
+    "resource_deficit_score": 0.0,
+    "response_gap_score": 41.68,
+    "display_score": 4.2,
+    "tier": "MODERATE",
+    "components": {
+      "heat_exposure": 5.6,
+      "vulnerability": 5.6,
+      "resource_deficit": 0.0,
+      "raw_heat_score": 55.61,
+      "raw_vulnerability_score": 55.53,
+      "raw_resource_deficit_score": 0.0
+    },
+    "evidence": {
+      "current_temp_c": 44.2,
+      "current_temp_f": 111.6,
+      "persistence_hours": 4.0,
+      "exceedance_hours": 4.5,
+      "historical_anomaly_c": 2.1,
+      "population_estimate": 2311,
+      "elderly_pct": 0.2208,
+      "socioeconomic_vulnerability": 0.6832,
+      "source_tracts": [
+        "04013114000",
+        "04013115000"
+      ],
+      "cooling_resources_in_1mi": 6,
+      "cooling_resources_in_zone": 1,
+      "nearest_resource_distance_m": 0.0,
+      "nearest_resource_name": "Phoenix City Hall Heat Respite Pavilion"
+    },
+    "rank": 4,
+    "disclaimer": "Response Gap is a project-derived decision-support score for this hackathon prototype. It is not an official public-health index, medical prediction, or mortality forecast."
+  }
+]

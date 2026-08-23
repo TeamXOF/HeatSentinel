@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@source "./**/*.{js,ts,jsx,tsx,html}";
+@source "../index.html";
+@source "../src/**/*.{js,ts,jsx,tsx,html}";
 
 @theme {
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;

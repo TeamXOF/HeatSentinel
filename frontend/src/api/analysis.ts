@@ -280,7 +280,7 @@ export function useZoneEvidence(zoneId: string | null) {
 export function useHeatMapMarkers() {
   const { data: zones = [] } = useZones();
   return useQuery<HeatZoneMarker[]>({
-    queryKey: ['heatmapMarkers', zones.length],
+    queryKey: ['heatmapMarkers', zones],
     queryFn: async () => {
       if (zones.length > 0) {
         return zones.map((z) => {
@@ -317,7 +317,6 @@ export function useHeatMapMarkers() {
       }
       return mockHeatZoneMarkers;
     },
-    enabled: zones.length > 0,
   });
 }
 
@@ -327,7 +326,7 @@ export function useHeatMapMarkers() {
 export function useHeatGeoJSON() {
   const { data: zones = [] } = useZones();
   return useQuery<GeoJSON.FeatureCollection>({
-    queryKey: ['heatmapGeoJSON', zones.length],
+    queryKey: ['heatmapGeoJSON', zones],
     queryFn: async () => {
       if (zones.length > 0) {
         const features: GeoJSON.Feature[] = zones

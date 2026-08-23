@@ -28,7 +28,7 @@ updated: 2026-08-22
 - **GitHub:** https://github.com/TeamXOF/HeatSentinel
 - **Local workspace:** `d:\[Project]\HeatSentinel`
 - **Default branch:** `main`
-- **Active feature branch:** `feature/backend-phase1-foundation`
+- **Active feature branch:** `main` (all phases 1–6 merged cleanly)
 
 ---
 

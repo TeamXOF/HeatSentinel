@@ -8,7 +8,7 @@
 ## HeatSentinel AI (FortyGuard Hackathon '26)
 - [status] Full project state, phase tracking, resume instructions → heatsentinel-project.md
 - [status] Frontend UI complete (10 pages, 13 components, mock data layer, in /frontend) → heatsentinel-project.md
-- [status] Active branch: feature/phase-5-external-data → heatsentinel-project.md
+- [status] Active branch: main (all phases 1-6 merged cleanly) → heatsentinel-project.md
 - [status] Phase 2 FortyGuard Integration COMPLETE. API client, SQLite caching, MapLibre rendering verified. → heatsentinel-project.md
 - [status] Phase 3 Spatial Engine COMPLETE. Tiling, scan orchestration, hotspot detection, and refinement verified. → heatsentinel-project.md
 - [status] Phase 4 Heat Analytics COMPLETE. Native persistence/exceedance, historical baseline logic, HeatMetrics unified model, and caching verified. → heatsentinel-project.md

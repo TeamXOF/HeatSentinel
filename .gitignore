@@ -1,15 +1,40 @@
-# Dependencies
+# ==============================================================================
+# HeatSentinel AI — Git Ignore Configuration
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Dependencies & Package Managers
+# ------------------------------------------------------------------------------
 node_modules/
 /.pnp
 .pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+bun.lock
+bun.lockb
+package-lock.json.bak
 
-# Production build outputs
+# ------------------------------------------------------------------------------
+# Build & Distribution Artifacts
+# ------------------------------------------------------------------------------
 dist/
 build/
-coverage/
-scratch/
+out/
+.next/
+.nuxt/
+.vuepress/dist
+.serverless/
+.fusebox/
+.dynamodb/
+.tern-port
+*.tsbuildinfo
 
-# Environment files & Secrets
+# ------------------------------------------------------------------------------
+# Environment Variables & Sensitive Credentials (NEVER COMMIT)
+# ------------------------------------------------------------------------------
 .env
 .env.local
 .env.development.local
@@ -17,17 +42,81 @@ scratch/
 .env.production.local
 .env.*
 !.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
 
-# Logs
+# ------------------------------------------------------------------------------
+# Python & Virtual Environments
+# ------------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ------------------------------------------------------------------------------
+# Databases & Local Storage
+# ------------------------------------------------------------------------------
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+heatsentinel.db
+backend/heatsentinel.db
+
+# ------------------------------------------------------------------------------
+# Testing, Coverage & Playwright Artifacts
+# ------------------------------------------------------------------------------
+coverage/
+.nyc_output/
+.pytest_cache/
+backend/.pytest_cache/
+.playwright-mcp/
+playwright-report/
+test-results/
+blob-report/
+test_*.js
+scripts/test_*.js
+frontend/test_*.js
+
+# ------------------------------------------------------------------------------
+# Logs & Process PID Files
+# ------------------------------------------------------------------------------
+logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-*.log
+*.pid
+*.seed
+*.pid.lock
 
-# Editor & OS files
+# ------------------------------------------------------------------------------
+# Operating System & IDE Files
+# ------------------------------------------------------------------------------
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
 .idea/
 .vscode/
 *.suo
@@ -35,10 +124,12 @@ lerna-debug.log*
 *.njsproj
 *.sln
 *.sw?
-Thumbs.db
+*.bak
 
-# AG Kit — Agents / Skills / Workflows (private, do not push)
-# Ignore all .agents subfolders EXCEPT memory/ (project conventions)
+# ------------------------------------------------------------------------------
+# AG Kit Workspace Private Configurations
+# (Preserve .agents/memory/ for persistent project memory)
+# ------------------------------------------------------------------------------
 .agents/.ag-kit/
 .agents/.agents/
 .agents/agent/
@@ -58,16 +149,4 @@ Thumbs.db
 .agents/README.md
 .agents/VERSION
 .agents/hooks.json
-
-# Python & Virtualenv
-__pycache__/
-*.py[cod]
-*$py.class
-venv/
-.venv/
-*.sqlite3
-*.db
-
-# Playwright MCP & Testing artifacts
-.playwright-mcp/
-
+scratch/

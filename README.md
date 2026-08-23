@@ -1,152 +1,218 @@
-# HeatSentinel AI — Autonomous Urban Heat Vulnerability Platform
+# 🛡️ HeatSentinel AI — Autonomous Hyperlocal Heat Response Intelligence
 
-An enterprise-grade, autonomous municipal heat resilience and vulnerability intelligence platform designed for the Phoenix metropolitan corridor. HeatSentinel AI continuously monitors urban thermal anomalies, ingests geospatial census vulnerability indicators, tracks protective cooling infrastructure, and deploys targeted emergency interventions.
-
----
-
-## 🛠️ Tech Stack
-
-- **Framework & Runtime**: React 19, TypeScript (~5.8), Vite 6
-- **Styling & Design System**: Tailwind CSS v4, Custom Design Tokens, Accessible HSL color palettes, Glassmorphism, Responsive mobile-first grid
-- **Data Fetching & State**: TanStack Query (React Query v5) with centralized API abstraction layer (`/src/api/`)
-- **Spatial Mapping**: MapLibre GL (`maplibre-gl`) with interactive vector contours, custom heat-risk markers, and layer controls
-- **Data Visualization**: Recharts (Donut and risk distribution charts)
-- **Icons & Motion**: Lucide React (`lucide-react`), Motion (`motion`)
+> **FortyGuard Hackathon '26** — *Agentic AI & Data Analysis / Correlation Tracks*  
+> **Target Cities:** Phoenix, AZ (Primary Deployment & Live Demo) · New York City (Secondary Validation Track)  
+> **Author:** Waleed Khalid ([@Waleed-Khalid-dev](https://github.com/Waleed-Khalid-dev))
 
 ---
 
-## 📁 Folder Structure
+## 🌟 Executive Summary
+
+**HeatSentinel AI** is an autonomous municipal heat resilience and tactical response platform. Rather than merely rendering static temperature heatmaps, HeatSentinel dynamically investigates hyperlocal thermal anomalies, overlays socio-demographic vulnerability indices (US Census ACS 5-Year data), computes planar accessibility to protective infrastructure (Maricopa Association of Governments Cooling Centers), and outputs a transparent, reproducible **Response Gap ($R$)** priority score to direct emergency interventions where heat is most likely to harm human life.
+
+---
+
+## 🏗️ System Architecture
+
+HeatSentinel is engineered as a **modular monolith** with a **deterministic analysis core** paired with an autonomous agent tool loop and an interactive real-time Command Center.
+
+```
+                    ┌────────────────────────────────────────┐
+                    │       External Data Ingestion          │
+                    │  FortyGuard API · Census ACS · MAG HRN │
+                    └───────────────────┬────────────────────┘
+                                        │
+                                        ▼
+                    ┌────────────────────────────────────────┐
+                    │      Deterministic Core Engine         │
+                    │   • Spatial Tiling Engine (≤10 mi²)    │
+                    │   • DBSCAN Hotspot Clustering          │
+                    │   • EPSG:2223 Area-Weighted Joins      │
+                    │   • Response Gap Scoring (0.4E+0.35V)  │
+                    │   • SQLite 0ms Observation Cache       │
+                    └───────────────────┬────────────────────┘
+                                        │
+                         ┌──────────────┴──────────────┐
+                         ▼                             ▼
+        ┌────────────────────────────────┐  ┌────────────────────────────────┐
+        │       FastAPI Backend API      │  │     Agent Investigation Layer  │
+        │   POST /api/analysis/basic-scan│  │  Autonomous Tool Dispatching   │
+        │   GET  /api/health             │  │  Empirical Evidence Grounding  │
+        └────────────────┬───────────────┘  └────────────────┬───────────────┘
+                         │                                   │
+                         └─────────────────┬─────────────────┘
+                                           ▼
+                    ┌────────────────────────────────────────┐
+                    │    Frontend Command Center Dashboard   │
+                    │   • MapLibre GL Interactive Contours   │
+                    │   • Real-Time KPI Stat Cards           │
+                    │   • 3-Pillar Empirical WHY Drawer      │
+                    │   • Tactical Priority Registry         │
+                    └────────────────────────────────────────┘
+```
+
+---
+
+## 📁 Repository Directory Structure
 
 ```text
-heatsentinel-ai/
-├── public/
-├── src/
-│   ├── api/                     # Centralized API abstraction & Query hooks
-│   │   ├── alerts.ts            # useAlerts, useActiveAlerts
-│   │   ├── analysis.ts          # useZones, useZoneEvidence, useHeatMapMarkers, useHeatGeoJSON, etc.
-│   │   ├── config.ts            # USE_MOCK_DATA toggle & apiFetch utility
-│   │   ├── heatHunt.tsx         # HeatHuntProvider & useHeatHunt autonomous execution engine
-│   │   ├── index.ts             # Barrel exports for all API hooks
-│   │   ├── priorityActions.ts   # usePriorityActions, useTacticalPlanner
-│   │   ├── reports.ts           # useReports
-│   │   ├── resources.ts         # useResources, useResourceReadiness
-│   │   └── telemetry.ts         # useTelemetryRecords
-│   ├── components/              # Modular UI components
-│   │   ├── AnalyticsCards.tsx   # Risk summary, demographics & readiness cards
-│   │   ├── BottomTabBar.tsx     # Mobile bottom navigation bar
-│   │   ├── FooterStatusBar.tsx  # Autonomous agent telemetry footer
-│   │   ├── Header.tsx           # Global header with Heat Hunt launcher & profile
-│   │   ├── HyperlocalHeatMapCard.tsx # MapLibre GL heat risk map
-│   │   ├── KpiStatCards.tsx     # 5-card metric row
-│   │   ├── Layout.tsx           # Responsive shell layout
-│   │   ├── Logo.tsx             # HeatSentinel SVG geometric mark
-│   │   ├── MobileNavDrawer.tsx  # Slide-out drawer navigation for mobile
-│   │   ├── RightRailCards.tsx   # Active alerts & priority action cards
-│   │   ├── Sidebar.tsx          # Persistent desktop navigation sidebar
-│   │   └── WhyPanel.tsx         # Slide-in drawer with empirical evidence & scoring
-│   ├── context/                 # Application contexts
-│   ├── data/                    # Mock datasets & Phoenix geospatial coordinates
-│   │   ├── mockAnalyticsData.ts
-│   │   ├── mockHeatMapData.ts
-│   │   ├── mockKpiData.ts
-│   │   ├── mockRightRailData.ts
-│   │   └── mockZoneEvidenceData.ts
-│   ├── pages/                   # Application route views
-│   │   ├── AgentInsightsPage.tsx # Live telemetry event stream terminal
-│   │   ├── DataExplorerPage.tsx  # Raw telemetry tabular explorer & CSV export
-│   │   ├── EventsAlertsPage.tsx  # Interactive alerts ledger with ACK controls
-│   │   ├── HeatMapPage.tsx       # Fullscreen GIS heat risk map
-│   │   ├── OverviewPage.tsx      # Main municipal dashboard
-│   │   ├── ReportsPage.tsx       # Executive briefings & PDF download portal
-│   │   ├── ResourcesPage.tsx     # Cooling centers & hydration outposts
-│   │   ├── ResponsePlannerPage.tsx # Tactical dispatch planner
-│   │   ├── RiskZonesPage.tsx     # Ranked vulnerability registry
-│   │   └── SettingsPage.tsx      # Thresholds, API keys & preferences
-│   ├── theme/                   # Risk tier definitions & token constants
-│   ├── types.ts                 # Core TypeScript interfaces & schemas
-│   ├── App.tsx                  # Routing configuration & Query client
-│   ├── index.css                # Global CSS & Tailwind imports
-│   └── main.tsx                 # React DOM mount point
-├── package.json
-├── tsconfig.json
-└── vite.config.ts
+HeatSentinel/
+├── .agents/                     # AG Kit AI agent specifications, rules & memory index
+│   ├── memory/                  # Persistent project decisions & conventions
+│   └── rules/                   # Clean code, routing & testing protocols
+├── backend/                     # High-performance FastAPI backend service
+│   ├── app/
+│   │   ├── data/                # Versioned local datasets (Census GeoJSON & MAG Cooling Centers)
+│   │   ├── models/              # Pydantic schemas (HeatZone, HeatMetrics, ZoneEvidence, LatLng)
+│   │   ├── routers/             # API endpoints (analysis, health, heat-hunt)
+│   │   ├── services/            # Deterministic business logic & spatial algorithms
+│   │   │   ├── analytics_engine.py      # Heat persistence & exceedance metric computation
+│   │   │   ├── fortyguard_client.py     # Centralized submit/poll FortyGuard client
+│   │   │   ├── hotspot_service.py       # DBSCAN convex-hull spatial clustering
+│   │   │   ├── pipeline_service.py      # Unified end-to-end basic scan pipeline
+│   │   │   ├── priority_engine.py       # Deterministic Response Gap scoring formula
+│   │   │   ├── resource_service.py      # Planar 1-mile buffer & facility proximity
+│   │   │   ├── spatial_engine.py        # 10 mi² AOI tiling & coordinate validation
+│   │   │   └── vulnerability_service.py # Area-weighted demographic Census joins
+│   │   ├── config.py            # Pydantic environment settings
+│   │   ├── db.py                # SQLite result caching & persistence
+│   │   ├── errors.py            # Structured exception handling
+│   │   ├── logging_config.py    # Standardized logging formatter
+│   │   └── main.py              # FastAPI application entry point & CORS configuration
+│   ├── scripts/                 # Sensitivity analysis & dev utility scripts
+│   ├── tests/                   # Full pytest regression suite (56/56 passing)
+│   │   ├── fixtures/            # Golden sample datasets & sensitivity matrices
+│   │   └── test_*.py            # Modular unit and integration tests
+│   ├── requirements.txt         # Python dependencies
+│   └── .env.example             # Backend environment template
+├── frontend/                    # Modern React + Vite + Tailwind CSS dashboard
+│   ├── public/                  # Static assets & brand SVG logos
+│   ├── src/
+│   │   ├── api/                 # React Query API client abstraction
+│   │   │   ├── analysis.ts      # useBasicScan, useZones, useHeatMapMarkers, useHeatGeoJSON
+│   │   │   └── index.ts         # Barrel export for queries & mutations
+│   │   ├── components/          # Modular UI components
+│   │   │   ├── AnalyticsCards.tsx       # Risk summary, demographics & readiness cards
+│   │   │   ├── Header.tsx               # Action header with RUN ANALYSIS trigger
+│   │   │   ├── HyperlocalHeatMapCard.tsx# MapLibre GL interactive vector map & contours
+│   │   │   ├── KpiStatCards.tsx         # Top 5-card metric row
+│   │   │   ├── Layout.tsx               # Responsive application shell
+│   │   │   ├── Sidebar.tsx              # Persistent desktop navigation sidebar
+│   │   │   └── WhyPanel.tsx             # 3-pillar empirical evidence drawer
+│   │   ├── pages/               # Route views (Overview, Heat Map, Risk Zones, Settings)
+│   │   ├── theme/               # Risk tier configurations & HSL color tokens
+│   │   ├── types.ts             # TypeScript domain interfaces
+│   │   ├── App.tsx              # App routing & React Query Provider
+│   │   ├── index.css            # Tailwind CSS v4 design tokens & custom scrollbars
+│   │   └── main.tsx             # React DOM root mounting
+│   ├── package.json             # Frontend dependencies & scripts
+│   ├── tsconfig.json            # Strict TypeScript configuration
+│   └── vite.config.ts           # Vite 6 config with Tailwind CSS v4 integration
+├── context/                     # System design specs, roadmap & FortyGuard reference
+│   ├── HeatSentinel_AI_System_Design.md
+│   ├── HeatSentinel_AI_Context_Handoff.md
+│   ├── fortyguard-api-reference.md
+│   ├── fortyguard-participant-handbook.md
+│   └── heatsentinel_antigravity_roadmap.md
+├── docs/                        # Scientific methodology & mathematical formulations
+│   ├── architecture.md
+│   └── methodology.md
+├── .gitignore                   # Standard multi-language ignore rules
+├── LICENSE                      # MIT Open Source License
+├── metadata.json                # Project descriptor metadata
+└── README.md                    # This document
 ```
 
 ---
 
-## 🔌 Mock Data Layer
+## 🧮 Response Gap Formulation ($R$)
 
-The frontend is currently decoupled from live backend servers using client-side mock fixtures located in `/src/data/` and unified via `/src/api/`.
+To ensure accountability and prevent arbitrary AI hallucinations, all risk scoring is strictly deterministic:
 
-To switch between mock fixtures and the real FastAPI backend:
-1. Open [`/src/api/config.ts`](file:///c:/Users/USER/OneDrive/Documents/heatsentinel-ai/src/api/config.ts).
-2. Set `export const USE_MOCK_DATA = false;`.
-3. Provide `VITE_API_BASE_URL` in your `.env` file (defaults to `http://localhost:8000`).
+$$R = 0.40 \cdot E + 0.35 \cdot V + 0.25 \cdot D$$
 
----
+Where each sub-score is normalized on a standard $[0, 100]$ scale:
+1. **Heat Exposure Score ($E$):** Composite of peak thermal intensity, consecutive hours above $40^\circ\text{C}$ (FortyGuard Persistence), and baseline urban exceedance.
+2. **Vulnerability Score ($V$):** Census ACS 5-Year demographic overlap calculating population density, senior concentration ($\ge 65$), and the socioeconomic Social Vulnerability Index (SVI).
+3. **Resource Deficit Score ($D$):** Inverse accessibility score to active MAG cooling and hydration stations within a $1\text{-mile}$ ($1600\text{ m}$) planar walkability buffer.
 
-## 📋 TODO: Backend Wiring
+### Priority Tiers:
+- **`CRITICAL`** ($R \ge 7.0$): Immediate tactical deployment of mobile cooling & EMS units.
+- **`HIGH`** ($5.0 \le R < 7.0$): Priority hydration station expansion & community canvassing.
+- **`MODERATE`** ($3.0 \le R < 5.0$): Elevated awareness & cooling center readiness.
+- **`LOW`** ($R < 3.0$): Standard baseline municipal monitoring.
 
-The following hooks in `/src/api/` have mock implementations that need to be wired to the corresponding FastAPI backend endpoints. These align directly with the **Antigravity Roadmap**:
-
-### 1. FortyGuard & Thermal Telemetry Stream (Antigravity Steps 10–12)
-- **`useHeatMapMarkers`** (`/src/api/analysis.ts`):
-  - *Target Endpoint*: `GET /api/heatmap/markers`
-  - *Wiring*: Real-time coordinate ingest of calibrated sensor nodes with localized surface temperature deltas.
-- **`useHeatGeoJSON`** (`/src/api/analysis.ts`):
-  - *Target Endpoint*: `GET /api/heatmap/geojson`
-  - *Wiring*: Raster thermal polygon contours from regional infrared satellite passes and ground-station grids.
-- **`useTelemetryRecords`** (`/src/api/telemetry.ts`):
-  - *Target Endpoint*: `GET /api/telemetry/raw`
-  - *Wiring*: Historical and live sensor logs with wet-bulb globe temperature (WBGT) and canopy density.
-
-### 2. Ranked Risk Zones & Empirical Evidence (Antigravity Steps 28–29)
-- **`useZones`** (`/src/api/analysis.ts`):
-  - *Target Endpoint*: `GET /api/zones`
-  - *Wiring*: Dynamic Response Gap score calculation combining CDC SVI / Census ACS vulnerability with heat persistence.
-- **`useZoneEvidence`** (`/src/api/analysis.ts`):
-  - *Target Endpoint*: `GET /api/zones/{zoneId}/evidence`
-  - *Wiring*: Detailed factor breakdown (Heat Exposure, Vulnerability, Resource Deficit) powering the **WhyPanel** drawer.
-- **`useRiskZoneSummary`** & **`usePopulationAtRisk`** (`/src/api/analysis.ts`):
-  - *Target Endpoints*: `GET /api/analytics/risk-summary`, `GET /api/analytics/population-risk`
-  - *Wiring*: Aggregated risk tier tallies and vulnerable population demographic totals.
-
-### 3. Autonomous Heat Hunt Async Job Engine (Antigravity Steps 37–38)
-- **`useHeatHunt`** (`/src/api/heatHunt.tsx`):
-  - *Job Launch Endpoint*: `POST /api/heat-hunt/start`
-  - *SSE / Polling Stream Endpoint*: `GET /api/heat-hunt/{jobId}/events`
-  - *Status Endpoint*: `GET /api/heat-hunt/{jobId}/status`
-  - *Wiring*: Connect the React Context execution loop to Server-Sent Events (SSE) or WebSockets from the FastAPI autonomous worker pipeline.
-- **`useActiveAlerts`** & **`useAlerts`** (`/src/api/alerts.ts`):
-  - *Target Endpoints*: `GET /api/alerts/active`, `POST /api/alerts/{id}/acknowledge`
-  - *Wiring*: Real-time anomaly alerts generated during Heat Hunt runs.
-- **`usePriorityActions`** & **`useTacticalPlanner`** (`/src/api/priorityActions.ts`):
-  - *Target Endpoints*: `GET /api/actions/priority`, `POST /api/actions/{id}/dispatch`
-  - *Wiring*: Dynamic tactical intervention recommendations dispatched to field teams.
-- **`useResources`** & **`useResourceReadiness`** (`/src/api/resources.ts`):
-  - *Target Endpoints*: `GET /api/resources`, `GET /api/resources/readiness`
-  - *Wiring*: Live telemetry on cooling centers, hydration posts, and mobile misting units.
-- **`useReports`** (`/src/api/reports.ts`):
-  - *Target Endpoint*: `GET /api/reports`
-  - *Wiring*: Agent-generated automated PDF and GeoJSON assessment downloads.
+> **Disclaimer:** Response Gap is a project-derived decision-support score for this hackathon prototype. It is not an official public-health index, medical prediction, or mortality forecast.
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Quickstart Guide
 
-### 1. Install Dependencies
+### Prerequisites
+- **Node.js**: v18+ and `npm`
+- **Python**: v3.11+ (Python 3.13 supported)
+- **FortyGuard API Key** (Set in `backend/.env`)
+
+---
+
+### 1. Backend Setup (FastAPI)
+
 ```bash
+# Navigate to backend directory
+cd backend
+
+# Create and activate Python virtual environment
+python -m venv venv
+# Windows (PowerShell):
+.\venv\Scripts\Activate.ps1
+# macOS/Linux:
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure environment variables
+cp .env.example .env
+# Add your FORTYGUARD_API_KEY inside .env
+
+# Launch FastAPI development server
+uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+```
+API Documentation will be live at `http://127.0.0.1:8000/docs`.
+
+---
+
+### 2. Frontend Setup (React + Vite)
+
+```bash
+# Open a new terminal and navigate to frontend
+cd frontend
+
+# Install node dependencies
 npm install
-```
 
-### 2. Launch Local Development Server
-```bash
+# Start Vite development server
 npm run dev
 ```
-The application will be accessible at `http://localhost:3000/`.
+Access the Command Center at `http://localhost:3000/`.
 
-### 3. Production Build
+---
+
+## 🧪 Testing & Verification
+
+### Backend Automated Test Suite (Pytest)
+Run the full 56-test regression suite:
 ```bash
-npm run build
-npm run preview
+cd backend
+python -m pytest tests/
 ```
+*Result: `56 passed, 0 failed`.*
+
+### Verification & Quality Assurance
+- **Backend Test Suite (Pytest):** `cd backend && python -m pytest tests/` (`56/56 unit and integration tests passing`).
+- **Interactive Verification (Playwright MCP):** Verified via Playwright automation covering API endpoints, live data ingestion, MapLibre GL polygon rendering, and interactive WHY evidence drawers.
+
+---
+
+## ⚖️ License
+Distributed under the **MIT License**. See [`LICENSE`](file:///d:/[Project]/HeatSentinel/LICENSE) for more information.

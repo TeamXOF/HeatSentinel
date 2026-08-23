@@ -37,11 +37,14 @@ export const OverviewPage: React.FC = () => {
   const { data: zones = [] } = useZones();
 
   const handleZoneSelect = (zoneId: string) => {
-    // Find zone from query or fallback
-    const zoneMatch = zones.find((z) => z.id === zoneId);
-    const evidence = zoneMatch ? zoneMatch.evidence : getEvidenceForZone(zoneId);
-    setCurrentEvidence(evidence);
-    setIsWhyPanelOpen(true);
+    const zoneMatch = zones.find(
+      (z) => z.id === zoneId || String(z.zoneNumber) === String(zoneId) || z.id === `zone-${zoneId}`
+    );
+    const evidence = zoneMatch ? zoneMatch.evidence : (getEvidenceForZone(zoneId) || zones[0]?.evidence || null);
+    if (evidence) {
+      setCurrentEvidence(evidence);
+      setIsWhyPanelOpen(true);
+    }
   };
 
   const handleActionSelect = (action: PriorityAction) => {

@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AlertItem, AlertSeverity } from '../types';
 import { mockActiveAlerts } from '../data/mockRightRailData';
+import { USE_MOCK_DATA, apiFetch } from './config';
 
 export interface FullAlertItem {
   id: string;

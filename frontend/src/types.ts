@@ -199,6 +199,6 @@ export interface HeatHuntContextValue {
   errorMessage: string | null;
   simulateFailure: boolean;
   setSimulateFailure: (simulate: boolean) => void;
-  runHeatHunt: () => void;
+  runHeatHunt: (params?: { startDate?: string; startTime?: string; provider?: string }) => void;
   resetHeatHunt: () => void;
 }

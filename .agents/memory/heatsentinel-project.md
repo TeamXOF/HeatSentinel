@@ -68,9 +68,10 @@ Full architecture: see `context/HeatSentinel_AI_System_Design.md`
 | Phase 8 — Autonomous Heat Hunt Agent Core (Steps 33–35) | ✅ Done | AI | 10 tool schemas with multi-provider export, HeatHuntOrchestrator async loop, 7-phase adaptive investigation prompt & Gemini catalogue |
 | Phase 9 — Heat Hunt Job Model & Async Execution (Step 36) | ✅ Done | AI | HeatHuntJob SQLite model, non-blocking asyncio background worker, durable incremental event persistence, in-memory SSE queue |
 | Phase 10 — Heat Hunt API Endpoints (Step 37) | ✅ Done | AI | POST /start (<5ms), GET /status (polling), GET /results (409/200), GET /stream (SSE), GET /history |
-| Phase 11 — Command Center Full Wiring (Steps 38–40) | 🔨 In Progress | AI | Steps 38 ✅ + 39 ✅ done. Step 40 (Recommendation Display & Evidence Completeness) is next. |
+| Phase 11 — Command Center Full Wiring (Steps 38–40) | ✅ Done | AI | HeatHunt wired, AgentActivityPanel live SSE streaming, recommendation display, WhyPanel evidence completeness & audit trail |
+| Phase 12 — Integration (Step 41) | ✅ Done | AI | Full end-to-end integration test suite created (test_integration_full_flow.py), Playwright E2E browser verified, 103/103 tests passing |
 
-**Current position: Phase 11 Steps 38 & 39 complete. Next: Step 40 — Recommendation Display & Evidence Completeness Pass.**
+**Current position: Phase 12 complete (Step 41). Next: Phase 13 Step 42 — Retries, Timeouts, and Graceful Degradation.**
 
 ---
 
@@ -257,17 +258,18 @@ feature/backend-phase1-foundation
 - Verified live endpoints against running Uvicorn server.
 - All 95 backend unit/integration tests passing 100%.
 
-### Session 2026-08-24 (Phase 11 Steps 38 & 39 — Command Center Live Wiring)
-- Step 38 was already complete (real "RUN HEAT HUNT" button with SSE + polling fallback confirmed working).
-- Step 39 implemented: extracted `AgentActivityPanel` as reusable component from `AgentInsightsPage`.
-- Backend: added `TOOL_DISPLAY_NAMES` dict (11 entries) + `display_name: Optional[str]` to `ProgressEvent` model in `heat_hunt_service.py`. The `on_step_callback` now populates `display_name` so judges see human-readable labels, not raw tool names.
-- Frontend: NEW `frontend/src/components/AgentActivityPanel.tsx` — renders `evt.display_name || evt.message`, stable keys, compact mode, completed/failed terminal states, auto-scroll.
-- `AgentInsightsPage.tsx` refactored: 484 → 270 lines. All inline feed JSX replaced with `<AgentActivityPanel />`.
-- `types.ts`: added `display_name?: string` to `HeatHuntProgressEvent`.
-- `heatHunt.tsx`: mapped `display_name` in SSE handler, polling mapper, and fixed inline type.
-- TypeScript check: 0 new errors from Step 39 (4 pre-existing unrelated errors remain in `alerts.ts` + `priorityActions.ts`).
-- Backend model smoke test: all 10 core tools mapped, `display_name` populates correctly.
-- What's next: Step 40 — Recommendation Display & Evidence Completeness Pass.
+### Session 2026-08-24 & 2026-08-25 (Phase 12 Complete — Step 41 & Custom Parameter UI)
+- Step 41 Complete (Full End-to-End Integration Test):
+  - Backend: Created `tests/test_integration_full_flow.py` asserting full orchestrator tool sequence, asynchronous job execution with SSE streaming, and REST API contract (`POST /start`, `GET /status`, `GET /results`, `GET /history`).
+  - Backend: Fixed absolute SQLite database path resolution in `app/db.py` to prevent `sqlite3.OperationalError` regardless of execution cwd.
+  - Backend: Handled both `step_number` and `step` payload keys in `heat_hunt_service.py`.
+  - Backend: All 103 backend tests passing 100% (`pytest tests/`).
+  - Frontend: Created `HeatHuntConfigModal.tsx` allowing custom Date, Time, and AI Model selection with presets (*2024-08-01 Historic Peak*, *2024-07-20 Midsummer*, *2024-08-15 Monsoon*, *14:00 2PM Peak*, *12:00 Noon*, *16:00 Afternoon*, *20:00 Evening Lag*).
+  - Frontend: Integrated parameter launcher into `Header.tsx` and built an inline **Investigation Parameters Bar** in `AgentInsightsPage.tsx`.
+  - Frontend: Updated `runHeatHunt({ startDate, startTime, provider })` in `frontend/src/api/heatHunt.tsx` and `types.ts` for dynamic parameter execution.
+  - Frontend: Production build clean (0 TS errors, `npm run build` passing).
+  - E2E: Verified full browser workflow live with Playwright MCP on `http://localhost:3000` (custom parameters, SSE streaming, WHY panel math $0.4E + 0.35V + 0.25D$, and honest nulls).
+- What's next: Phase 13 / Step 42 — Retries, Timeouts, and Graceful Degradation.
 
 ---
 
@@ -277,12 +279,10 @@ To resume in a new session:
 ```
 Read .agents/memory/heatsentinel-project.md first.
 We are on branch main.
-Phase 11 Steps 38 & 39 are complete. 
-Next task: Step 40 — Recommendation Display & Evidence Completeness Pass.
-  - Inspect Zone model, pipeline output, WhyPanel, PriorityPanel before making changes
-  - Confirm whether tree canopy data exists; if not, label as "Not available in this analysis"
-  - Ensure recommend_action output renders in PriorityPanel under "Recommended:"
-  - Ensure explain_priority full evidence renders in WhyPanel expandable format
-  - Add Response Gap disclaimer next to every displayed score
+Phase 12 is 100% complete (Step 41).
+Next task: Phase 13 / Step 42 — Retries, Timeouts, and Graceful Degradation.
+  - Implement FortyGuard API retry logic with exponential backoff and jitter.
+  - Implement client timeouts and circuit breaker patterns.
+  - Graceful degradation when external APIs are degraded.
 Context Handoff + System Design + Roadmap are in context/ folder.
 ```

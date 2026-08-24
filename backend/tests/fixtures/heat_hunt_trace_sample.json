@@ -4,8 +4,8 @@
     "provider": "deterministic",
     "model_name": "deterministic-agent-pipeline",
     "total_steps": 21,
-    "generated_at": "2026-08-24T02:44:02.932166Z",
-    "total_elapsed_ms": 3319.3
+    "generated_at": "2026-08-24T22:02:20.265984Z",
+    "total_elapsed_ms": 218568.6
   },
   "step_events": [
     {
@@ -13,7 +13,7 @@
       "tool_name": "orchestrator_init",
       "status": "Initializing HeatSentinel autonomous agent (deterministic-agent-pipeline)...",
       "details": {},
-      "timestamp": "2026-08-24T02:43:59.612901Z",
+      "timestamp": "2026-08-24T21:58:41.697416Z",
       "elapsed_ms": 0.0
     },
     {
@@ -21,160 +21,160 @@
       "tool_name": "scan_city",
       "status": "Tiling target urban corridor and scanning FortyGuard thermal grid layers...",
       "details": {},
-      "timestamp": "2026-08-24T02:43:59.612926Z",
-      "elapsed_ms": 0.0
+      "timestamp": "2026-08-24T21:58:41.697447Z",
+      "elapsed_ms": 0.1
     },
     {
       "step_number": 2,
       "tool_name": "scan_city_completed",
-      "status": "Ingested 16,568 thermal grid cells across 0 tiles. Identified 2 candidate hotspot clusters.",
+      "status": "Ingested 0 thermal grid cells across 4 tiles. Identified 0 candidate hotspot clusters.",
       "details": {},
-      "timestamp": "2026-08-24T02:44:01.415889Z",
-      "elapsed_ms": 1803.0
+      "timestamp": "2026-08-24T22:00:35.897853Z",
+      "elapsed_ms": 114200.5
     },
     {
       "step_number": 3,
       "tool_name": "refine_hotspot",
-      "status": "Applying DBSCAN planar boundary refinement for candidate Zone 1...",
+      "status": "Applying DBSCAN planar boundary refinement for candidate Zone 1 (Downtown Core)...",
       "details": {},
-      "timestamp": "2026-08-24T02:44:01.415924Z",
-      "elapsed_ms": 1803.0
+      "timestamp": "2026-08-24T22:00:35.897938Z",
+      "elapsed_ms": 114200.5
     },
     {
       "step_number": 4,
       "tool_name": "query_fortyguard_heat",
-      "status": "Querying localized FortyGuard thermal layers for refined Zone 1...",
+      "status": "Querying localized FortyGuard thermal layers for refined Zone 1 (Downtown Core)...",
       "details": {},
-      "timestamp": "2026-08-24T02:44:01.418446Z",
-      "elapsed_ms": 1805.6
+      "timestamp": "2026-08-24T22:00:35.909185Z",
+      "elapsed_ms": 114211.8
     },
     {
       "step_number": 5,
       "tool_name": "get_vulnerability_data",
-      "status": "Performing area-weighted US Census ACS join for Zone 1...",
+      "status": "Performing area-weighted US Census ACS join for Zone 1 (Downtown Core)...",
       "details": {},
-      "timestamp": "2026-08-24T02:44:01.865949Z",
-      "elapsed_ms": 2253.1
+      "timestamp": "2026-08-24T22:01:14.353197Z",
+      "elapsed_ms": 152655.8
     },
     {
       "step_number": 6,
       "tool_name": "get_resources",
-      "status": "Analyzing 1-mile protective cooling resource proximity for Zone 1...",
+      "status": "Analyzing 1-mile protective cooling resource proximity for Zone 1 (Downtown Core)...",
       "details": {},
-      "timestamp": "2026-08-24T02:44:01.869262Z",
-      "elapsed_ms": 2256.4
+      "timestamp": "2026-08-24T22:01:14.364302Z",
+      "elapsed_ms": 152666.9
     },
     {
       "step_number": 7,
       "tool_name": "calculate_risk_metrics",
-      "status": "Computing thermal persistence and threshold exceedance for Zone 1...",
+      "status": "Computing thermal persistence and threshold exceedance for Zone 1 (Downtown Core)...",
       "details": {},
-      "timestamp": "2026-08-24T02:44:01.871648Z",
-      "elapsed_ms": 2258.8
+      "timestamp": "2026-08-24T22:01:14.366894Z",
+      "elapsed_ms": 152669.5
     },
     {
       "step_number": 8,
       "tool_name": "calculate_response_gap",
-      "status": "Computing Response Gap (0.40E + 0.35V + 0.25D) for Zone 1...",
+      "status": "Computing Response Gap (0.40E + 0.35V + 0.25D) for Zone 1 (Downtown Core)...",
       "details": {},
-      "timestamp": "2026-08-24T02:44:02.234427Z",
-      "elapsed_ms": 2621.5
+      "timestamp": "2026-08-24T22:01:14.724386Z",
+      "elapsed_ms": 153027.0
     },
     {
       "step_number": 9,
       "tool_name": "recommend_action",
-      "status": "Evaluating deterministic tactical action recommendation for Zone 1 (MODERATE)...",
+      "status": "Evaluating deterministic tactical action recommendation for Zone 1 (Downtown Core) (MODERATE)...",
       "details": {},
-      "timestamp": "2026-08-24T02:44:02.234481Z",
-      "elapsed_ms": 2621.6
+      "timestamp": "2026-08-24T22:01:14.724449Z",
+      "elapsed_ms": 153027.1
     },
     {
       "step_number": 10,
       "tool_name": "explain_priority",
-      "status": "Assembling empirical audit trail for Zone 1...",
+      "status": "Assembling empirical audit trail for Zone 1 (Downtown Core)...",
       "details": {},
-      "timestamp": "2026-08-24T02:44:02.234502Z",
-      "elapsed_ms": 2621.6
+      "timestamp": "2026-08-24T22:01:14.724472Z",
+      "elapsed_ms": 153027.1
     },
     {
       "step_number": 11,
       "tool_name": "refine_hotspot",
-      "status": "Applying DBSCAN planar boundary refinement for candidate Zone 2...",
+      "status": "Applying DBSCAN planar boundary refinement for candidate Zone 2 (Maryvale Urban)...",
       "details": {},
-      "timestamp": "2026-08-24T02:44:02.234524Z",
-      "elapsed_ms": 2621.6
+      "timestamp": "2026-08-24T22:01:14.724495Z",
+      "elapsed_ms": 153027.1
     },
     {
       "step_number": 12,
       "tool_name": "query_fortyguard_heat",
-      "status": "Querying localized FortyGuard thermal layers for refined Zone 2...",
+      "status": "Querying localized FortyGuard thermal layers for refined Zone 2 (Maryvale Urban)...",
       "details": {},
-      "timestamp": "2026-08-24T02:44:02.235574Z",
-      "elapsed_ms": 2622.7
+      "timestamp": "2026-08-24T22:01:14.725578Z",
+      "elapsed_ms": 153028.2
     },
     {
       "step_number": 13,
       "tool_name": "get_vulnerability_data",
-      "status": "Performing area-weighted US Census ACS join for Zone 2...",
+      "status": "Performing area-weighted US Census ACS join for Zone 2 (Maryvale Urban)...",
       "details": {},
-      "timestamp": "2026-08-24T02:44:02.585707Z",
-      "elapsed_ms": 2972.8
+      "timestamp": "2026-08-24T22:02:19.877517Z",
+      "elapsed_ms": 218180.1
     },
     {
       "step_number": 14,
       "tool_name": "get_resources",
-      "status": "Analyzing 1-mile protective cooling resource proximity for Zone 2...",
+      "status": "Analyzing 1-mile protective cooling resource proximity for Zone 2 (Maryvale Urban)...",
       "details": {},
-      "timestamp": "2026-08-24T02:44:02.587729Z",
-      "elapsed_ms": 2974.8
+      "timestamp": "2026-08-24T22:02:19.879386Z",
+      "elapsed_ms": 218182.0
     },
     {
       "step_number": 15,
       "tool_name": "calculate_risk_metrics",
-      "status": "Computing thermal persistence and threshold exceedance for Zone 2...",
+      "status": "Computing thermal persistence and threshold exceedance for Zone 2 (Maryvale Urban)...",
       "details": {},
-      "timestamp": "2026-08-24T02:44:02.589274Z",
-      "elapsed_ms": 2976.4
+      "timestamp": "2026-08-24T22:02:19.880742Z",
+      "elapsed_ms": 218183.3
     },
     {
       "step_number": 16,
       "tool_name": "calculate_response_gap",
-      "status": "Computing Response Gap (0.40E + 0.35V + 0.25D) for Zone 2...",
+      "status": "Computing Response Gap (0.40E + 0.35V + 0.25D) for Zone 2 (Maryvale Urban)...",
       "details": {},
-      "timestamp": "2026-08-24T02:44:02.932055Z",
-      "elapsed_ms": 3319.2
+      "timestamp": "2026-08-24T22:02:20.265850Z",
+      "elapsed_ms": 218568.5
     },
     {
       "step_number": 17,
       "tool_name": "recommend_action",
-      "status": "Evaluating deterministic tactical action recommendation for Zone 2 (MODERATE)...",
+      "status": "Evaluating deterministic tactical action recommendation for Zone 2 (Maryvale Urban) (MODERATE)...",
       "details": {},
-      "timestamp": "2026-08-24T02:44:02.932104Z",
-      "elapsed_ms": 3319.2
+      "timestamp": "2026-08-24T22:02:20.265909Z",
+      "elapsed_ms": 218568.5
     },
     {
       "step_number": 18,
       "tool_name": "explain_priority",
-      "status": "Assembling empirical audit trail for Zone 2...",
+      "status": "Assembling empirical audit trail for Zone 2 (Maryvale Urban)...",
       "details": {},
-      "timestamp": "2026-08-24T02:44:02.932124Z",
-      "elapsed_ms": 3319.2
+      "timestamp": "2026-08-24T22:02:20.265933Z",
+      "elapsed_ms": 218568.5
     },
     {
       "step_number": 19,
       "tool_name": "finalize_heat_hunt",
       "status": "Finalizing structured Heat Hunt report and dispatch recommendations...",
       "details": {},
-      "timestamp": "2026-08-24T02:44:02.932150Z",
-      "elapsed_ms": 3319.3
+      "timestamp": "2026-08-24T22:02:20.265964Z",
+      "elapsed_ms": 218568.6
     },
     {
       "step_number": 20,
       "tool_name": "agent_completed",
       "status": "Autonomous Heat Hunt run successfully completed.",
       "details": {},
-      "timestamp": "2026-08-24T02:44:02.932166Z",
-      "elapsed_ms": 3319.3
+      "timestamp": "2026-08-24T22:02:20.265984Z",
+      "elapsed_ms": 218568.6
     }
   ],
   "final_result": {
@@ -183,16 +183,16 @@
     "primary_hotspots_count": 2,
     "ranked_zones": [
       {
-        "zone_id": "Zone 1",
-        "zone_name": "Zone 1 \u2014 Central District (33.448, -112.074)",
-        "response_gap_score": 3.8,
-        "raw_score": 37.5,
+        "zone_id": "Zone 1 (Downtown Core)",
+        "zone_name": "Zone 1 (Downtown Core) \u2014 Central District (33.448, -112.074)",
+        "response_gap_score": 4.5,
+        "raw_score": 44.5,
         "priority_tier": "MODERATE",
         "component_breakdown": {
-          "heat_exposure": 5.0,
+          "heat_exposure": 6.8,
           "vulnerability": 5.0,
           "resource_deficit": 0.0,
-          "raw_heat_score": 50.0,
+          "raw_heat_score": 67.5,
           "raw_vulnerability_score": 50.0,
           "raw_resource_deficit_score": 0.0
         },
@@ -290,21 +290,21 @@
           "priority_urgency": "HIGH_PRIORITY",
           "target_capacity_people": 300,
           "rationale": "Elevated demographic sensitivity (high senior concentration / socioeconomic vulnerability). Deploy neighborhood health ambassadors for direct wellness check-ins.",
-          "recommended_at": "2026-08-24T02:44:02.234496Z"
+          "recommended_at": "2026-08-24T22:01:14.724466Z"
         },
         "disclaimer": "Response Gap is a project-derived decision-support score for this hackathon prototype. It is not an official public-health index, medical prediction, or mortality forecast."
       },
       {
-        "zone_id": "Zone 2",
-        "zone_name": "Zone 2 \u2014 Central District (33.448, -112.074)",
-        "response_gap_score": 3.8,
-        "raw_score": 37.5,
+        "zone_id": "Zone 2 (Maryvale Urban)",
+        "zone_name": "Zone 2 (Maryvale Urban) \u2014 Central District (33.488, -112.185)",
+        "response_gap_score": 4.2,
+        "raw_score": 41.7,
         "priority_tier": "MODERATE",
         "component_breakdown": {
-          "heat_exposure": 5.0,
+          "heat_exposure": 6.1,
           "vulnerability": 5.0,
           "resource_deficit": 0.0,
-          "raw_heat_score": 50.0,
+          "raw_heat_score": 60.50000000000001,
           "raw_vulnerability_score": 50.0,
           "raw_resource_deficit_score": 0.0
         },
@@ -402,7 +402,7 @@
           "priority_urgency": "HIGH_PRIORITY",
           "target_capacity_people": 300,
           "rationale": "Elevated demographic sensitivity (high senior concentration / socioeconomic vulnerability). Deploy neighborhood health ambassadors for direct wellness check-ins.",
-          "recommended_at": "2026-08-24T02:44:02.932119Z"
+          "recommended_at": "2026-08-24T22:02:20.265927Z"
         },
         "disclaimer": "Response Gap is a project-derived decision-support score for this hackathon prototype. It is not an official public-health index, medical prediction, or mortality forecast."
       }
@@ -414,7 +414,7 @@
         "priority_urgency": "HIGH_PRIORITY",
         "target_capacity_people": 300,
         "rationale": "Elevated demographic sensitivity (high senior concentration / socioeconomic vulnerability). Deploy neighborhood health ambassadors for direct wellness check-ins.",
-        "recommended_at": "2026-08-24T02:44:02.234496Z"
+        "recommended_at": "2026-08-24T22:01:14.724466Z"
       },
       {
         "action_type": "SENIOR_WELLNESS_CANVASSING",
@@ -422,11 +422,11 @@
         "priority_urgency": "HIGH_PRIORITY",
         "target_capacity_people": 300,
         "rationale": "Elevated demographic sensitivity (high senior concentration / socioeconomic vulnerability). Deploy neighborhood health ambassadors for direct wellness check-ins.",
-        "recommended_at": "2026-08-24T02:44:02.932119Z"
+        "recommended_at": "2026-08-24T22:02:20.265927Z"
       }
     ],
-    "executive_briefing": "HeatSentinel autonomous agent completed a comprehensive thermal investigation across Phoenix. Analyzed 16,568 thermal sensor cells across 0 tiles, identifying 2 primary hotspot clusters. Highest priority zone registered Response Gap 3.8/10 (MODERATE). Recommended immediate tactical dispatch: Senior Wellness Outreach & Door-to-Door Canvassing.",
+    "executive_briefing": "HeatSentinel autonomous agent completed a comprehensive thermal investigation across Phoenix. Analyzed 16,568 thermal sensor cells across 4 tiles, identifying 2 primary hotspot clusters. Highest priority zone registered Response Gap 4.5/10 (MODERATE). Recommended immediate tactical dispatch: Senior Wellness Outreach & Door-to-Door Canvassing.",
     "disclaimer": "Response Gap is a project-derived decision-support score for this hackathon prototype. It is not an official public-health index, medical prediction, or mortality forecast.",
-    "finalized_at": "2026-08-24T02:44:02.932162Z"
+    "finalized_at": "2026-08-24T22:02:20.265979Z"
   }
 }

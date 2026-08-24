@@ -2,7 +2,7 @@ from typing import Optional
 from app.services.fortyguard_client import FortyGuardClient
 from app.services.scan_service import scan_area
 from app.logging_config import logger
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import asyncio
 import statistics
 import json
@@ -264,7 +264,7 @@ async def compute_zone_heat_metrics(
         anomaly_c=anomaly_c,
         baseline_available=baseline.get("baseline_available", False),
         data_sources=["FortyGuard API"],
-        computed_at=datetime.utcnow(),
+        computed_at=datetime.now(timezone.utc),
         mode="live"
     )
     

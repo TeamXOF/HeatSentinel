@@ -8,9 +8,9 @@
 ## HeatSentinel AI (FortyGuard Hackathon '26)
 - [status] Full project state, phase tracking, resume instructions → heatsentinel-project.md
 - [status] Frontend UI complete (10 pages, 13 components, mock data layer, in /frontend) → heatsentinel-project.md
-- [status] Phase 11 Steps 38 & 39 COMPLETE. HeatHunt button live, AgentActivityPanel extracted with display_name labels. → heatsentinel-project.md
-- [status] Active branch: main (all phases 1-11 steps 38-39 merged cleanly) → heatsentinel-project.md
-- [status] Next step: Phase 11 Step 40 — Recommendation Display & Evidence Completeness Pass → heatsentinel-project.md
+- [status] Phase 11 & Phase 12 COMPLETE (Steps 38–41). HeatHunt fully verified end-to-end (test_integration_full_flow.py). → heatsentinel-project.md
+- [status] Active branch: main (all phases 1-12 merged cleanly, 0 TS errors, 103 backend tests passing 100%) → heatsentinel-project.md
+- [status] Next step: Phase 13 Step 42 — Retries, Timeouts, and Graceful Degradation → heatsentinel-project.md
 - [api] FortyGuard API is PREMIUM plan for hackathon — all endpoints available including satellite, streetview, heat_intelligence → heatsentinel-project.md
 - [api] FortyGuard auth is header 'api-key: KEY' (NOT Bearer token) → context/fortyguard-api-reference.md
 - [api] FortyGuard polygon coordinates are [longitude, latitude] — validate before every call → context/fortyguard-api-reference.md

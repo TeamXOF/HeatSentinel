@@ -152,7 +152,7 @@ export const HeatHuntProvider: React.FC<{ children: React.ReactNode }> = ({ chil
    * 2. Subscribes to real-time SSE stream at /api/heat-hunt/{jobId}/stream
    * 3. Falls back seamlessly to status polling if stream drops
    */
-  const runHeatHunt = useCallback(async () => {
+  const runHeatHunt = useCallback(async (params?: { startDate?: string; startTime?: string; provider?: string }) => {
     cleanupConnections();
     setStatus('running');
     setProgressEvents([]);
@@ -198,9 +198,9 @@ export const HeatHuntProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          start_date: '2024-08-01',
-          start_time: '14:00',
-          provider: 'auto',
+          start_date: params?.startDate || '2024-08-01',
+          start_time: params?.startTime || '14:00',
+          provider: params?.provider || 'auto',
           model_name: 'gemini-3.5-flash-lite',
           mode: 'live',
         }),

@@ -124,13 +124,22 @@ async def _execute_heat_hunt_background(
     # In-memory accumulator for this job's events
     events: List[ProgressEvent] = []
 
-    async def on_step_callback(step_num: int, tool_name: str, message: str):
-        evt_type = "success" if tool_name in ("finalize_heat_hunt", "agent_completed") else "info"
+    async def on_step_callback(step_or_event: Any, tool_name: Optional[str] = None, message: Optional[str] = None):
+        if isinstance(step_or_event, dict):
+            step_num = step_or_event.get("step_number") if step_or_event.get("step_number") is not None else step_or_event.get("step", len(events) + 1)
+            t_name = step_or_event.get("tool_name", "agent_step")
+            msg = step_or_event.get("status") or step_or_event.get("message", "")
+        else:
+            step_num = int(step_or_event)
+            t_name = tool_name or "agent_step"
+            msg = message or ""
+
+        evt_type = "success" if t_name in ("finalize_heat_hunt", "agent_completed") else "info"
         event = ProgressEvent(
             step_number=step_num,
-            tool_name=tool_name,
-            message=message,
-            display_name=TOOL_DISPLAY_NAMES.get(tool_name),
+            tool_name=t_name,
+            message=msg,
+            display_name=TOOL_DISPLAY_NAMES.get(t_name),
             type=evt_type
         )
         events.append(event)

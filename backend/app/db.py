@@ -12,12 +12,22 @@ from app.logging_config import logger
 
 
 def get_db_path() -> str:
-    """Extract SQLite local file path from config database_url."""
+    """Extract SQLite local file path from config database_url, resolving to absolute path."""
+    import os
     settings = get_settings()
     url = settings.database_url
     if url.startswith("sqlite:///"):
-        return url.replace("sqlite:///", "")
-    return "heatsentinel.db"
+        raw_path = url.replace("sqlite:///", "")
+    else:
+        raw_path = "heatsentinel.db"
+    
+    if os.path.isabs(raw_path):
+        return raw_path
+    # Anchor relative path to backend directory (parent of app/)
+    backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    # Strip leading './' or '.\\' if present
+    clean_rel = raw_path.lstrip("./").lstrip(".\\")
+    return os.path.join(backend_dir, clean_rel)
 
 
 @contextmanager

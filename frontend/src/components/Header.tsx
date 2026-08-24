@@ -1,7 +1,24 @@
 import React, { useState } from 'react';
-import { Sun, MapPin, ChevronDown, Bell, Radar, Loader2, CheckCircle2, AlertTriangle, RotateCcw, Menu, User, Shield, Sparkles } from 'lucide-react';
+import {
+  Sun,
+  MapPin,
+  ChevronDown,
+  Bell,
+  Radar,
+  Loader2,
+  CheckCircle2,
+  AlertTriangle,
+  RotateCcw,
+  Menu,
+  User,
+  Shield,
+  Sparkles,
+  SlidersHorizontal,
+  Calendar,
+} from 'lucide-react';
 import { HeaderProps } from '../types';
 import { useHeatHunt, useBasicScan } from '../api';
+import { HeatHuntConfigModal } from './HeatHuntConfigModal';
 
 export const Header: React.FC<HeaderProps> = ({
   greeting = 'Good Morning, Team HeatSentinel',
@@ -15,6 +32,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isRefreshingScan, setIsRefreshingScan] = useState(false);
+  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
 
   const {
     status,
@@ -160,7 +178,26 @@ export const Header: React.FC<HeaderProps> = ({
               </>
             )}
           </button>
+
+          {/* Parameters & Custom Date/Time Button */}
+          <button
+            id="open-heat-hunt-config-btn"
+            type="button"
+            onClick={() => setIsConfigModalOpen(true)}
+            disabled={status === 'running'}
+            title="Configure custom observation date, time, and AI intelligence model"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-full border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-[#0F172A] focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-colors cursor-pointer shadow-2xs shrink-0 disabled:opacity-50"
+            aria-label="Configure date and time parameters"
+          >
+            <SlidersHorizontal size={15} strokeWidth={2.2} />
+          </button>
         </div>
+
+        {/* Custom Heat Hunt Date/Time Config Modal */}
+        <HeatHuntConfigModal
+          isOpen={isConfigModalOpen}
+          onClose={() => setIsConfigModalOpen(false)}
+        />
 
         {/* Location Selector Pill - Min 44px Touch Target */}
         <div className="relative">

@@ -1874,9 +1874,10 @@ Report: audit findings, fixes applied, dependency scan results, any deferred ite
 
 ---
 
-## [ ] PHASE 15 — PERFORMANCE
+## [X] PHASE 15 — PERFORMANCE
 
-### [ ] STEP 45 — Latency & Caching Optimization Pass
+### [X] STEP 45 — Latency & Caching Optimization Pass
+
 
 **PURPOSE:** Get Heat Hunt run time and map responsiveness into demo-acceptable ranges.
 
@@ -1917,9 +1918,10 @@ Report: real before/after timing data, specific optimizations applied and why, c
 
 ---
 
-## [ ] PHASE 16 — DEMO MODE
+## [X] PHASE 16 — DEMO MODE
 
-### [ ] STEP 46 — 3–5 Minute Demo Flow Assembly
+### [X] STEP 46 — 3–5 Minute Demo Flow Assembly
+
 
 **PURPOSE:** Assemble the actual demo script and ensure the app supports it smoothly.
 

@@ -71,8 +71,12 @@ Full architecture: see `context/HeatSentinel_AI_System_Design.md`
 | Phase 11 — Command Center Full Wiring (Steps 38–40) | ✅ Done | AI | HeatHunt wired, AgentActivityPanel live SSE streaming, recommendation display, WhyPanel evidence completeness & audit trail |
 | Phase 12 — Integration (Step 41) | ✅ Done | AI | Full end-to-end integration test suite created (test_integration_full_flow.py), Playwright E2E browser verified, 103/103 tests passing |
 | Phase 13 — Reliability (Steps 42–43) | ✅ Done | AI | Three-tier fallback resolver (Live → Cached <24h → Deterministic Demo), timeout guards, fault recovery, UI Reliability Shield controls, test_fallback_mode.py passing |
+| Phase 14 — Security (Step 44) | ✅ Done | AI | Security headers middleware, strict US coordinate validation, zero-leak exception handling, test_security_audit.py passing |
+| Phase 15 — Performance (Step 45) | ✅ Done | AI | Multi-city caching, dynamic date resolution, force refresh invalidation, test_temporal_scan.py passing |
+| Phase 16 — Demo Mode (Step 46) | ✅ Done | AI | Presenter Demo Controller HUD (Shift+P), 5-stage pitch jumper, live countdown timer, 3-min script in docs/demo_script.md |
 
-**Current position: Phase 13 complete (Step 43). Next: Phase 14 Step 44 — Secrets, .env, and Security Audit.**
+**Current position: Phases 1–16 COMPLETE. Next: Phase 17 — Final Demo Day Polish & Wrap-up.**
+
 
 ---
 

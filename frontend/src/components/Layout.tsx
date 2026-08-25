@@ -4,10 +4,12 @@ import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { BottomTabBar } from './BottomTabBar';
 import { MobileNavDrawer } from './MobileNavDrawer';
+import { PresenterDemoController } from './PresenterDemoController';
 
 export const Layout: React.FC = () => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
 
   // Dynamic header subtitle based on current route
   const getHeaderInfo = () => {
@@ -107,7 +109,11 @@ export const Layout: React.FC = () => {
 
       {/* Mobile Bottom Tab Bar (hidden on lg+) */}
       <BottomTabBar />
+
+      {/* Presenter Pitch Controller HUD */}
+      <PresenterDemoController />
     </div>
   );
 };
+
 

@@ -19,6 +19,7 @@ import {
 import { HeaderProps } from '../types';
 import { useHeatHunt, useBasicScan } from '../api';
 import { HeatHuntConfigModal } from './HeatHuntConfigModal';
+import { useCity } from '../context/CityContext';
 
 export const Header: React.FC<HeaderProps> = ({
   greeting = 'Good Morning, Team HeatSentinel',
@@ -34,6 +35,8 @@ export const Header: React.FC<HeaderProps> = ({
   const [isRefreshingScan, setIsRefreshingScan] = useState(false);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
 
+  const { activeCity, setActiveCity, supportedCities } = useCity();
+
   const {
     status,
     runHeatHunt,
@@ -43,6 +46,7 @@ export const Header: React.FC<HeaderProps> = ({
   } = useHeatHunt();
 
   const { data: basicScan } = useBasicScan();
+
   const currentMode = activeMode || basicScan?.mode || 'live';
 
   return (
@@ -227,7 +231,7 @@ export const Header: React.FC<HeaderProps> = ({
           onClose={() => setIsConfigModalOpen(false)}
         />
 
-        {/* Location Selector Pill - Min 44px Touch Target */}
+        {/* Location Selector Pill - Min 44px Touch Target with Dynamic Multi-City Engine */}
         <div className="relative">
           <button
             id="location-selector-btn"
@@ -236,39 +240,45 @@ export const Header: React.FC<HeaderProps> = ({
             className="min-h-[44px] flex items-center gap-1 sm:gap-2 bg-slate-50 border border-slate-200 px-2.5 sm:px-3.5 py-2 rounded-full cursor-pointer hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-colors shadow-2xs shrink-0"
           >
             <MapPin size={14} className="text-[#F97316] shrink-0" strokeWidth={2.2} />
-            <span className="text-[11px] sm:text-xs font-bold text-[#0F172A] uppercase tracking-wide truncate max-w-[58px] xs:max-w-none">
-              {location}
+            <span className="text-[11px] sm:text-xs font-bold text-[#0F172A] uppercase tracking-wide truncate max-w-[80px] xs:max-w-none">
+              {activeCity.fullName}
             </span>
             <ChevronDown size={12} className="text-[#64748B] shrink-0" strokeWidth={2.2} />
           </button>
 
           {isLocationOpen && (
-            <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-lg border border-slate-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
-              <div className="px-3.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                Monitored Metro
+            <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+              <div className="px-3.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+                <span>Select Monitored Metro</span>
+                <span className="text-emerald-600 font-bold">{supportedCities.length} Cities</span>
               </div>
-              <button
-                type="button"
-                onClick={() => setIsLocationOpen(false)}
-                className="w-full text-left px-3.5 py-2 text-[13px] font-semibold text-[#F97316] bg-orange-50/50 flex items-center justify-between"
-              >
-                <span>Phoenix, AZ</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#F97316]"></span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsLocationOpen(false)}
-                className="w-full text-left px-3.5 py-2 text-[13px] text-slate-600 hover:bg-slate-50 transition-colors"
-              >
-                Tucson, AZ (Preview)
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsLocationOpen(false)}
-                className="w-full text-left px-3.5 py-2 text-[13px] text-slate-600 hover:bg-slate-50 transition-colors"
-              >
-                Las Vegas, NV (Preview)
-              </button>
+              <div className="max-h-60 overflow-y-auto py-1">
+                {supportedCities.map((city) => (
+                  <button
+                    key={city.id}
+                    type="button"
+                    onClick={() => {
+                      setActiveCity(city);
+                      setIsLocationOpen(false);
+                    }}
+                    className={`w-full text-left px-3.5 py-2 text-xs flex items-center justify-between transition-colors ${
+                      activeCity.id === city.id
+                        ? 'font-bold text-[#F97316] bg-orange-50/60'
+                        : 'text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    <div>
+                      <div className="font-semibold text-[13px]">{city.fullName}</div>
+                      <div className="text-[10px] text-slate-400 font-normal">
+                        {city.countyFips} FIPS • {city.heatTier} Tier
+                      </div>
+                    </div>
+                    {activeCity.id === city.id && (
+                      <span className="w-2 h-2 rounded-full bg-[#F97316]" />
+                    )}
+                  </button>
+                ))}
+              </div>
 
               <div className="border-t border-slate-100 my-1"></div>
               <div className="px-3.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">

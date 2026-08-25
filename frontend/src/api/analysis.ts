@@ -20,6 +20,8 @@ import {
   mockAgentStatusBar,
 } from '../data/mockAnalyticsData';
 import { mockStatCards } from '../data/mockKpiData';
+import { useCity } from '../context/CityContext';
+
 
 /**
  * Backend API Pipeline Interfaces (Step 28 / 29)
@@ -225,14 +227,22 @@ export function transformBackendZoneToZoneData(
 export const MOCK_ZONES_ARRAY: ZoneData[] = [];
 
 /**
- * Fetch Basic Scan from Backend API
+ * Fetch Basic Scan from Backend API with Dynamic Multi-City & Temporal Date Support
  */
-export async function fetchBasicScan(forceRefresh: boolean = false): Promise<BasicScanApiResponse> {
+export async function fetchBasicScan(
+  forceRefresh: boolean = false,
+  city: string = 'Phoenix',
+  startDate?: string
+): Promise<BasicScanApiResponse> {
   const url = `${API_BASE_URL}/api/analysis/basic-scan${forceRefresh ? '?force_refresh=true' : ''}`;
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ top_n_hotspots: 5 }),
+    body: JSON.stringify({
+      city,
+      start_date: startDate,
+      top_n_hotspots: 5,
+    }),
   });
   if (!res.ok) {
     throw new Error(`Failed to fetch basic scan: ${res.statusText}`);
@@ -243,15 +253,26 @@ export async function fetchBasicScan(forceRefresh: boolean = false): Promise<Bas
 /**
  * React Query Hook for Live/Cached Basic Pipeline Scan
  */
-export function useBasicScan(options: { forceRefresh?: boolean; enabled?: boolean } = {}) {
-  const { forceRefresh = false, enabled = true } = options;
+export function useBasicScan(
+  options: { forceRefresh?: boolean; city?: string; startDate?: string; enabled?: boolean } = {}
+) {
+  let activeCityName = 'Phoenix';
+  try {
+    const cityCtx = useCity();
+    activeCityName = cityCtx.activeCity.name;
+  } catch (e) {
+    // In case called outside provider
+  }
+  const { forceRefresh = false, city = activeCityName, startDate, enabled = true } = options;
   return useQuery<BasicScanApiResponse>({
-    queryKey: ['basic-scan', forceRefresh],
-    queryFn: () => fetchBasicScan(forceRefresh),
+    queryKey: ['basic-scan', city, startDate, forceRefresh],
+    queryFn: () => fetchBasicScan(forceRefresh, city, startDate),
     staleTime: 1000 * 60 * 10, // 10 minutes cache
     enabled,
   });
 }
+
+
 
 /**
  * Hook to retrieve all monitored vulnerability zones (derived from live basic scan)

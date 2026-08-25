@@ -31,30 +31,39 @@ from app.services.priority_engine import (
 from app.logging_config import logger
 
 
+CITY_TARGET_BBOXES: Dict[str, List[List[float]]] = {
+    "phoenix": [[-112.095, 33.375], [-112.030, 33.375], [-112.030, 33.465], [-112.095, 33.465], [-112.095, 33.375]],
+    "las vegas": [[-115.20, 36.10], [-115.10, 36.10], [-115.10, 36.22], [-115.20, 36.22], [-115.20, 36.10]],
+    "miami": [[-80.25, 25.72], [-80.15, 25.72], [-80.15, 25.82], [-80.25, 25.82], [-80.25, 25.72]],
+    "houston": [[-95.42, 29.70], [-95.32, 29.70], [-95.32, 29.80], [-95.42, 29.80], [-95.42, 29.70]],
+    "los angeles": [[-118.30, 34.00], [-118.20, 34.00], [-118.20, 34.10], [-118.30, 34.10], [-118.30, 34.00]],
+    "new york": [[-74.02, 40.70], [-73.95, 40.70], [-73.95, 40.78], [-74.02, 40.78], [-74.02, 40.70]],
+}
+
+
+def load_default_city_target_area(city: str = "Phoenix") -> Dict[str, Any]:
+    """Loads target study area GeoJSON for any supported US city, falling back to bounding box."""
+    city_key = city.lower().strip()
+    if city_key == "phoenix":
+        data_path = Path(__file__).resolve().parent.parent / "data" / "phoenix_target_area.geojson"
+        if data_path.exists():
+            with open(data_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if data.get("type") == "FeatureCollection" and data.get("features"):
+                    return data["features"][0]["geometry"]
+                elif data.get("type") == "Feature":
+                    return data["geometry"]
+                return data
+
+    coords = CITY_TARGET_BBOXES.get(city_key, CITY_TARGET_BBOXES["phoenix"])
+    return {
+        "type": "Polygon",
+        "coordinates": [coords]
+    }
+
+
 def load_default_phoenix_target_area() -> Dict[str, Any]:
-    """Loads the official Phoenix target study area GeoJSON."""
-    data_path = Path(__file__).resolve().parent.parent / "data" / "phoenix_target_area.geojson"
-    if not data_path.exists():
-        # Fallback bounding box if file is missing
-        return {
-            "type": "Polygon",
-            "coordinates": [
-                [
-                    [-112.095, 33.375],
-                    [-112.030, 33.375],
-                    [-112.030, 33.465],
-                    [-112.095, 33.465],
-                    [-112.095, 33.375]
-                ]
-            ]
-        }
-    with open(data_path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-        if data.get("type") == "FeatureCollection" and data.get("features"):
-            return data["features"][0]["geometry"]
-        elif data.get("type") == "Feature":
-            return data["geometry"]
-        return data
+    return load_default_city_target_area("Phoenix")
 
 
 def _determine_primary_driver(h_score: float, v_score: float, d_score: float) -> str:
@@ -68,16 +77,20 @@ def _determine_primary_driver(h_score: float, v_score: float, d_score: float) ->
         return "Critical Cooling Infrastructure Deficit"
 
 
-def _generate_zone_name(idx: int, center_lat: float, center_lng: float) -> str:
-    """Generates human-readable zone name based on geographic position."""
-    if center_lat >= 33.44:
-        sub = "North Corridor"
-    elif center_lat <= 33.39:
-        sub = "South Corridor"
+def _generate_zone_name(idx: int, center_lat: float, center_lng: float, city: str = "Phoenix") -> str:
+    """Generates human-readable zone name based on geographic position and city."""
+    if city.lower() == "phoenix":
+        if center_lat >= 33.44:
+            sub = "North Corridor"
+        elif center_lat <= 33.39:
+            sub = "South Corridor"
+        else:
+            sub = "Central District"
     else:
-        sub = "Central District"
+        sub = f"{city} Sector {idx + 1}"
         
     return f"Zone {idx + 1} — {sub} ({center_lat:.3f}, {center_lng:.3f})"
+
 
 
 async def _process_hotspot(
@@ -86,7 +99,8 @@ async def _process_hotspot(
     start_date: str,
     start_time: str,
     client: FortyGuardClient,
-    semaphore: asyncio.Semaphore
+    semaphore: asyncio.Semaphore,
+    city: str = "Phoenix"
 ) -> Dict[str, Any]:
     """Processes a single hotspot through metrics, vulnerability, resources, and scoring."""
     async with semaphore:
@@ -116,12 +130,17 @@ async def _process_hotspot(
         # 3. Calculate Response Gap
         rg_result = calculate_response_gap(h_score, v_score, d_score)
         
-        # 4. Construct explanations & evidence
         primary_driver = _determine_primary_driver(h_score, v_score, d_score)
         temp_c = heat_metrics.current_temp_c
         temp_f = round((temp_c * 9/5) + 32, 1)
         
+        # 4. Build Structured Evidence Trail
         evidence = ZoneEvidence(
+            zone_id=hotspot.get("hotspot_id", f"zone-{idx+1}"),
+            heat_exposure_score=h_score,
+            vulnerability_score=v_score,
+            resource_deficit_score=d_score,
+            response_gap_score=rg_result["response_gap_score"],
             primary_driver=primary_driver,
             heat_score_explanation=(
                 f"Peak surface temperature of {temp_c:.1f}°C ({temp_f:.1f}°F) with "
@@ -161,14 +180,15 @@ async def _process_hotspot(
                 "computed_at": datetime.now(timezone.utc).isoformat()
             }
         )
+
         
         # Coordinates in [lng, lat] format
         raw_coords = geom.get("coordinates", [[]])[0]
         
         zone_dict = {
             "zone_id": hotspot.get("hotspot_id", f"zone-{idx+1}"),
-            "name": _generate_zone_name(idx, centroid.y, centroid.x),
-            "city": "Phoenix",
+            "name": _generate_zone_name(idx, centroid.y, centroid.x, city=city),
+            "city": city,
             "coordinates": raw_coords,
             "center": center,
             "mean_temp_c": temp_c,
@@ -189,13 +209,14 @@ async def _process_hotspot(
 
 async def run_basic_pipeline(
     target_area: Optional[Dict[str, Any]] = None,
+    city: str = "Phoenix",
     start_date: str = "2024-08-01",
     start_time: str = "14:00",
     top_n_hotspots: int = 5,
     client: Optional[FortyGuardClient] = None
 ) -> BasicPipelineResult:
     """
-    Executes the end-to-end basic pipeline for Phoenix:
+    Executes the end-to-end basic pipeline for any monitored city:
     1. Scan area with FortyGuard
     2. Detect thermal hotspot clusters
     3. Concurrently enrich with metrics, Census demographics, and cooling resources
@@ -207,8 +228,8 @@ async def run_basic_pipeline(
         client = FortyGuardClient()
         
     # 1. Target Polygon
-    aoi_polygon = target_area or load_default_phoenix_target_area()
-    logger.info(f"PipelineService: Starting basic pipeline scan for AOI with {top_n_hotspots} max hotspots.")
+    aoi_polygon = target_area or load_default_city_target_area(city)
+    logger.info(f"PipelineService: Starting basic pipeline scan for {city} with {top_n_hotspots} max hotspots.")
     
     # 2. Run FortyGuard Heatmap Scan
     scan_res = await scan_area(
@@ -225,7 +246,7 @@ async def run_basic_pipeline(
         scan_result=scan_res.get("data", {}),
         top_n=top_n_hotspots
     )
-    logger.info(f"PipelineService: Detected {len(hotspots)} hotspot clusters.")
+    logger.info(f"PipelineService: Detected {len(hotspots)} hotspot clusters for {city}.")
     
     # 4. Concurrently process detected hotspots with bounded semaphore
     semaphore = asyncio.Semaphore(3)
@@ -236,7 +257,8 @@ async def run_basic_pipeline(
             start_date=start_date,
             start_time=start_time,
             client=client,
-            semaphore=semaphore
+            semaphore=semaphore,
+            city=city
         )
         for i, hs in enumerate(hotspots)
     ]

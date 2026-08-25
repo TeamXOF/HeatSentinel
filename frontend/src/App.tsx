@@ -18,6 +18,7 @@ import { ReportsPage } from './pages/ReportsPage';
 import { DataExplorerPage } from './pages/DataExplorerPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { HeatHuntProvider } from './api/heatHunt';
+import { CityProvider } from './context/CityContext';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,30 +32,33 @@ const queryClient = new QueryClient({
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <HeatHuntProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Layout />}>
-              {/* Default Route: Overview */}
-              <Route index element={<OverviewPage />} />
+      <CityProvider>
+        <HeatHuntProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Layout />}>
+                {/* Default Route: Overview */}
+                <Route index element={<OverviewPage />} />
 
-              {/* Core Functional Module Routes */}
-              <Route path="heat-map" element={<HeatMapPage />} />
-              <Route path="risk-zones" element={<RiskZonesPage />} />
-              <Route path="events-alerts" element={<EventsAlertsPage />} />
-              <Route path="agent-insights" element={<AgentInsightsPage />} />
-              <Route path="resources" element={<ResourcesPage />} />
-              <Route path="response-planner" element={<ResponsePlannerPage />} />
-              <Route path="reports" element={<ReportsPage />} />
-              <Route path="data-explorer" element={<DataExplorerPage />} />
-              <Route path="settings" element={<SettingsPage />} />
+                {/* Core Functional Module Routes */}
+                <Route path="heat-map" element={<HeatMapPage />} />
+                <Route path="risk-zones" element={<RiskZonesPage />} />
+                <Route path="events-alerts" element={<EventsAlertsPage />} />
+                <Route path="agent-insights" element={<AgentInsightsPage />} />
+                <Route path="resources" element={<ResourcesPage />} />
+                <Route path="response-planner" element={<ResponsePlannerPage />} />
+                <Route path="reports" element={<ReportsPage />} />
+                <Route path="data-explorer" element={<DataExplorerPage />} />
+                <Route path="settings" element={<SettingsPage />} />
 
-              {/* Fallback to Overview */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
-      </HeatHuntProvider>
+                {/* Fallback to Overview */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </HeatHuntProvider>
+      </CityProvider>
     </QueryClientProvider>
   );
 }
+

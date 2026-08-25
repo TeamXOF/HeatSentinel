@@ -285,11 +285,13 @@ function createCircleGeoJSON(centerLng: number, centerLat: number, radiusMiles: 
 
 interface HyperlocalHeatMapCardProps {
   onZoneSelect?: (zoneId: string) => void;
+  onDistrictChange?: (district: PhoenixDistrictPreset) => void;
   className?: string;
 }
 
 export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
   onZoneSelect = (zoneId) => console.log('Selected Heat Zone:', zoneId),
+  onDistrictChange,
   className = '',
 }) => {
   const [activeTab, setActiveTab] = useState<MapFilterTab>('risk');
@@ -300,6 +302,7 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
   const [selectedDistrictId, setSelectedDistrictId] = useState<string>('downtown');
   const [customDistrict, setCustomDistrict] = useState<PhoenixDistrictPreset | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
 
   const queryClient = useQueryClient();
   const { activeCity } = useCity();
@@ -458,13 +461,14 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
     map.on('load', () => {
       setMapLoaded(true);
 
-      // Layer 1: FortyGuard Raw Thermal Cells
+      // Layer 1: FortyGuard Raw 60m Thermal Cells (Vibrant Multi-Stop Heat Ramp)
       if (!map.getSource('fortyguard-thermal-grid')) {
         map.addSource('fortyguard-thermal-grid', {
           type: 'geojson',
           data: districtThermalGrid,
         });
 
+        // 1a: Thermal Grid Fill with FortyGuard's exact color spectrum
         map.addLayer({
           id: 'thermal-grid-fill',
           type: 'fill',
@@ -473,18 +477,67 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
             'fill-color': [
               'interpolate',
               ['linear'],
-              ['coalesce', ['get', 'value'], ['get', 'temp'], ['get', 'average_temperature'], ['get', 'max_temperature'], 38],
-              35, '#0D9488', // Teal
-              38, '#F59E0B', // Amber
-              41, '#EA580C', // Orange
-              44, '#DC2626', // Red
+              ['coalesce', ['get', 'temp'], ['get', 'value'], 41],
+              37.0, '#38BDF8', // Cool Sky Blue (98.6°F)
+              39.0, '#10B981', // Emerald Green (102.2°F)
+              41.0, '#FBBF24', // Warm Amber (105.8°F)
+              43.0, '#F97316', // Fiery Orange (109.4°F)
+              45.0, '#EF4444', // Hot Red (113.0°F)
+              46.5, '#991B1B', // Deep Crimson (115.7°F)
             ],
-            'fill-opacity': 0.42,
+            'fill-opacity': 0.72,
           },
+        });
+
+        // 1b: Thermal Grid Boundary Lines (Crisp 60m Satellite Mesh)
+        map.addLayer({
+          id: 'thermal-grid-line',
+          type: 'line',
+          source: 'fortyguard-thermal-grid',
+          paint: {
+            'line-color': '#FFFFFF',
+            'line-width': 0.75,
+            'line-opacity': 0.40,
+          },
+        });
+
+        // Interactive Hover Tooltip for 60m Grid Cells
+        const popup = new maplibregl.Popup({
+          closeButton: false,
+          closeOnClick: false,
+          className: 'thermal-cell-tooltip',
+          offset: 12,
+        });
+
+        map.on('mousemove', 'thermal-grid-fill', (e) => {
+          if (e.features && e.features.length > 0) {
+            map.getCanvas().style.cursor = 'crosshair';
+            const f = e.features[0];
+            const props = f.properties;
+            const tempF = props?.temp_f ?? (props?.temp ? (props.temp * 1.8 + 32).toFixed(1) : '108.5');
+            const tempC = props?.temp ?? (props?.temp_f ? ((props.temp_f - 32) / 1.8).toFixed(1) : '42.5');
+            const tileId = props?.tile_id ?? props?.grid_id ?? '0';
+
+            popup
+              .setLngLat(e.lngLat)
+              .setHTML(
+                `<div style="font-family: ui-sans-serif, system-ui; background: #0F172A; color: white; padding: 6px 10px; border-radius: 8px; font-size: 11px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid #334155;">
+                  <div style="font-weight: 800; color: #F97316; margin-bottom: 2px;">🛰️ FortyGuard 60m Cell #${tileId}</div>
+                  <div style="font-weight: 700; font-size: 13px;">🌡️ ${tempF}°F <span style="font-size: 10px; color: #94A3B8;">(${tempC}°C)</span></div>
+                  <div style="font-size: 9px; color: #64748B; margin-top: 2px;">Live Ingestion · FortyGuard Satellite</div>
+                </div>`
+              )
+              .addTo(map);
+          }
+        });
+
+        map.on('mouseleave', 'thermal-grid-fill', () => {
+          map.getCanvas().style.cursor = '';
+          popup.remove();
         });
       }
 
-      // Layer 2: Ranked Zone Polygons (Convex Hulls)
+      // Layer 2: Ranked Zone Polygons (Transparent Bounding Contours)
       if (!map.getSource('ranked-zone-polygons')) {
         map.addSource('ranked-zone-polygons', {
           type: 'geojson',
@@ -505,7 +558,7 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
               'LOW', '#0D9488',
               '#F59E0B',
             ],
-            'fill-opacity': 0.52,
+            'fill-opacity': 0.12,
           },
         });
 
@@ -517,14 +570,15 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
             'line-color': [
               'match',
               ['get', 'tier'],
-              'CRITICAL', '#B91C1C',
-              'HIGH', '#C2410C',
-              'MODERATE', '#D97706',
-              'LOW', '#0F766E',
-              '#D97706',
+              'CRITICAL', '#EF4444',
+              'HIGH', '#F97316',
+              'MODERATE', '#F59E0B',
+              'LOW', '#0D9488',
+              '#F59E0B',
             ],
-            'line-width': 3,
-            'line-opacity': 0.95,
+            'line-width': 2.5,
+            'line-opacity': 0.90,
+            'line-dasharray': [4, 2],
           },
         });
 
@@ -561,7 +615,7 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
           source: 'custom-aoi-source',
           paint: {
             'fill-color': '#F97316',
-            'fill-opacity': 0.35,
+            'fill-opacity': 0.25,
           },
         });
 
@@ -571,7 +625,7 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
           source: 'custom-aoi-source',
           paint: {
             'line-color': '#F97316',
-            'line-width': 3.5,
+            'line-width': 3,
             'line-dasharray': [2, 1],
           },
         });
@@ -583,6 +637,7 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
         handleCustomMapClick(lng, lat);
       });
     });
+
 
     const resizeObserver = new ResizeObserver(() => {
       if (mapInstanceRef.current) {
@@ -745,6 +800,10 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
       curve: 1.4,
       essential: true,
     });
+
+    if (onDistrictChange) {
+      onDistrictChange(customData);
+    }
   };
 
   // Smooth cinematic camera flyTo handler for district presets
@@ -774,7 +833,12 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
         essential: true,
       });
     }
+
+    if (onDistrictChange) {
+      onDistrictChange(district);
+    }
   };
+
 
   // Map control handlers
   const handleZoomIn = () => {
@@ -815,22 +879,24 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
       {/* 1. DISTRICT SECTOR SELECTOR RIBBON */}
       <div
         id="phoenix-district-ribbon"
-        className="bg-slate-900 px-3.5 sm:px-5 py-3 border-b border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-2.5 text-white"
+        className="bg-slate-900 px-3.5 sm:px-5 py-3 border-b border-slate-800 flex flex-col gap-2.5 text-white"
       >
-        <div className="flex items-center gap-2 shrink-0">
-          <div className="w-6 h-6 rounded-lg bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-[#F97316]">
-            <Compass size={14} className="animate-spin-slow" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-lg bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-[#F97316]">
+              <Compass size={14} className="animate-spin-slow" />
+            </div>
+            <span className="text-xs font-black uppercase tracking-wider text-slate-200">
+              Arizona Monitored Corridors
+            </span>
           </div>
-          <span className="text-xs font-black uppercase tracking-wider text-slate-200">
-            Phoenix Metro Districts
-          </span>
-          <span className="text-[10px] text-slate-400 font-medium hidden sm:inline">
-            (Click Anywhere on Map to Inspect Custom Location)
+          <span className="text-[11px] text-orange-400/90 font-medium hidden sm:inline">
+            📍 Click anywhere on map to inspect custom AOI
           </span>
         </div>
 
-        {/* District Quick-Selection Pills + Click Anywhere Indicator */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none touch-pan-x">
+        {/* District Quick-Selection Pills Container */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent touch-pan-x">
           {PHOENIX_DISTRICT_PRESETS.map((district) => {
             const isSelected = selectedDistrictId === district.id;
             return (
@@ -839,10 +905,10 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
                 id={`district-preset-btn-${district.id}`}
                 type="button"
                 onClick={() => handleSelectDistrict(district)}
-                className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap min-h-[34px] flex items-center gap-1.5 shrink-0 ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap min-h-[34px] flex items-center gap-1.5 shrink-0 ${
                   isSelected
-                    ? 'bg-[#F97316] text-white shadow-md ring-2 ring-orange-300/40 scale-102'
-                    : 'bg-slate-800/90 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700/60'
+                    ? 'bg-[#F97316] text-white shadow-md ring-2 ring-orange-300/40 scale-102 font-extrabold'
+                    : 'bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700/80'
                 }`}
               >
                 <span>{district.icon}</span>
@@ -856,7 +922,7 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
             <button
               id="district-preset-btn-custom"
               type="button"
-              className="px-3 py-1.5 rounded-full text-xs font-bold bg-amber-500 text-white shadow-md ring-2 ring-amber-300/40 whitespace-nowrap min-h-[34px] flex items-center gap-1.5 shrink-0 animate-pulse"
+              className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-amber-500 text-white shadow-md ring-2 ring-amber-300/40 whitespace-nowrap min-h-[34px] flex items-center gap-1.5 shrink-0 animate-pulse font-extrabold"
             >
               <span>🎯</span>
               <span>{customDistrict.shortLabel}</span>
@@ -864,6 +930,7 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
           )}
         </div>
       </div>
+
 
       {/* 2. CARD HEADER: Title & Filter Tabs */}
       <div

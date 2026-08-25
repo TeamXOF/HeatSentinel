@@ -34,6 +34,19 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# Global Security Headers Middleware
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["Content-Security-Policy"] = "default-src 'self'; frame-ancestors 'none';"
+    return response
+
+
 # Exception handlers
 @app.exception_handler(HeatSentinelError)
 async def custom_error_handler(request: Request, exc: HeatSentinelError):
@@ -43,6 +56,16 @@ async def custom_error_handler(request: Request, exc: HeatSentinelError):
         content={"error": {"code": exc.code, "message": exc.message}},
     )
 
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Unhandled server exception: {exc}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"error": {"code": "INTERNAL_SERVER_ERROR", "message": "An internal server error occurred."}},
+    )
+
+
 # CORS middleware for React frontend (Vite dev server default 5173, custom 3000)
 app.add_middleware(
     CORSMiddleware,
@@ -51,6 +74,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # Include routers
 app.include_router(health.router)

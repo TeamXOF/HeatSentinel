@@ -27,6 +27,7 @@ export const AgentInsightsPage: React.FC = () => {
     progressEvents,
     result,
     errorMessage,
+    activeMode,
     simulateFailure,
     setSimulateFailure,
     runHeatHunt,
@@ -39,6 +40,7 @@ export const AgentInsightsPage: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<string>('2024-08-01');
   const [selectedTime, setSelectedTime] = useState<string>('14:00');
   const [selectedProvider, setSelectedProvider] = useState<string>('auto');
+  const [selectedMode, setSelectedMode] = useState<'live' | 'cached' | 'demo'>('live');
   const [isConfigModalOpen, setIsConfigModalOpen] = useState<boolean>(false);
 
   const handleOpenZoneEvidence = (zoneId: string) => {
@@ -55,6 +57,7 @@ export const AgentInsightsPage: React.FC = () => {
       startDate: selectedDate,
       startTime: selectedTime,
       provider: selectedProvider,
+      mode: selectedMode,
     });
   };
 
@@ -72,6 +75,18 @@ export const AgentInsightsPage: React.FC = () => {
                 <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#CCFBF1] text-[#0D9488] text-[11px] sm:text-xs font-bold uppercase tracking-wider">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#0D9488] animate-pulse" />
                   Autonomous Engine
+                </span>
+                <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold uppercase tracking-wider border ${
+                  (result?.mode || activeMode) === 'live'
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                    : (result?.mode || activeMode) === 'cached'
+                    ? 'bg-blue-50 text-blue-800 border-blue-200'
+                    : 'bg-purple-50 text-purple-800 border-purple-200'
+                }`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${
+                    (result?.mode || activeMode) === 'live' ? 'bg-emerald-500 animate-ping' : (result?.mode || activeMode) === 'cached' ? 'bg-blue-500' : 'bg-purple-500'
+                  }`} />
+                  {(result?.mode || activeMode) === 'live' ? 'LIVE DATA' : (result?.mode || activeMode) === 'cached' ? 'CACHED' : 'DEMO MODE'}
                 </span>
                 <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">
                   Model: {selectedProvider === 'auto' ? 'Gemini 3.5 Flash' : 'Deterministic Fast-Path'}
@@ -204,6 +219,22 @@ export const AgentInsightsPage: React.FC = () => {
                 <option value="deterministic">Deterministic Fast-Path</option>
               </select>
             </div>
+
+            {/* Mode Selector */}
+            <div className="flex items-center gap-1.5">
+              <span className="font-bold text-slate-700">Mode:</span>
+              <select
+                id="agent-param-mode-select"
+                value={selectedMode}
+                disabled={status === 'running'}
+                onChange={(e) => setSelectedMode(e.target.value as any)}
+                className="px-2.5 py-1 rounded-lg border border-slate-200 text-xs font-semibold text-slate-800 bg-slate-50/70 focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:opacity-50"
+              >
+                <option value="live">🟢 Live Pipeline</option>
+                <option value="cached">🔵 Replay Cache</option>
+                <option value="demo">🟣 Demo Scenario</option>
+              </select>
+            </div>
           </div>
 
           {/* Quick Presets */}
@@ -262,6 +293,7 @@ export const AgentInsightsPage: React.FC = () => {
         initialDate={selectedDate}
         initialTime={selectedTime}
         initialProvider={selectedProvider}
+        initialMode={selectedMode}
       />
 
       {/* Main Grid: Left Event Stream Terminal (2/3) + Right Telemetry & Priority Rails (1/3) */}
@@ -342,7 +374,7 @@ export const AgentInsightsPage: React.FC = () => {
                 return (
                   <div
                     key={zone.id}
-                    id={`agent-hotspot-${zone.id}`}
+                    id={`agent-zone-card-${zone.zoneNumber}`}
                     tabIndex={0}
                     role="button"
                     aria-label={`View empirical evidence for ${zone.name}`}

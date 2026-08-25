@@ -12,6 +12,7 @@ const HeatHuntContext = createContext<HeatHuntContextValue | undefined>(undefine
 
 export const HeatHuntProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [status, setStatus] = useState<HeatHuntStatus>('idle');
+  const [activeMode, setActiveMode] = useState<'live' | 'cached' | 'demo'>('live');
   const [progressEvents, setProgressEvents] = useState<HeatHuntProgressEvent[]>([]);
   const [result, setResult] = useState<HeatHuntResult | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -56,8 +57,10 @@ export const HeatHuntProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     try {
       const res = await apiFetch<{
         status: string;
+        mode?: 'live' | 'cached' | 'demo';
         result?: {
           status: string;
+          mode?: 'live' | 'cached' | 'demo';
           city: string;
           ranked_zones?: any[];
           executive_briefing?: string;
@@ -68,6 +71,8 @@ export const HeatHuntProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }>(`/api/heat-hunt/${jobId}/results`);
 
       if (res.status === 'completed' && res.result) {
+        const resMode = res.mode || res.result.mode || 'live';
+        setActiveMode(resMode);
         const ranked = res.result.ranked_zones || [];
         const criticalCount = ranked.filter(
           (z: any) => z.priority_level === 'CRITICAL' || z.priority_tier === 'CRITICAL'
@@ -77,6 +82,7 @@ export const HeatHuntProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           zonesScanned: res.result.scan_summary?.total_cells || 16568,
           criticalZonesFound: criticalCount,
           completedAt: formatTimestamp(new Date()),
+          mode: resMode,
           summary:
             res.result.executive_briefing ||
             `HeatSentinel autonomous agent completed investigation across ${ranked.length} priority zones.`,
@@ -121,13 +127,14 @@ export const HeatHuntProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }>(`/api/heat-hunt/${jobId}/status`);
 
         if (statusRes.progress_events && statusRes.progress_events.length > 0) {
+          const maxObserved = Math.max(...statusRes.progress_events.map(e => e.step_number || 0), 10);
           const mappedEvents: HeatHuntProgressEvent[] = statusRes.progress_events.map((e) => ({
             id: e.id,
             message: e.message,
             display_name: e.display_name,
             timestamp: e.timestamp || formatTimestamp(new Date()),
             stepNumber: e.step_number,
-            totalSteps: 7,
+            totalSteps: maxObserved,
             type: e.type || 'info',
           }));
           setProgressEvents(mappedEvents);
@@ -152,20 +159,22 @@ export const HeatHuntProvider: React.FC<{ children: React.ReactNode }> = ({ chil
    * 2. Subscribes to real-time SSE stream at /api/heat-hunt/{jobId}/stream
    * 3. Falls back seamlessly to status polling if stream drops
    */
-  const runHeatHunt = useCallback(async (params?: { startDate?: string; startTime?: string; provider?: string }) => {
+  const runHeatHunt = useCallback(async (params?: { startDate?: string; startTime?: string; provider?: string; mode?: 'live' | 'cached' | 'demo' }) => {
     cleanupConnections();
     setStatus('running');
     setProgressEvents([]);
     setResult(null);
     setErrorMessage(null);
+    const requestedMode = params?.mode || 'live';
+    setActiveMode(requestedMode);
 
     // Initial local event
     const initialEvent: HeatHuntProgressEvent = {
       id: `evt-init-${Date.now()}`,
-      message: 'Autonomous HeatSentinel agent initialized — starting Phoenix Heat Hunt investigation...',
+      message: `Autonomous HeatSentinel agent initialized — starting Phoenix Heat Hunt (${requestedMode.toUpperCase()} mode)...`,
       timestamp: formatTimestamp(new Date()),
       stepNumber: 0,
-      totalSteps: 7,
+      totalSteps: 10,
       type: 'info',
     };
     setProgressEvents([initialEvent]);
@@ -178,7 +187,7 @@ export const HeatHuntProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           message: 'Connection interrupted: Unable to retrieve thermal telemetry stream from regional sensor node.',
           timestamp: formatTimestamp(new Date()),
           stepNumber: 3,
-          totalSteps: 7,
+          totalSteps: 10,
           type: 'error',
         };
         setProgressEvents((prev) => [...prev, failEvent]);
@@ -194,6 +203,7 @@ export const HeatHuntProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         job_id?: string;
         jobId?: string;
         status: string;
+        mode?: 'live' | 'cached' | 'demo';
       }>('/api/heat-hunt/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -202,7 +212,7 @@ export const HeatHuntProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           start_time: params?.startTime || '14:00',
           provider: params?.provider || 'auto',
           model_name: 'gemini-3.5-flash-lite',
-          mode: 'live',
+          mode: requestedMode,
         }),
       });
 
@@ -211,6 +221,9 @@ export const HeatHuntProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         throw new Error('Backend did not return a valid jobId.');
       }
       activeJobIdRef.current = jobId;
+      if (startRes.mode) {
+        setActiveMode(startRes.mode);
+      }
 
       // 2. Connect to Server-Sent Events (SSE) Stream
       const streamUrl = `${API_BASE_URL}/api/heat-hunt/${jobId}/stream`;
@@ -226,19 +239,22 @@ export const HeatHuntProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
         try {
           const parsed = JSON.parse(event.data);
+          const stepNum = typeof parsed.step_number === 'number' ? parsed.step_number : 1;
           const newEvent: HeatHuntProgressEvent = {
             id: parsed.id || `evt-${Date.now()}-${Math.random()}`,
             message: parsed.message || 'Agent executing tactical tool...',
             display_name: parsed.display_name,
             timestamp: parsed.timestamp || formatTimestamp(new Date()),
-            stepNumber: typeof parsed.step_number === 'number' ? parsed.step_number : 1,
-            totalSteps: 7,
+            stepNumber: stepNum,
+            totalSteps: typeof parsed.total_steps === 'number' ? parsed.total_steps : Math.max(stepNum, 10),
             type: parsed.type || (parsed.tool_name === 'finalize_heat_hunt' ? 'success' : 'info'),
           };
 
           setProgressEvents((prev) => {
             if (prev.some((e) => e.id === newEvent.id)) return prev;
-            return [...prev, newEvent];
+            const updated = [...prev, newEvent];
+            const maxStep = Math.max(...updated.map(e => e.stepNumber || 0), 10);
+            return updated.map(e => ({ ...e, totalSteps: maxStep }));
           });
 
           if (parsed.tool_name === 'finalize_heat_hunt' || parsed.tool_name === 'agent_completed') {
@@ -267,6 +283,7 @@ export const HeatHuntProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const resetHeatHunt = useCallback(() => {
     cleanupConnections();
     setStatus('idle');
+    setActiveMode('live');
     setProgressEvents([]);
     setResult(null);
     setErrorMessage(null);
@@ -279,6 +296,7 @@ export const HeatHuntProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         progressEvents,
         result,
         errorMessage,
+        activeMode,
         simulateFailure,
         setSimulateFailure,
         runHeatHunt,

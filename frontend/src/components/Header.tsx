@@ -37,11 +37,13 @@ export const Header: React.FC<HeaderProps> = ({
   const {
     status,
     runHeatHunt,
+    activeMode,
     simulateFailure,
     setSimulateFailure,
   } = useHeatHunt();
 
   const { data: basicScan } = useBasicScan();
+  const currentMode = activeMode || basicScan?.mode || 'live';
 
   return (
     <header
@@ -135,21 +137,47 @@ export const Header: React.FC<HeaderProps> = ({
           )}
 
           {/* Mode / Status Tag */}
-          {basicScan && (
-            <div
-              id="pipeline-status-badge"
-              className={`hidden xl:inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border ${
-                basicScan.mode === 'live'
-                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                  : 'bg-blue-50 text-blue-800 border-blue-200'
+          <div
+            id="pipeline-status-badge"
+            className={`hidden xl:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border ${
+              currentMode === 'live'
+                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                : currentMode === 'cached'
+                ? 'bg-blue-50 text-blue-800 border-blue-200'
+                : 'bg-purple-50 text-purple-800 border-purple-200'
+            }`}
+          >
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                currentMode === 'live'
+                  ? 'bg-emerald-500 animate-ping'
+                  : currentMode === 'cached'
+                  ? 'bg-blue-500'
+                  : 'bg-purple-500'
               }`}
-            >
-              <span className={`w-1.5 h-1.5 rounded-full ${basicScan.mode === 'live' ? 'bg-emerald-500 animate-ping' : 'bg-blue-500'}`} />
-              <span>{basicScan.mode === 'live' ? 'Live Telemetry' : 'Cached Grid'}</span>
-              <span className="text-slate-400 font-normal">|</span>
-              <span>{basicScan.ranked_zones.length} Zones</span>
-            </div>
-          )}
+            />
+            <span>
+              {currentMode === 'live'
+                ? 'Live Telemetry'
+                : currentMode === 'cached'
+                ? 'Cached Pipeline'
+                : 'Demo Scenario'}
+            </span>
+            {basicScan && (
+              <>
+                <span className="text-slate-400 font-normal">|</span>
+                {/* Show ranked zones from API; supplement with 6-sector metro count when doing a full metro scan */}
+                <span>{basicScan.ranked_zones.length} API Zones · 6 Districts</span>
+              </>
+            )}
+            {!basicScan && (
+              <>
+                <span className="text-slate-400 font-normal">|</span>
+                <span>6 Metro Districts</span>
+              </>
+            )}
+          </div>
+
 
           {/* Primary RUN HEAT HUNT Button (Autonomous Agent Investigation) */}
           <button

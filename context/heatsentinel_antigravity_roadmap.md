@@ -1749,9 +1749,9 @@ Report, stage by stage, real evidence that the full Definition-of-Done flow work
 
 ---
 
-## [ ] PHASE 13 — RELIABILITY
+## [X] PHASE 13 — RELIABILITY
 
-### [ ] STEP 42 — Retries, Timeouts, and Graceful Degradation
+### [X] STEP 42 — Retries, Timeouts, and Graceful Degradation
 
 **PURPOSE:** Harden every external call against real-world flakiness before demo day.
 
@@ -1790,7 +1790,7 @@ COMPLETION REPORT
 Report: standardized timeout/retry values, degradation behaviors confirmed, test results, and next dependency (fallback/demo-mode caching layer).
 ```
 
-### [ ] STEP 43 — Fallback Mode: Cached → Deterministic Demo Scenario
+### [X] STEP 43 — Fallback Mode: Cached → Deterministic Demo Scenario
 
 **PURPOSE:** Build the three-tier fallback (live → cached → deterministic demo) as a real, labeled system behavior.
 

@@ -23,6 +23,7 @@ from app.agent.heat_hunt_service import (
     HeatHuntJob,
     ProgressEvent,
 )
+from app.services.fallback_service import load_demo_scenario
 from app.logging_config import logger
 
 router = APIRouter(prefix="/api/heat-hunt", tags=["Heat Hunt"])
@@ -84,6 +85,18 @@ class JobStatusResponse(BaseModel):
 # ==========================================
 # 2. ROUTE HANDLERS
 # ==========================================
+
+@router.get("/demo-scenario")
+async def get_demo_scenario():
+    """
+    Returns the canonical deterministic Phoenix demo scenario dataset and metadata.
+    Used for offline evaluation, judge previews, and reliability verification.
+    """
+    try:
+        return load_demo_scenario()
+    except Exception as exc:
+        logger.error(f"HeatHuntRouter: Failed to load demo scenario: {exc}")
+        raise HTTPException(status_code=500, detail=f"Failed to load demo scenario: {str(exc)}")
 
 @router.post("/start", response_model=JobStartResponse)
 async def start_heat_hunt(

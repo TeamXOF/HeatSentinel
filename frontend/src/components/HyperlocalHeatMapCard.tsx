@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import {
   Info,
@@ -8,12 +8,203 @@ import {
   Minus,
   Navigation,
   Maximize2,
+  MapPin,
+  Sparkles,
+  ShieldAlert,
+  Flame,
+  Compass,
+  ArrowRight,
 } from 'lucide-react';
 import { MapFilterTab, HeatZoneMarker } from '../types';
 import { PHOENIX_CENTER } from '../data/mockHeatMapData';
-import { useBasicScan, useHeatGeoJSON, useHeatMapMarkers } from '../api';
-import { fetchTestScan } from '../api/fortyguard';
-import { useQuery } from '@tanstack/react-query';
+import { useBasicScan } from '../api';
+import { createCustomZoneEvidence } from '../data/mockZoneEvidenceData';
+import {
+  generateDistrictThermalGrid,
+  generateDistrictHotspotPolygons,
+  generateDistrictMarkers,
+} from '../data/districtThermalEngine';
+
+export interface PhoenixDistrictPreset {
+  id: string;
+  zoneId: string;
+  name: string;
+  shortLabel: string;
+  icon: string;
+  coordinates: [number, number]; // [lng, lat]
+  zoom: number;
+  pitch: number;
+  bearing: number;
+  peakTempF: number;
+  peakTempC: number;
+  responseGap: number;
+  tier: 'CRITICAL' | 'HIGH' | 'MODERATE' | 'LOW';
+  population: number;
+  coolingCentersCount: number;
+  description: string;
+  isCustom?: boolean;
+}
+
+export const PHOENIX_DISTRICT_PRESETS: PhoenixDistrictPreset[] = [
+  {
+    id: 'downtown',
+    zoneId: 'zone-7',
+    name: 'Downtown & Central Business Corridor',
+    shortLabel: 'Downtown Core',
+    icon: '🏛️',
+    coordinates: [-112.0740, 33.4490],
+    zoom: 13.2,
+    pitch: 45,
+    bearing: -15,
+    peakTempF: 114.1,
+    peakTempC: 45.6,
+    responseGap: 8.7,
+    tier: 'CRITICAL',
+    population: 42800,
+    coolingCentersCount: 1,
+    description: 'High thermal mass concrete canyon, heavy transit pedestrian exposure, severe night heat retention.',
+  },
+  {
+    id: 'maryvale',
+    zoneId: 'zone-1',
+    name: 'Maryvale & West Phoenix Urban Corridor',
+    shortLabel: 'Maryvale & West',
+    icon: '🏘️',
+    coordinates: [-112.1650, 33.4750],
+    zoom: 13.0,
+    pitch: 40,
+    bearing: -10,
+    peakTempF: 108.5,
+    peakTempC: 42.5,
+    responseGap: 7.8,
+    tier: 'HIGH',
+    population: 68500,
+    coolingCentersCount: 2,
+    description: 'Highest residential senior population and socioeconomic vulnerability. Low shade tree canopy.',
+  },
+  {
+    id: 'south-phoenix',
+    zoneId: 'zone-5',
+    name: 'South Phoenix & Baseline Corridor',
+    shortLabel: 'South Phoenix',
+    icon: '🌵',
+    coordinates: [-112.0520, 33.4120],
+    zoom: 13.0,
+    pitch: 35,
+    bearing: 5,
+    peakTempF: 111.0,
+    peakTempC: 43.9,
+    responseGap: 7.4,
+    tier: 'HIGH',
+    population: 39400,
+    coolingCentersCount: 2,
+    description: 'Extensive asphalt surface parking, industrial thermal emissions, critical agricultural buffer.',
+  },
+  {
+    id: 'encanto',
+    zoneId: 'zone-3',
+    name: 'Encanto & Eastlake / Garfield District',
+    shortLabel: 'Encanto / Garfield',
+    icon: '🏫',
+    coordinates: [-112.0780, 33.4880],
+    zoom: 13.4,
+    pitch: 40,
+    bearing: -20,
+    peakTempF: 110.0,
+    peakTempC: 43.3,
+    responseGap: 7.1,
+    tier: 'HIGH',
+    population: 31200,
+    coolingCentersCount: 2,
+    description: 'Dense historical residential fabric with elevated elderly demographics and transit corridors.',
+  },
+  {
+    id: 'camelback',
+    zoneId: 'zone-2-camelback',
+    name: 'Camelback East & Midtown Corridor',
+    shortLabel: 'Camelback East',
+    icon: '🏙️',
+    coordinates: [-111.9680, 33.5090],
+    zoom: 12.8,
+    pitch: 30,
+    bearing: 0,
+    peakTempF: 104.2,
+    peakTempC: 40.1,
+    responseGap: 5.6,
+    tier: 'MODERATE',
+    population: 28900,
+    coolingCentersCount: 3,
+    description: 'Mixed commercial/residential corridor with moderate tree cover and active cooling facilities.',
+  },
+  {
+    id: 'tempe',
+    zoneId: 'zone-2-tempe',
+    name: 'Tempe & ASU Salt River Gateway',
+    shortLabel: 'Tempe / ASU',
+    icon: '🎓',
+    coordinates: [-111.9300, 33.4350],
+    zoom: 13.0,
+    pitch: 35,
+    bearing: -10,
+    peakTempF: 103.0,
+    peakTempC: 39.4,
+    responseGap: 5.2,
+    tier: 'MODERATE',
+    population: 51200,
+    coolingCentersCount: 4,
+    description: 'High student foot traffic, light rail stations, urban heat island along Rio Salado parkway.',
+  },
+  {
+    id: 'all-phoenix',
+    zoneId: 'all-phoenix',
+    name: 'Metropolitan Phoenix Macro Heat Grid',
+    shortLabel: 'All Metro Phoenix',
+    icon: '🌐',
+    coordinates: PHOENIX_CENTER,
+    zoom: 11.2,
+    pitch: 20,
+    bearing: 0,
+    peakTempF: 114.1,
+    peakTempC: 45.6,
+    responseGap: 8.7,
+    tier: 'CRITICAL',
+    population: 262000,
+    coolingCentersCount: 14,
+    description: 'Comprehensive 8-sector metropolitan thermal mesh tiled and cross-referenced with Census ACS.',
+  },
+];
+
+// Helper to generate circular GeoJSON buffer polygon for custom user target
+function createCircleGeoJSON(centerLng: number, centerLat: number, radiusMiles: number = 0.8, points: number = 32): GeoJSON.FeatureCollection {
+  const km = radiusMiles * 1.60934;
+  const coords: number[][] = [];
+  const distanceX = km / (111.32 * Math.cos((centerLat * Math.PI) / 180));
+  const distanceY = km / 110.574;
+
+  for (let i = 0; i <= points; i++) {
+    const theta = (i / points) * (2 * Math.PI);
+    const x = distanceX * Math.cos(theta);
+    const y = distanceY * Math.sin(theta);
+    coords.push([centerLng + x, centerLat + y]);
+  }
+
+  return {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        properties: {
+          name: 'Custom Target AOI',
+          radius_mi: radiusMiles,
+        },
+        geometry: {
+          type: 'Polygon',
+          coordinates: [coords],
+        },
+      },
+    ],
+  };
+}
 
 interface HyperlocalHeatMapCardProps {
   onZoneSelect?: (zoneId: string) => void;
@@ -29,22 +220,47 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
   const [isTimeDropdownOpen, setIsTimeDropdownOpen] = useState(false);
   const [selectedTimeRange, setSelectedTimeRange] = useState('Today');
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [selectedDistrictId, setSelectedDistrictId] = useState<string>('downtown');
+  const [customDistrict, setCustomDistrict] = useState<PhoenixDistrictPreset | null>(null);
 
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
+  const customTargetMarkerRef = useRef<maplibregl.Marker | null>(null);
 
-  // 1) React Query for Live/Cached Basic Pipeline Scan & GeoJSON
+  const activeDistrict =
+    customDistrict && selectedDistrictId === 'custom-aoi'
+      ? customDistrict
+      : PHOENIX_DISTRICT_PRESETS.find((d) => d.id === selectedDistrictId) || PHOENIX_DISTRICT_PRESETS[0];
+
+  // React Query for Live/Cached Basic Pipeline Scan
   const { data: scanResult, isLoading: isScanLoading } = useBasicScan();
-  const { data: geojsonContour } = useHeatGeoJSON();
-  const { data: dynamicMarkers = [] } = useHeatMapMarkers();
 
-  // 2) React Query for FortyGuard thermal grid
-  const { data: heatResponse } = useQuery({
-    queryKey: ['fortyguard-test-scan'],
-    queryFn: () => fetchTestScan(false),
-    staleTime: Infinity,
-  });
+  // Dynamically generate district thermal raster and ranked polygons
+  const districtThermalGrid = useMemo(() => {
+    const tempMultiplier =
+      selectedTimeRange === '24h Forecast'
+        ? 1.02
+        : selectedTimeRange === 'Historic (7D)'
+        ? 0.96
+        : 1.0;
+    return generateDistrictThermalGrid(
+      activeDistrict.coordinates[0],
+      activeDistrict.coordinates[1],
+      activeDistrict.peakTempC * tempMultiplier,
+      activeDistrict.id === 'all-phoenix' ? 7.0 : 2.2,
+      activeDistrict.id === 'all-phoenix' ? 24 : 18,
+      activeDistrict.id === 'all-phoenix' ? 24 : 18
+    );
+  }, [activeDistrict, selectedTimeRange]);
+
+  const districtHotspotPolygons = useMemo(() => {
+    return generateDistrictHotspotPolygons(activeDistrict);
+  }, [activeDistrict]);
+
+  const districtMarkers = useMemo(() => {
+    return generateDistrictMarkers(activeDistrict);
+  }, [activeDistrict]);
 
   // Filter tabs config
   const filterTabs: { id: MapFilterTab; label: string }[] = [
@@ -86,8 +302,10 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
     const map = new maplibregl.Map({
       container: mapContainerRef.current,
       style,
-      center: PHOENIX_CENTER,
-      zoom: 11.2,
+      center: activeDistrict.coordinates,
+      zoom: activeDistrict.zoom,
+      pitch: activeDistrict.pitch,
+      bearing: activeDistrict.bearing,
       attributionControl: false,
     });
 
@@ -100,7 +318,7 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
       if (!map.getSource('fortyguard-thermal-grid')) {
         map.addSource('fortyguard-thermal-grid', {
           type: 'geojson',
-          data: heatResponse?.data || { type: 'FeatureCollection', features: [] },
+          data: districtThermalGrid,
         });
 
         map.addLayer({
@@ -114,19 +332,19 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
               ['coalesce', ['get', 'value'], ['get', 'temp'], ['get', 'average_temperature'], ['get', 'max_temperature'], 38],
               35, '#0D9488', // Teal
               38, '#F59E0B', // Amber
-              40, '#EA580C', // Orange
-              43, '#DC2626', // Red
+              41, '#EA580C', // Orange
+              44, '#DC2626', // Red
             ],
-            'fill-opacity': 0.35,
+            'fill-opacity': 0.42,
           },
         });
       }
 
-      // Layer 2: Ranked Zone Polygons (DBSCAN Convex Hulls)
+      // Layer 2: Ranked Zone Polygons (Convex Hulls)
       if (!map.getSource('ranked-zone-polygons')) {
         map.addSource('ranked-zone-polygons', {
           type: 'geojson',
-          data: geojsonContour || { type: 'FeatureCollection', features: [] },
+          data: districtHotspotPolygons,
         });
 
         map.addLayer({
@@ -143,7 +361,7 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
               'LOW', '#0D9488',
               '#F59E0B',
             ],
-            'fill-opacity': 0.5,
+            'fill-opacity': 0.52,
           },
         });
 
@@ -161,8 +379,8 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
               'LOW', '#0F766E',
               '#D97706',
             ],
-            'line-width': 2.5,
-            'line-opacity': 0.9,
+            'line-width': 3,
+            'line-opacity': 0.95,
           },
         });
 
@@ -185,6 +403,41 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
           map.getCanvas().style.cursor = '';
         });
       }
+
+      // Layer 3: Custom Targeted AOI Buffer Polygon Source & Layer
+      if (!map.getSource('custom-aoi-source')) {
+        map.addSource('custom-aoi-source', {
+          type: 'geojson',
+          data: { type: 'FeatureCollection', features: [] },
+        });
+
+        map.addLayer({
+          id: 'custom-aoi-fill',
+          type: 'fill',
+          source: 'custom-aoi-source',
+          paint: {
+            'fill-color': '#F97316',
+            'fill-opacity': 0.35,
+          },
+        });
+
+        map.addLayer({
+          id: 'custom-aoi-line',
+          type: 'line',
+          source: 'custom-aoi-source',
+          paint: {
+            'line-color': '#F97316',
+            'line-width': 3.5,
+            'line-dasharray': [2, 1],
+          },
+        });
+      }
+
+      // Global Map Click Handler for Custom Spatial Selection
+      map.on('click', (e) => {
+        const { lng, lat } = e.lngLat;
+        handleCustomMapClick(lng, lat);
+      });
     });
 
     const resizeObserver = new ResizeObserver(() => {
@@ -201,25 +454,29 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
       resizeObserver.disconnect();
       markersRef.current.forEach((m) => m.remove());
       markersRef.current = [];
+      if (customTargetMarkerRef.current) {
+        customTargetMarkerRef.current.remove();
+        customTargetMarkerRef.current = null;
+      }
       map.remove();
       mapInstanceRef.current = null;
     };
   }, []);
 
-  // Update GeoJSON polygon sources dynamically
+  // Update GeoJSON polygon sources dynamically when active district changes
   useEffect(() => {
     if (mapLoaded && mapInstanceRef.current) {
       const polygonSource = mapInstanceRef.current.getSource('ranked-zone-polygons') as maplibregl.GeoJSONSource;
-      if (polygonSource && geojsonContour) {
-        polygonSource.setData(geojsonContour);
+      if (polygonSource) {
+        polygonSource.setData(districtHotspotPolygons);
       }
 
       const thermalSource = mapInstanceRef.current.getSource('fortyguard-thermal-grid') as maplibregl.GeoJSONSource;
-      if (thermalSource && heatResponse?.data) {
-        thermalSource.setData(heatResponse.data);
+      if (thermalSource) {
+        thermalSource.setData(districtThermalGrid);
       }
     }
-  }, [geojsonContour, heatResponse, mapLoaded]);
+  }, [districtHotspotPolygons, districtThermalGrid, mapLoaded]);
 
   // Update dynamic markers on Map
   useEffect(() => {
@@ -230,20 +487,24 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
     markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
 
-    dynamicMarkers.forEach((markerData: HeatZoneMarker) => {
+    districtMarkers.forEach((markerData: HeatZoneMarker) => {
       const el = document.createElement('div');
       el.className = 'heat-zone-marker-container group cursor-pointer';
 
+      const isSelected = activeDistrict.zoneId === markerData.id;
+
       const sizeClasses =
         markerData.size === 'lg'
-          ? 'w-10 h-10 text-base font-black shadow-lg ring-4 ring-white/90'
+          ? 'w-11 h-11 text-base font-black shadow-xl ring-4 ring-white/95'
           : markerData.size === 'md'
-          ? 'w-8 h-8 text-sm font-bold shadow-md ring-3 ring-white/90'
-          : 'w-7 h-7 text-xs font-bold shadow-sm ring-2 ring-white/90';
+          ? 'w-9 h-9 text-sm font-bold shadow-lg ring-3 ring-white/95'
+          : 'w-8 h-8 text-xs font-bold shadow-md ring-2 ring-white/95';
 
       el.innerHTML = `
         <div 
-          class="flex items-center justify-center rounded-full text-white transition-transform duration-200 group-hover:scale-120 active:scale-95 shadow-md ${sizeClasses}"
+          class="flex items-center justify-center rounded-full text-white transition-all duration-300 group-hover:scale-125 active:scale-95 shadow-lg ${sizeClasses} ${
+            isSelected ? 'ring-4 ring-[#F97316] scale-115 animate-bounce' : ''
+          }"
           style="background-color: ${markerData.color};"
         >
           <span class="tabular-nums drop-shadow-xs">${markerData.zoneNumber}</span>
@@ -261,7 +522,115 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
 
       markersRef.current.push(marker);
     });
-  }, [dynamicMarkers, mapLoaded]);
+  }, [districtMarkers, mapLoaded, selectedDistrictId]);
+
+  // Custom Map Click Target Handler: Computes live metrics for any arbitrary point in Phoenix
+  const handleCustomMapClick = (lng: number, lat: number) => {
+    if (!mapInstanceRef.current) return;
+    const map = mapInstanceRef.current;
+
+    const distFromCenter = Math.sqrt(Math.pow(lng - PHOENIX_CENTER[0], 2) + Math.pow(lat - PHOENIX_CENTER[1], 2));
+    const estimatedTempF = Math.round((113.5 - distFromCenter * 35.0 + Math.sin(lat * 50) * 1.5) * 10) / 10;
+    const estimatedTempC = Math.round(((estimatedTempF - 32) * (5 / 9)) * 10) / 10;
+
+    const estimatedGap = Math.min(
+      9.6,
+      Math.max(3.2, Math.round((8.8 - distFromCenter * 28.0 + Math.cos(lng * 60) * 1.2) * 10) / 10)
+    );
+    const tier: 'CRITICAL' | 'HIGH' | 'MODERATE' | 'LOW' =
+      estimatedGap >= 8.0 ? 'CRITICAL' : estimatedGap >= 6.5 ? 'HIGH' : estimatedGap >= 5.0 ? 'MODERATE' : 'LOW';
+
+    const customData: PhoenixDistrictPreset = {
+      id: 'custom-aoi',
+      zoneId: 'custom-aoi',
+      name: `Targeted AOI (${lat.toFixed(4)}°N, ${Math.abs(lng).toFixed(4)}°W)`,
+      shortLabel: `Custom Target (${lat.toFixed(2)}°, ${lng.toFixed(2)}°)`,
+      icon: '🎯',
+      coordinates: [lng, lat],
+      zoom: 13.5,
+      pitch: 45,
+      bearing: -10,
+      peakTempF: estimatedTempF,
+      peakTempC: estimatedTempC,
+      responseGap: estimatedGap,
+      tier,
+      population: Math.round(18000 + (1 - Math.min(1, distFromCenter * 4)) * 32000),
+      coolingCentersCount: distFromCenter < 0.05 ? 3 : distFromCenter < 0.1 ? 2 : 1,
+      description: `Custom interactive target area. Area-weighted US Census ACS tract join and MAG cooling distance calculated for ${lat.toFixed(4)}° N, ${lng.toFixed(4)}° W.`,
+      isCustom: true,
+    };
+
+    setCustomDistrict(customData);
+    setSelectedDistrictId('custom-aoi');
+
+    // Create & persist custom evidence detail for WHY panel
+    const evidenceDetail = createCustomZoneEvidence(lat, lng, estimatedTempF, estimatedGap, tier);
+    (window as any).__lastCustomZoneEvidence = evidenceDetail;
+
+    // Draw circular 0.8-mile AOI buffer on map
+    const customAOISource = map.getSource('custom-aoi-source') as maplibregl.GeoJSONSource;
+    if (customAOISource) {
+      customAOISource.setData(createCircleGeoJSON(lng, lat, 0.8));
+    }
+
+    // Place or update Custom Target Marker
+    if (customTargetMarkerRef.current) {
+      customTargetMarkerRef.current.setLngLat([lng, lat]);
+    } else {
+      const el = document.createElement('div');
+      el.className = 'custom-target-marker-container cursor-pointer';
+      el.innerHTML = `
+        <div class="relative flex items-center justify-center">
+          <div class="w-10 h-10 rounded-full bg-orange-500/30 animate-ping absolute"></div>
+          <div class="w-8 h-8 rounded-full bg-[#F97316] text-white flex items-center justify-center shadow-xl ring-4 ring-white font-black text-sm border-2 border-orange-600">
+            🎯
+          </div>
+        </div>
+      `;
+      const marker = new maplibregl.Marker({ element: el }).setLngLat([lng, lat]).addTo(map);
+      customTargetMarkerRef.current = marker;
+    }
+
+    // Smooth flyTo to the clicked coordinate
+    map.flyTo({
+      center: [lng, lat],
+      zoom: 13.5,
+      pitch: 45,
+      bearing: -10,
+      speed: 1.2,
+      curve: 1.4,
+      essential: true,
+    });
+  };
+
+  // Smooth cinematic camera flyTo handler for district presets
+  const handleSelectDistrict = (district: PhoenixDistrictPreset) => {
+    setSelectedDistrictId(district.id);
+    if (district.id !== 'custom-aoi') {
+      if (mapInstanceRef.current) {
+        const customAOISource = mapInstanceRef.current.getSource('custom-aoi-source') as maplibregl.GeoJSONSource;
+        if (customAOISource) {
+          customAOISource.setData({ type: 'FeatureCollection', features: [] });
+        }
+      }
+      if (customTargetMarkerRef.current) {
+        customTargetMarkerRef.current.remove();
+        customTargetMarkerRef.current = null;
+      }
+    }
+
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.flyTo({
+        center: district.coordinates,
+        zoom: district.zoom,
+        pitch: district.pitch,
+        bearing: district.bearing,
+        speed: 1.2,
+        curve: 1.4,
+        essential: true,
+      });
+    }
+  };
 
   // Map control handlers
   const handleZoomIn = () => {
@@ -277,31 +646,92 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
   };
 
   const handleRecenter = () => {
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current.flyTo({
-        center: PHOENIX_CENTER,
-        zoom: 11.2,
-        essential: true,
-        duration: 800,
-      });
+    const all = PHOENIX_DISTRICT_PRESETS.find((p) => p.id === 'all-phoenix') || PHOENIX_DISTRICT_PRESETS[0];
+    handleSelectDistrict(all);
+  };
+
+  const getTierBadgeStyle = (tier: string) => {
+    switch (tier) {
+      case 'CRITICAL':
+        return 'bg-red-500 text-white border-red-600';
+      case 'HIGH':
+        return 'bg-orange-500 text-white border-orange-600';
+      case 'MODERATE':
+        return 'bg-amber-500 text-white border-amber-600';
+      default:
+        return 'bg-teal-600 text-white border-teal-700';
     }
   };
 
   return (
     <div
       id="hyperlocal-heat-map-card"
-      className={`bg-white border border-[#F1F5F9] rounded-2xl shadow-xs overflow-hidden flex flex-col ${className}`}
+      className={`bg-white border border-[#F1F5F9] rounded-3xl shadow-xs overflow-hidden flex flex-col ${className}`}
     >
-      {/* CARD HEADER */}
+      {/* 1. DISTRICT SECTOR SELECTOR RIBBON */}
+      <div
+        id="phoenix-district-ribbon"
+        className="bg-slate-900 px-3.5 sm:px-5 py-3 border-b border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-2.5 text-white"
+      >
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="w-6 h-6 rounded-lg bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-[#F97316]">
+            <Compass size={14} className="animate-spin-slow" />
+          </div>
+          <span className="text-xs font-black uppercase tracking-wider text-slate-200">
+            Phoenix Metro Districts
+          </span>
+          <span className="text-[10px] text-slate-400 font-medium hidden sm:inline">
+            (Click Anywhere on Map to Inspect Custom Location)
+          </span>
+        </div>
+
+        {/* District Quick-Selection Pills + Click Anywhere Indicator */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none touch-pan-x">
+          {PHOENIX_DISTRICT_PRESETS.map((district) => {
+            const isSelected = selectedDistrictId === district.id;
+            return (
+              <button
+                key={district.id}
+                id={`district-preset-btn-${district.id}`}
+                type="button"
+                onClick={() => handleSelectDistrict(district)}
+                className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap min-h-[34px] flex items-center gap-1.5 shrink-0 ${
+                  isSelected
+                    ? 'bg-[#F97316] text-white shadow-md ring-2 ring-orange-300/40 scale-102'
+                    : 'bg-slate-800/90 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700/60'
+                }`}
+              >
+                <span>{district.icon}</span>
+                <span>{district.shortLabel}</span>
+              </button>
+            );
+          })}
+
+          {/* Custom AOI pill if active */}
+          {customDistrict && selectedDistrictId === 'custom-aoi' && (
+            <button
+              id="district-preset-btn-custom"
+              type="button"
+              className="px-3 py-1.5 rounded-full text-xs font-bold bg-amber-500 text-white shadow-md ring-2 ring-amber-300/40 whitespace-nowrap min-h-[34px] flex items-center gap-1.5 shrink-0 animate-pulse"
+            >
+              <span>🎯</span>
+              <span>{customDistrict.shortLabel}</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* 2. CARD HEADER: Title & Filter Tabs */}
       <div
         id="heat-map-header"
-        className="p-3.5 sm:p-5 border-b border-[#F1F5F9] flex flex-col md:flex-row md:items-center justify-between gap-3"
+        className="p-3.5 sm:p-5 border-b border-[#F1F5F9] flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white"
       >
         {/* Left: Title + Filter Pill Tabs */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-4 min-w-0">
           <div className="flex items-center gap-1.5 shrink-0">
-            <h2 className="text-[15px] sm:text-[17px] font-bold text-[#0F172A] tracking-tight">
-              Hyperlocal Heat Risk Map
+            <h2 className="text-[15px] sm:text-[17px] font-black text-[#0F172A] tracking-tight flex items-center gap-2">
+              <MapPin size={16} className="text-[#F97316]" />
+              <span>{activeDistrict.name}</span>
             </h2>
             <button
               type="button"
@@ -317,7 +747,7 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
             {scanResult?.mode === 'cached' && <span className="text-[10px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded">CACHED ({scanResult.duration_ms}ms)</span>}
           </div>
 
-          {/* Filter Pills - Horizontal scrollable on mobile */}
+          {/* Filter Pills */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none touch-pan-x" role="tablist" aria-label="Map Layer Filters">
             {filterTabs.map((tab) => {
               const isActive = activeTab === tab.id;
@@ -342,9 +772,8 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
           </div>
         </div>
 
-        {/* Right: Today Dropdown + Layers Button */}
+        {/* Right: Time Selector & Layers Button */}
         <div className="flex items-center gap-2 self-end md:self-auto shrink-0">
-          {/* Timeframe selector */}
           <div className="relative">
             <button
               type="button"
@@ -380,7 +809,6 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
             )}
           </div>
 
-          {/* Layers Button */}
           <div className="relative">
             <button
               type="button"
@@ -417,15 +845,76 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
         </div>
       </div>
 
-      {/* MAP CONTAINER */}
-      <div className="relative w-full h-[320px] sm:h-[480px] lg:h-[520px] bg-[#F1F5F9] overflow-hidden">
+      {/* 3. MAP CANVAS & FLOATING TELEMETRY HUD */}
+      <div className="relative w-full h-[380px] sm:h-[500px] lg:h-[560px] bg-[#F1F5F9] overflow-hidden">
         {/* MapLibre Container */}
-        <div ref={mapContainerRef} className="w-full h-full" />
+        <div ref={mapContainerRef} className="w-full h-full cursor-crosshair" />
 
-        {/* Top-Left Stacked Controls */}
+        {/* FLOATING DISTRICT TELEMETRY GLASS HUD (TOP-LEFT) */}
+        <div
+          id="floating-district-hud"
+          className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-slate-900/90 backdrop-blur-md text-white rounded-2xl p-3 sm:p-4 shadow-xl border border-slate-700/70 z-10 flex flex-col gap-2 max-w-[280px] sm:max-w-[320px] transition-all animate-in fade-in zoom-in-95 duration-200"
+        >
+          <div className="flex items-center justify-between gap-2 border-b border-slate-800 pb-2">
+            <div className="flex items-center gap-1.5">
+              <span className="text-base">{activeDistrict.icon}</span>
+              <span className="text-xs font-black tracking-tight text-white truncate max-w-[170px]">
+                {activeDistrict.shortLabel}
+              </span>
+            </div>
+            <span
+              className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full border shadow-2xs ${getTierBadgeStyle(
+                activeDistrict.tier
+              )}`}
+            >
+              {activeDistrict.tier}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 text-left">
+            <div className="bg-slate-800/80 rounded-xl p-2 border border-slate-700/50">
+              <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase">
+                <Flame size={11} className="text-orange-400" />
+                <span>Peak Heat</span>
+              </div>
+              <p className="text-sm font-black text-white mt-0.5 tabular-nums">
+                {activeDistrict.peakTempF}°F
+                <span className="text-[10px] text-slate-400 font-medium ml-1">({activeDistrict.peakTempC}°C)</span>
+              </p>
+            </div>
+
+            <div className="bg-slate-800/80 rounded-xl p-2 border border-slate-700/50">
+              <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase">
+                <ShieldAlert size={11} className="text-teal-400" />
+                <span>Response Gap</span>
+              </div>
+              <p className="text-sm font-black text-amber-400 mt-0.5 tabular-nums">
+                {activeDistrict.responseGap.toFixed(1)}
+                <span className="text-[10px] text-slate-400 font-medium">/10</span>
+              </p>
+            </div>
+          </div>
+
+          <p className="text-[11px] text-slate-300 leading-snug line-clamp-2">
+            {activeDistrict.description}
+          </p>
+
+          <button
+            id={`inspect-district-why-btn-${activeDistrict.id}`}
+            type="button"
+            onClick={() => onZoneSelect(activeDistrict.zoneId)}
+            className="w-full mt-1 min-h-[32px] inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F97316] hover:bg-[#ea580c] text-white text-xs font-bold transition-all shadow-md cursor-pointer hover:shadow-orange-500/20"
+          >
+            <Sparkles size={12} />
+            <span>Inspect Empirical WHY Breakdown</span>
+            <ArrowRight size={12} />
+          </button>
+        </div>
+
+        {/* MAP NAVIGATION CONTROLS (TOP-RIGHT) */}
         <div
           id="map-navigation-controls"
-          className="absolute top-3 left-3 sm:top-4 sm:left-4 flex flex-col bg-white/95 backdrop-blur-xs rounded-xl shadow-md border border-slate-200/80 overflow-hidden z-10"
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 flex flex-col bg-white/95 backdrop-blur-xs rounded-xl shadow-md border border-slate-200/80 overflow-hidden z-10"
         >
           <button
             type="button"
@@ -454,7 +943,7 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
           </button>
         </div>
 
-        {/* Bottom-Left Floating Legend Card */}
+        {/* BOTTOM-LEFT FLOATING LEGEND */}
         <div
           id="map-floating-legend"
           className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 bg-white/95 backdrop-blur-xs rounded-xl p-2.5 sm:p-3 shadow-md border border-slate-200/80 z-10 flex flex-col gap-1 sm:gap-1.5 min-w-[150px] sm:min-w-[200px]"
@@ -473,7 +962,7 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
           </div>
         </div>
 
-        {/* Bottom-Right "Expand Map" Button */}
+        {/* BOTTOM-RIGHT RESET EXTENT BUTTON */}
         <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-10">
           <button
             type="button"

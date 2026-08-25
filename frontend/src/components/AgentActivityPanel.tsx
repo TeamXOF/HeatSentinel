@@ -138,8 +138,7 @@ export const AgentActivityPanel: React.FC<AgentActivityPanelProps> = ({
             </p>
             {!compact && status !== 'running' && (
               <p className="text-xs text-slate-400 mt-1 max-w-sm">
-                Click <strong>&quot;Launch Heat Hunt&quot;</strong> to trigger the automated
-                7-step telemetry investigation pipeline.
+                Click <strong>&quot;Launch Heat Hunt&quot;</strong> to trigger the autonomous multi-step spatial investigation pipeline.
               </p>
             )}
           </div>
@@ -167,7 +166,7 @@ export const AgentActivityPanel: React.FC<AgentActivityPanelProps> = ({
                         className={`font-bold text-[#0F172A] ${compact ? 'text-[11px]' : 'text-xs'}`}
                       >
                         {evt.stepNumber > 0
-                          ? `Step ${evt.stepNumber} of ${evt.totalSteps}`
+                          ? `Step ${evt.stepNumber}${evt.totalSteps && evt.totalSteps >= evt.stepNumber ? ` of ${evt.totalSteps}` : ''}`
                           : 'Initialization'}
                       </span>
                       <span className="text-[11px] font-mono text-[#94A3B8] tabular-nums">

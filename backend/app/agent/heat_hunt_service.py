@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 
 from app.db import get_db_connection, init_db
 from app.agent.orchestrator import HeatHuntOrchestrator
+from app.services.fallback_service import resolve_heat_hunt_fallback
 from app.logging_config import logger
 
 
@@ -159,22 +160,36 @@ async def _execute_heat_hunt_background(
         await _broadcast_event(job_id, event)
 
     try:
-        # Emit initial start event
-        await on_step_callback(0, "agent_init", "Autonomous Heat Hunt agent initialized — commencing investigation.")
+        if mode in ("demo", "cached"):
+            logger.info(f"HeatHuntService: Job {job_id} running in explicit '{mode}' mode.")
+            final_result = await resolve_heat_hunt_fallback(
+                job_id=job_id,
+                on_step_callback=on_step_callback,
+                force_mode=mode,
+                replay_delay_ms=150,
+            )
+            resolved_mode = final_result.get("mode", mode)
+        else:
+            # Emit initial start event for live investigation
+            await on_step_callback(0, "agent_init", "Autonomous Heat Hunt agent initialized — commencing live investigation.")
 
-        # Instantiate orchestrator if not injected
-        agent_orchestrator = orchestrator or HeatHuntOrchestrator(
-            provider=provider,
-            model_name=model_name,
-        )
+            # Instantiate orchestrator if not injected
+            agent_orchestrator = orchestrator or HeatHuntOrchestrator(
+                provider=provider,
+                model_name=model_name,
+            )
 
-        # Run multi-turn tool calling loop
-        final_result = await agent_orchestrator.run(
-            target_area_geojson=target_area,
-            date_str=date_str,
-            time_str=time_str,
-            on_step=on_step_callback,
-        )
+            # Run multi-turn tool calling loop with 300s timeout guard
+            final_result = await asyncio.wait_for(
+                agent_orchestrator.run(
+                    target_area_geojson=target_area,
+                    date_str=date_str,
+                    time_str=time_str,
+                    on_step=on_step_callback,
+                ),
+                timeout=300.0,
+            )
+            resolved_mode = "live"
 
         completed_at = datetime.now(timezone.utc).isoformat()
 
@@ -190,19 +205,21 @@ async def _execute_heat_hunt_background(
                     zone["recommend_action"] = dispatch.get("rationale") or dispatch.get("title") or None
                     zone["recommend_action_category"] = dispatch.get("action_type") or dispatch.get("title") or None
 
-        # Update SQLite with success and full result
+        # Update SQLite with success and full result (updating mode to resolved_mode)
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(
                 """
                 UPDATE heat_hunt_jobs
                 SET status = 'completed',
+                    mode = ?,
                     result_json = ?,
                     completed_at = ?,
                     progress_events_json = ?
                 WHERE job_id = ?
                 """,
                 (
+                    resolved_mode,
                     json.dumps(final_result, default=str),
                     completed_at,
                     json.dumps([e.model_dump() for e in events], default=str),
@@ -210,41 +227,80 @@ async def _execute_heat_hunt_background(
                 )
             )
 
-        logger.info(f"HeatHuntService: Job {job_id} completed successfully with {len(events)} events.")
+        logger.info(f"HeatHuntService: Job {job_id} completed successfully ({resolved_mode}) with {len(events)} events.")
 
     except Exception as exc:
-        logger.error(f"HeatHuntService: Job {job_id} failed with error: {exc}", exc_info=True)
-        completed_at = datetime.now(timezone.utc).isoformat()
-        err_msg = str(exc)
-
-        # Emit failure event
-        fail_event = ProgressEvent(
-            step_number=len(events) + 1,
-            tool_name="execution_error",
-            message=f"Investigation halted due to execution error: {err_msg}",
-            type="error"
+        logger.warning(
+            f"HeatHuntService: Live investigation failed for job {job_id}: {exc}. "
+            "Engaging Reliability Shield 3-tier fallback...",
+            exc_info=True
         )
-        events.append(fail_event)
-        await _broadcast_event(job_id, fail_event)
-
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                """
-                UPDATE heat_hunt_jobs
-                SET status = 'failed',
-                    error = ?,
-                    completed_at = ?,
-                    progress_events_json = ?
-                WHERE job_id = ?
-                """,
-                (
-                    err_msg,
-                    completed_at,
-                    json.dumps([e.model_dump() for e in events], default=str),
-                    job_id
-                )
+        try:
+            # Graceful fault recovery via Fallback Service
+            final_result = await resolve_heat_hunt_fallback(
+                job_id=job_id,
+                on_step_callback=on_step_callback,
+                failure_reason=str(exc),
+                replay_delay_ms=150,
             )
+            resolved_mode = final_result.get("mode", "demo")
+            completed_at = datetime.now(timezone.utc).isoformat()
+
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    """
+                    UPDATE heat_hunt_jobs
+                    SET status = 'completed',
+                        mode = ?,
+                        result_json = ?,
+                        completed_at = ?,
+                        progress_events_json = ?
+                    WHERE job_id = ?
+                    """,
+                    (
+                        resolved_mode,
+                        json.dumps(final_result, default=str),
+                        completed_at,
+                        json.dumps([e.model_dump() for e in events], default=str),
+                        job_id
+                    )
+                )
+            logger.info(f"HeatHuntService: Job {job_id} recovered via fallback ({resolved_mode}).")
+
+        except Exception as fallback_exc:
+            logger.error(f"HeatHuntService: Critical fallback failure for job {job_id}: {fallback_exc}", exc_info=True)
+            completed_at = datetime.now(timezone.utc).isoformat()
+            err_msg = f"Live failure: {exc}; Fallback failure: {fallback_exc}"
+
+            # Emit failure event
+            fail_event = ProgressEvent(
+                step_number=len(events) + 1,
+                tool_name="execution_error",
+                message=f"Investigation halted due to execution error: {err_msg}",
+                type="error"
+            )
+            events.append(fail_event)
+            await _broadcast_event(job_id, fail_event)
+
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    """
+                    UPDATE heat_hunt_jobs
+                    SET status = 'failed',
+                        error = ?,
+                        completed_at = ?,
+                        progress_events_json = ?
+                    WHERE job_id = ?
+                    """,
+                    (
+                        err_msg,
+                        completed_at,
+                        json.dumps([e.model_dump() for e in events], default=str),
+                        job_id
+                    )
+                )
     finally:
         _running_tasks.pop(job_id, None)
 

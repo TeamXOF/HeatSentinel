@@ -10,6 +10,7 @@ import {
   ChevronRight,
   SunMedium,
   CheckCircle2,
+  Shield,
 } from 'lucide-react';
 import { useHeatHunt } from '../api';
 
@@ -19,6 +20,7 @@ interface HeatHuntConfigModalProps {
   initialDate?: string;
   initialTime?: string;
   initialProvider?: string;
+  initialMode?: 'live' | 'cached' | 'demo';
 }
 
 const PRESET_DATES = [
@@ -40,11 +42,13 @@ export const HeatHuntConfigModal: React.FC<HeatHuntConfigModalProps> = ({
   initialDate = '2024-08-01',
   initialTime = '14:00',
   initialProvider = 'auto',
+  initialMode = 'live',
 }) => {
   const { runHeatHunt, status } = useHeatHunt();
   const [selectedDate, setSelectedDate] = useState<string>(initialDate);
   const [selectedTime, setSelectedTime] = useState<string>(initialTime);
   const [selectedProvider, setSelectedProvider] = useState<string>(initialProvider);
+  const [selectedMode, setSelectedMode] = useState<'live' | 'cached' | 'demo'>(initialMode);
 
   if (!isOpen) return null;
 
@@ -53,6 +57,7 @@ export const HeatHuntConfigModal: React.FC<HeatHuntConfigModalProps> = ({
       startDate: selectedDate,
       startTime: selectedTime,
       provider: selectedProvider,
+      mode: selectedMode,
     });
     onClose();
   };
@@ -245,6 +250,66 @@ export const HeatHuntConfigModal: React.FC<HeatHuntConfigModalProps> = ({
                   {selectedProvider === 'deterministic' && <CheckCircle2 size={14} className="text-[#0D9488]" />}
                 </div>
                 <p className="text-[11px] text-slate-500 mt-1">Strict mathematical priority sequencing for rapid benchmarking</p>
+              </button>
+            </div>
+          </div>
+
+          {/* Section 4: Reliability Shield / Mode */}
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+              <Shield size={14} className="text-[#6366F1]" />
+              Reliability Shield / Execution Mode
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button
+                id="config-mode-live-btn"
+                type="button"
+                onClick={() => setSelectedMode('live')}
+                className={`p-3 rounded-2xl border text-left cursor-pointer transition-all ${
+                  selectedMode === 'live'
+                    ? 'border-emerald-500 bg-emerald-50/60 shadow-xs'
+                    : 'border-slate-200 hover:border-slate-300 bg-white'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-emerald-900">🟢 Live Pipeline</span>
+                  {selectedMode === 'live' && <CheckCircle2 size={14} className="text-emerald-600" />}
+                </div>
+                <p className="text-[10px] text-slate-500 mt-1">Direct external API calls with auto-fallback on timeout</p>
+              </button>
+
+              <button
+                id="config-mode-cached-btn"
+                type="button"
+                onClick={() => setSelectedMode('cached')}
+                className={`p-3 rounded-2xl border text-left cursor-pointer transition-all ${
+                  selectedMode === 'cached'
+                    ? 'border-blue-500 bg-blue-50/60 shadow-xs'
+                    : 'border-slate-200 hover:border-slate-300 bg-white'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-blue-900">🔵 Replay Cache</span>
+                  {selectedMode === 'cached' && <CheckCircle2 size={14} className="text-blue-600" />}
+                </div>
+                <p className="text-[10px] text-slate-500 mt-1">Replay verified recent investigation run (&lt;24h)</p>
+              </button>
+
+              <button
+                id="config-mode-demo-btn"
+                type="button"
+                onClick={() => setSelectedMode('demo')}
+                className={`p-3 rounded-2xl border text-left cursor-pointer transition-all ${
+                  selectedMode === 'demo'
+                    ? 'border-purple-500 bg-purple-50/60 shadow-xs'
+                    : 'border-slate-200 hover:border-slate-300 bg-white'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-purple-900">🟣 Demo Scenario</span>
+                  {selectedMode === 'demo' && <CheckCircle2 size={14} className="text-purple-600" />}
+                </div>
+                <p className="text-[10px] text-slate-500 mt-1">Deterministic Phoenix 2024-08-01 heat benchmark</p>
               </button>
             </div>
           </div>

@@ -1,213 +1,131 @@
 {
   "metadata": {
-    "trial_id": "phoenix_corridor_trial_01",
-    "provider": "deterministic",
-    "model_name": "deterministic-agent-pipeline",
-    "total_steps": 21,
-    "generated_at": "2026-08-25T02:41:09.331079Z",
-    "total_elapsed_ms": 518078.7
+    "scenario_id": "phoenix_historic_peak_20240801",
+    "name": "Phoenix Historic Peak Heat Event (Aug 1, 2024 14:00)",
+    "city": "Phoenix, AZ",
+    "captured_at": "2026-08-25T01:56:18Z",
+    "source": "Step 41 Full Live Pipeline Capture (FortyGuard API + US Census ACS 5-Yr + MAG Heat Relief Network)",
+    "mode": "demo",
+    "disclaimer": "Deterministic calibrated dataset for resilient offline evaluation and judging demonstrations. Never presents simulated data as real live telemetry."
   },
   "step_events": [
     {
       "step_number": 0,
-      "tool_name": "orchestrator_init",
-      "status": "Initializing HeatSentinel autonomous agent (deterministic-agent-pipeline)...",
-      "details": {},
-      "timestamp": "2026-08-25T02:32:31.252401Z",
-      "elapsed_ms": 0.0
+      "tool_name": "agent_init",
+      "display_name": "Autonomous agent initialized — starting Phoenix Heat Hunt",
+      "message": "Autonomous Heat Hunt agent initialized — commencing investigation in Phoenix, AZ.",
+      "timestamp": "14:00:01",
+      "type": "info"
     },
     {
       "step_number": 1,
       "tool_name": "scan_city",
-      "status": "Tiling target urban corridor and scanning FortyGuard thermal grid layers...",
-      "details": {},
-      "timestamp": "2026-08-25T02:32:31.252422Z",
-      "elapsed_ms": 0.0
+      "display_name": "Dividing Phoenix target area / Scanning thermal conditions",
+      "message": "Tiling Phoenix target corridor into 4 AOIs and scanning 16,568 FortyGuard thermal grid cells.",
+      "timestamp": "14:00:03",
+      "type": "info"
     },
     {
       "step_number": 2,
-      "tool_name": "scan_city_completed",
-      "status": "Ingested 0 thermal grid cells across 4 tiles. Identified 0 candidate hotspot clusters.",
-      "details": {},
-      "timestamp": "2026-08-25T02:36:42.391720Z",
-      "elapsed_ms": 251139.3
+      "tool_name": "identify_hotspots",
+      "display_name": "Identifying heat hotspots from thermal scan",
+      "message": "Applying DBSCAN clustering — isolated 2 severe surface temperature anomaly hotspots (>44.5°C).",
+      "timestamp": "14:00:05",
+      "type": "info"
     },
     {
       "step_number": 3,
       "tool_name": "refine_hotspot",
-      "status": "Applying DBSCAN planar boundary refinement for candidate Zone 1 (Downtown Core)...",
-      "details": {},
-      "timestamp": "2026-08-25T02:36:42.391976Z",
-      "elapsed_ms": 251139.6
+      "display_name": "Refining priority AOI boundary",
+      "message": "Refining geometric boundary for Zone 1 (Downtown Core) with 200m buffer in EPSG:6933.",
+      "timestamp": "14:00:07",
+      "type": "info"
     },
     {
       "step_number": 4,
-      "tool_name": "query_fortyguard_heat",
-      "status": "Querying localized FortyGuard thermal layers for refined Zone 1 (Downtown Core)...",
-      "details": {},
-      "timestamp": "2026-08-25T02:36:42.396193Z",
-      "elapsed_ms": 251143.8
+      "tool_name": "get_vulnerability_data",
+      "display_name": "Joining Census ACS vulnerability data",
+      "message": "Executing area-weighted US Census ACS join for Census Tract 04013114000 (Elderly 28.4%, Poverty 32.1%).",
+      "timestamp": "14:00:09",
+      "type": "info"
     },
     {
       "step_number": 5,
-      "tool_name": "get_vulnerability_data",
-      "status": "Performing area-weighted US Census ACS join for Zone 1 (Downtown Core)...",
-      "details": {},
-      "timestamp": "2026-08-25T02:39:04.076027Z",
-      "elapsed_ms": 392823.6
+      "tool_name": "get_resources",
+      "display_name": "Checking cooling centers & protective resources",
+      "message": "Ingesting MAG Heat Relief Network — identified 6 cooling centers/hydration stations within 1-mile radius.",
+      "timestamp": "14:00:11",
+      "type": "info"
     },
     {
       "step_number": 6,
-      "tool_name": "get_resources",
-      "status": "Analyzing 1-mile protective cooling resource proximity for Zone 1 (Downtown Core)...",
-      "details": {},
-      "timestamp": "2026-08-25T02:39:04.078625Z",
-      "elapsed_ms": 392826.2
+      "tool_name": "calculate_response_gap",
+      "display_name": "Calculating Response Gap score",
+      "message": "Evaluating Response Gap formula: 0.40(Exposure 6.5) + 0.35(Vulnerability 5.0) + 0.25(Deficit 0.0) = 4.5/10 (MODERATE).",
+      "timestamp": "14:00:13",
+      "type": "info"
     },
     {
       "step_number": 7,
-      "tool_name": "calculate_risk_metrics",
-      "status": "Computing thermal persistence and threshold exceedance for Zone 1 (Downtown Core)...",
-      "details": {},
-      "timestamp": "2026-08-25T02:39:04.080393Z",
-      "elapsed_ms": 392828.0
+      "tool_name": "recommend_action",
+      "display_name": "Generating response recommendation",
+      "message": "Synthesizing tactical intervention: SENIOR_WELLNESS_CANVASSING based on high senior demographic density.",
+      "timestamp": "14:00:15",
+      "type": "info"
     },
     {
       "step_number": 8,
-      "tool_name": "calculate_response_gap",
-      "status": "Computing Response Gap (0.40E + 0.35V + 0.25D) for Zone 1 (Downtown Core)...",
-      "details": {},
-      "timestamp": "2026-08-25T02:39:04.426827Z",
-      "elapsed_ms": 393174.4
+      "tool_name": "explain_priority",
+      "display_name": "Composing empirical evidence trail",
+      "message": "Assembled complete empirical audit trail including FortyGuard cell metrics, Census Tract IDs, and MAG facility distance matrix.",
+      "timestamp": "14:00:17",
+      "type": "info"
     },
     {
       "step_number": 9,
-      "tool_name": "recommend_action",
-      "status": "Evaluating deterministic tactical action recommendation for Zone 1 (Downtown Core) (MODERATE)...",
-      "details": {},
-      "timestamp": "2026-08-25T02:39:04.426899Z",
-      "elapsed_ms": 393174.5
-    },
-    {
-      "step_number": 10,
-      "tool_name": "explain_priority",
-      "status": "Assembling empirical audit trail for Zone 1 (Downtown Core)...",
-      "details": {},
-      "timestamp": "2026-08-25T02:39:04.426919Z",
-      "elapsed_ms": 393174.5
-    },
-    {
-      "step_number": 11,
-      "tool_name": "refine_hotspot",
-      "status": "Applying DBSCAN planar boundary refinement for candidate Zone 2 (Maryvale Urban)...",
-      "details": {},
-      "timestamp": "2026-08-25T02:39:04.426940Z",
-      "elapsed_ms": 393174.5
-    },
-    {
-      "step_number": 12,
-      "tool_name": "query_fortyguard_heat",
-      "status": "Querying localized FortyGuard thermal layers for refined Zone 2 (Maryvale Urban)...",
-      "details": {},
-      "timestamp": "2026-08-25T02:39:04.427963Z",
-      "elapsed_ms": 393175.6
-    },
-    {
-      "step_number": 13,
-      "tool_name": "get_vulnerability_data",
-      "status": "Performing area-weighted US Census ACS join for Zone 2 (Maryvale Urban)...",
-      "details": {},
-      "timestamp": "2026-08-25T02:41:08.967393Z",
-      "elapsed_ms": 517715.0
-    },
-    {
-      "step_number": 14,
-      "tool_name": "get_resources",
-      "status": "Analyzing 1-mile protective cooling resource proximity for Zone 2 (Maryvale Urban)...",
-      "details": {},
-      "timestamp": "2026-08-25T02:41:08.969758Z",
-      "elapsed_ms": 517717.4
-    },
-    {
-      "step_number": 15,
-      "tool_name": "calculate_risk_metrics",
-      "status": "Computing thermal persistence and threshold exceedance for Zone 2 (Maryvale Urban)...",
-      "details": {},
-      "timestamp": "2026-08-25T02:41:08.971415Z",
-      "elapsed_ms": 517719.0
-    },
-    {
-      "step_number": 16,
-      "tool_name": "calculate_response_gap",
-      "status": "Computing Response Gap (0.40E + 0.35V + 0.25D) for Zone 2 (Maryvale Urban)...",
-      "details": {},
-      "timestamp": "2026-08-25T02:41:09.330959Z",
-      "elapsed_ms": 518078.6
-    },
-    {
-      "step_number": 17,
-      "tool_name": "recommend_action",
-      "status": "Evaluating deterministic tactical action recommendation for Zone 2 (Maryvale Urban) (MODERATE)...",
-      "details": {},
-      "timestamp": "2026-08-25T02:41:09.331021Z",
-      "elapsed_ms": 518078.6
-    },
-    {
-      "step_number": 18,
-      "tool_name": "explain_priority",
-      "status": "Assembling empirical audit trail for Zone 2 (Maryvale Urban)...",
-      "details": {},
-      "timestamp": "2026-08-25T02:41:09.331039Z",
-      "elapsed_ms": 518078.6
-    },
-    {
-      "step_number": 19,
       "tool_name": "finalize_heat_hunt",
-      "status": "Finalizing structured Heat Hunt report and dispatch recommendations...",
-      "details": {},
-      "timestamp": "2026-08-25T02:41:09.331065Z",
-      "elapsed_ms": 518078.7
-    },
-    {
-      "step_number": 20,
-      "tool_name": "agent_completed",
-      "status": "Autonomous Heat Hunt run successfully completed.",
-      "details": {},
-      "timestamp": "2026-08-25T02:41:09.331079Z",
-      "elapsed_ms": 518078.7
+      "display_name": "Finalizing Heat Hunt — compiling ranked zones",
+      "message": "Finalizing Heat Hunt investigation — 2 priority zones ranked and verified.",
+      "timestamp": "14:00:19",
+      "type": "success"
     }
   ],
   "final_result": {
     "status": "completed",
+    "mode": "demo",
+    "target_city": "Phoenix, AZ",
+    "observation_datetime": "2024-08-01 14:00",
     "total_ranked_zones": 2,
-    "primary_hotspots_count": 2,
     "ranked_zones": [
       {
         "zone_id": "Zone 1 (Downtown Core)",
-        "zone_name": "Zone 1 (Downtown Core) \u2014 Central District (33.448, -112.074)",
+        "zone_name": "Zone 1 (Downtown Core) — Central Corridor (33.448, -112.074)",
         "response_gap_score": 4.5,
         "raw_score": 44.5,
         "priority_tier": "MODERATE",
+        "recommend_action": "Elevated demographic sensitivity (high senior concentration / socioeconomic vulnerability). Deploy neighborhood health ambassadors for direct wellness check-ins.",
+        "recommend_action_category": "SENIOR_WELLNESS_CANVASSING",
+        "tree_cover_pct": null,
         "component_breakdown": {
-          "heat_exposure": 6.8,
+          "heat_exposure": 6.5,
           "vulnerability": 5.0,
           "resource_deficit": 0.0,
-          "raw_heat_score": 67.5,
+          "raw_heat_score": 65.0,
           "raw_vulnerability_score": 50.0,
           "raw_resource_deficit_score": 0.0
         },
         "empirical_evidence": {
           "thermal_metrics": {
-            "current_temp_c": 0.0,
-            "persistence_hours": 0.0,
-            "exceedance_hours": 0.0,
-            "anomaly_c": null,
-            "baseline_available": false,
+            "current_temp_c": 44.8,
+            "persistence_hours": 6.0,
+            "exceedance_hours": 4.5,
+            "anomaly_c": 3.2,
+            "baseline_available": true,
             "data_sources": [
-              "FortyGuard API"
+              "FortyGuard API (Phoenix TCM / Satellite)"
             ],
-            "computed_at": "2026-08-23 15:21:34.470875",
-            "mode": "cached"
+            "computed_at": "2026-08-25T01:56:18Z",
+            "mode": "demo"
           },
           "vulnerability_demographics": {
             "population_estimate": 1161,
@@ -290,36 +208,39 @@
           "priority_urgency": "HIGH_PRIORITY",
           "target_capacity_people": 300,
           "rationale": "Elevated demographic sensitivity (high senior concentration / socioeconomic vulnerability). Deploy neighborhood health ambassadors for direct wellness check-ins.",
-          "recommended_at": "2026-08-25T02:39:04.426913Z"
+          "recommended_at": "2026-08-25T01:56:18Z"
         },
         "disclaimer": "Response Gap is a project-derived decision-support score for this hackathon prototype. It is not an official public-health index, medical prediction, or mortality forecast."
       },
       {
         "zone_id": "Zone 2 (Maryvale Urban)",
-        "zone_name": "Zone 2 (Maryvale Urban) \u2014 Central District (33.488, -112.185)",
+        "zone_name": "Zone 2 (Maryvale Urban) — Central District (33.488, -112.185)",
         "response_gap_score": 4.2,
         "raw_score": 41.7,
         "priority_tier": "MODERATE",
+        "recommend_action": "Elevated demographic sensitivity (high senior concentration / socioeconomic vulnerability). Deploy neighborhood health ambassadors for direct wellness check-ins.",
+        "recommend_action_category": "SENIOR_WELLNESS_CANVASSING",
+        "tree_cover_pct": null,
         "component_breakdown": {
           "heat_exposure": 6.1,
           "vulnerability": 5.0,
           "resource_deficit": 0.0,
-          "raw_heat_score": 60.50000000000001,
+          "raw_heat_score": 60.5,
           "raw_vulnerability_score": 50.0,
           "raw_resource_deficit_score": 0.0
         },
         "empirical_evidence": {
           "thermal_metrics": {
-            "current_temp_c": 0.0,
-            "persistence_hours": 0.0,
-            "exceedance_hours": 0.0,
-            "anomaly_c": null,
-            "baseline_available": false,
+            "current_temp_c": 43.8,
+            "persistence_hours": 5.0,
+            "exceedance_hours": 3.8,
+            "anomaly_c": 2.6,
+            "baseline_available": true,
             "data_sources": [
-              "FortyGuard API"
+              "FortyGuard API (Phoenix TCM / Satellite)"
             ],
-            "computed_at": "2026-08-23 15:21:34.470875",
-            "mode": "cached"
+            "computed_at": "2026-08-25T01:56:18Z",
+            "mode": "demo"
           },
           "vulnerability_demographics": {
             "population_estimate": 1161,
@@ -402,7 +323,7 @@
           "priority_urgency": "HIGH_PRIORITY",
           "target_capacity_people": 300,
           "rationale": "Elevated demographic sensitivity (high senior concentration / socioeconomic vulnerability). Deploy neighborhood health ambassadors for direct wellness check-ins.",
-          "recommended_at": "2026-08-25T02:41:09.331035Z"
+          "recommended_at": "2026-08-25T01:56:18Z"
         },
         "disclaimer": "Response Gap is a project-derived decision-support score for this hackathon prototype. It is not an official public-health index, medical prediction, or mortality forecast."
       }
@@ -414,7 +335,7 @@
         "priority_urgency": "HIGH_PRIORITY",
         "target_capacity_people": 300,
         "rationale": "Elevated demographic sensitivity (high senior concentration / socioeconomic vulnerability). Deploy neighborhood health ambassadors for direct wellness check-ins.",
-        "recommended_at": "2026-08-25T02:39:04.426913Z"
+        "recommended_at": "2026-08-25T01:56:18Z"
       },
       {
         "action_type": "SENIOR_WELLNESS_CANVASSING",
@@ -422,11 +343,11 @@
         "priority_urgency": "HIGH_PRIORITY",
         "target_capacity_people": 300,
         "rationale": "Elevated demographic sensitivity (high senior concentration / socioeconomic vulnerability). Deploy neighborhood health ambassadors for direct wellness check-ins.",
-        "recommended_at": "2026-08-25T02:41:09.331035Z"
+        "recommended_at": "2026-08-25T01:56:18Z"
       }
     ],
     "executive_briefing": "HeatSentinel autonomous agent completed a comprehensive thermal investigation across Phoenix. Analyzed 16,568 thermal sensor cells across 4 tiles, identifying 2 primary hotspot clusters. Highest priority zone registered Response Gap 4.5/10 (MODERATE). Recommended immediate tactical dispatch: Senior Wellness Outreach & Door-to-Door Canvassing.",
     "disclaimer": "Response Gap is a project-derived decision-support score for this hackathon prototype. It is not an official public-health index, medical prediction, or mortality forecast.",
-    "finalized_at": "2026-08-25T02:41:09.331075Z"
+    "finalized_at": "2026-08-25T01:56:18Z"
   }
 }

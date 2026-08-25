@@ -13,6 +13,14 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./heatsentinel.db"
     environment: str = "dev"
 
+    # Standardized Timeout & Retry Policy (Step 42)
+    fortyguard_request_timeout_seconds: float = 30.0
+    fortyguard_poll_timeout_seconds: float = 60.0
+    fortyguard_max_retries: int = 2
+    census_request_timeout_seconds: float = 15.0
+    llm_per_turn_timeout_seconds: float = 45.0
+    heat_hunt_overall_timeout_seconds: float = 300.0
+
     model_config = SettingsConfigDict(
         env_file=os.path.join(os.path.dirname(__file__), "..", ".env"),
         extra="ignore"

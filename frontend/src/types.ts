@@ -190,6 +190,7 @@ export interface HeatHuntResult {
   criticalZonesFound: number;
   completedAt: string;
   summary: string;
+  mode?: 'live' | 'cached' | 'demo';
 }
 
 export interface HeatHuntContextValue {
@@ -197,8 +198,9 @@ export interface HeatHuntContextValue {
   progressEvents: HeatHuntProgressEvent[];
   result: HeatHuntResult | null;
   errorMessage: string | null;
+  activeMode: 'live' | 'cached' | 'demo';
   simulateFailure: boolean;
   setSimulateFailure: (simulate: boolean) => void;
-  runHeatHunt: (params?: { startDate?: string; startTime?: string; provider?: string }) => void;
+  runHeatHunt: (params?: { startDate?: string; startTime?: string; provider?: string; mode?: 'live' | 'cached' | 'demo' }) => void;
   resetHeatHunt: () => void;
 }

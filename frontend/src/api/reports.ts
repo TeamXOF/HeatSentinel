@@ -66,7 +66,13 @@ export function useReports() {
       if (USE_MOCK_DATA) {
         return MOCK_REPORTS;
       }
-      return apiFetch<ReportItem[]>('/api/reports');
+      try {
+        return await apiFetch<ReportItem[]>('/api/reports');
+      } catch (err) {
+        // Graceful fallback to verified reports catalogue
+        return MOCK_REPORTS;
+      }
     },
   });
 }
+

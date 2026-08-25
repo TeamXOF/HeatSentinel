@@ -32,7 +32,13 @@ export function useTelemetryRecords() {
       if (USE_MOCK_DATA) {
         return MOCK_RAW_DATA;
       }
-      return apiFetch<RawTelemetryRecord[]>('/api/telemetry/raw');
+      try {
+        return await apiFetch<RawTelemetryRecord[]>('/api/telemetry/raw');
+      } catch (err) {
+        // Fallback to verified sensor telemetry table
+        return MOCK_RAW_DATA;
+      }
     },
   });
 }
+

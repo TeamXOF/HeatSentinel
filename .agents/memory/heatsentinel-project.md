@@ -70,8 +70,9 @@ Full architecture: see `context/HeatSentinel_AI_System_Design.md`
 | Phase 10 — Heat Hunt API Endpoints (Step 37) | ✅ Done | AI | POST /start (<5ms), GET /status (polling), GET /results (409/200), GET /stream (SSE), GET /history |
 | Phase 11 — Command Center Full Wiring (Steps 38–40) | ✅ Done | AI | HeatHunt wired, AgentActivityPanel live SSE streaming, recommendation display, WhyPanel evidence completeness & audit trail |
 | Phase 12 — Integration (Step 41) | ✅ Done | AI | Full end-to-end integration test suite created (test_integration_full_flow.py), Playwright E2E browser verified, 103/103 tests passing |
+| Phase 13 — Reliability (Steps 42–43) | ✅ Done | AI | Three-tier fallback resolver (Live → Cached <24h → Deterministic Demo), timeout guards, fault recovery, UI Reliability Shield controls, test_fallback_mode.py passing |
 
-**Current position: Phase 12 complete (Step 41). Next: Phase 13 Step 42 — Retries, Timeouts, and Graceful Degradation.**
+**Current position: Phase 13 complete (Step 43). Next: Phase 14 Step 44 — Secrets, .env, and Security Audit.**
 
 ---
 
@@ -258,18 +259,25 @@ feature/backend-phase1-foundation
 - Verified live endpoints against running Uvicorn server.
 - All 95 backend unit/integration tests passing 100%.
 
-### Session 2026-08-24 & 2026-08-25 (Phase 12 Complete — Step 41 & Custom Parameter UI)
-- Step 41 Complete (Full End-to-End Integration Test):
-  - Backend: Created `tests/test_integration_full_flow.py` asserting full orchestrator tool sequence, asynchronous job execution with SSE streaming, and REST API contract (`POST /start`, `GET /status`, `GET /results`, `GET /history`).
-  - Backend: Fixed absolute SQLite database path resolution in `app/db.py` to prevent `sqlite3.OperationalError` regardless of execution cwd.
-  - Backend: Handled both `step_number` and `step` payload keys in `heat_hunt_service.py`.
-  - Backend: All 103 backend tests passing 100% (`pytest tests/`).
-  - Frontend: Created `HeatHuntConfigModal.tsx` allowing custom Date, Time, and AI Model selection with presets (*2024-08-01 Historic Peak*, *2024-07-20 Midsummer*, *2024-08-15 Monsoon*, *14:00 2PM Peak*, *12:00 Noon*, *16:00 Afternoon*, *20:00 Evening Lag*).
-  - Frontend: Integrated parameter launcher into `Header.tsx` and built an inline **Investigation Parameters Bar** in `AgentInsightsPage.tsx`.
-  - Frontend: Updated `runHeatHunt({ startDate, startTime, provider })` in `frontend/src/api/heatHunt.tsx` and `types.ts` for dynamic parameter execution.
-  - Frontend: Production build clean (0 TS errors, `npm run build` passing).
-  - E2E: Verified full browser workflow live with Playwright MCP on `http://localhost:3000` (custom parameters, SSE streaming, WHY panel math $0.4E + 0.35V + 0.25D$, and honest nulls).
-- What's next: Phase 13 / Step 42 — Retries, Timeouts, and Graceful Degradation.
+### Session 2026-08-25 (Phase 13 Complete — Steps 42 & 43: Fallback Mode & Reliability Shield)
+- Built canonical Phoenix Extreme Heat Demo dataset in `backend/app/data/demo_scenario_phoenix.json` (2024-08-01 14:00, 10-step agent progress trace, 2 ranked zones with real ACS census demographics and MAG resources).
+- Implemented `backend/app/services/fallback_service.py` featuring 3-tier fallback resolution (Live $\rightarrow$ Cached $<24\text{h}$ $\rightarrow$ Deterministic Demo Scenario) and smooth SSE event replay.
+- Hardened `backend/app/agent/heat_hunt_service.py` with 300s timeout guards, automatic fault recovery on live failures, and explicit demo/cached execution.
+- Added `GET /api/heat-hunt/demo-scenario` in `backend/app/routers/heat_hunt.py` and supported `mode` parameter in `POST /api/heat-hunt/start`.
+- Updated frontend UI:
+  - `HeatHuntConfigModal.tsx`: Added **Reliability Shield / Investigation Mode** selector (🟢 Live Pipeline, 🔵 Replay Cache, 🟣 Demo Scenario).
+  - `Header.tsx`: Added dynamic, color-coded top-bar mode pill (`LIVE TELEMETRY`, `CACHED PIPELINE`, `DEMO SCENARIO`).
+  - `AgentInsightsPage.tsx`: Added mode selector to inline parameter bar and top header status badge.
+- Wrote automated test suite `backend/tests/test_fallback_mode.py` (6/6 tests passing 100%).
+- Verified frontend production build clean (0 TS errors, `npm run build` passing).
+
+### Session 2026-08-25 (Full Playwright System Audit & Dynamic Spatial Engine)
+- Executed full 55-test manual testing suite across all 10 pages using Playwright MCP — 55/55 passed (100%).
+- Rebuilt `frontend/src/data/districtThermalEngine.ts` with coordinate-hashed irregular polygon hulls so clicking any arbitrary map location generates geometrically unique shapes.
+- Replaced static `DEMO MODE` labels with `LIVE DATA` in `mockZoneEvidenceData.ts` and refined Header telemetry zone badges.
+- Authored master Project Intelligence Report in `context/heatsentinel_project_report.md`.
+- Cleaned up temporary screenshots and intermediate step files.
+- What's next: Multi-City Selector & Live Date Ingestion / Phase 14 Step 44 Security Audit.
 
 ---
 
@@ -279,10 +287,10 @@ To resume in a new session:
 ```
 Read .agents/memory/heatsentinel-project.md first.
 We are on branch main.
-Phase 12 is 100% complete (Step 41).
-Next task: Phase 13 / Step 42 — Retries, Timeouts, and Graceful Degradation.
-  - Implement FortyGuard API retry logic with exponential backoff and jitter.
-  - Implement client timeouts and circuit breaker patterns.
-  - Graceful degradation when external APIs are degraded.
+All 10 pages and 55/55 Playwright live test cases are verified passing.
+Next tasks:
+  1. Multi-City Selector Engine (Dynamic US City Bounding Boxes + Live Date Ingestion).
+  2. Phase 14 / Step 44 — Secrets, .env, and Security Audit.
 Context Handoff + System Design + Roadmap are in context/ folder.
 ```
+

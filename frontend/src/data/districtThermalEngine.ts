@@ -1,17 +1,17 @@
-﻿import { HeatZoneMarker } from '../types';
+import { HeatZoneMarker } from '../types';
 import { PHOENIX_DISTRICT_PRESETS, PhoenixDistrictPreset } from '../components/HyperlocalHeatMapCard';
 
 export function generateDistrictThermalGrid(
   centerLng: number,
   centerLat: number,
-  basePeakTempC: number = 44.5,
-  radiusMiles: number = 1.8,
-  gridCols: number = 18,
-  gridRows: number = 18
+  basePeakTempC: number = 43.5,
+  radiusMiles: number = 1.6,
+  gridCols: number = 20,
+  gridRows: number = 20
 ): GeoJSON.FeatureCollection {
   const km = radiusMiles * 1.60934;
-  const deltaLng = (km / (111.32 * Math.cos((centerLat * Math.PI) / 180))) * 0.9;
-  const deltaLat = (km / 110.574) * 0.9;
+  const deltaLng = (km / (111.32 * Math.cos((centerLat * Math.PI) / 180))) * 0.85;
+  const deltaLat = (km / 110.574) * 0.85;
   const minLng = centerLng - deltaLng;
   const maxLng = centerLng + deltaLng;
   const minLat = centerLat - deltaLat;
@@ -19,28 +19,62 @@ export function generateDistrictThermalGrid(
   const stepLng = (maxLng - minLng) / gridCols;
   const stepLat = (maxLat - minLat) / gridRows;
   const features: GeoJSON.Feature[] = [];
+
+  // Realistic FortyGuard thermal variation bounds
+  const clampedBaseTempC = Math.max(38.0, Math.min(46.0, basePeakTempC));
+
+  let tileId = 0;
   for (let r = 0; r < gridRows; r++) {
     for (let c = 0; c < gridCols; c++) {
       const cellMinLng = minLng + c * stepLng;
-      const cellMaxLng = cellMinLng + stepLng * 0.96;
+      const cellMaxLng = cellMinLng + stepLng * 0.97;
       const cellMinLat = minLat + r * stepLat;
-      const cellMaxLat = cellMinLat + stepLat * 0.96;
+      const cellMaxLat = cellMinLat + stepLat * 0.97;
       const cellCenterLng = (cellMinLng + cellMaxLng) / 2;
       const cellCenterLat = (cellMinLat + cellMaxLat) / 2;
-      const dist = Math.sqrt(Math.pow(cellCenterLng - centerLng, 2) + Math.pow(cellCenterLat - centerLat, 2));
-      const normalizedDist = Math.min(1.0, dist / Math.max(deltaLng, deltaLat));
-      const microNoise = Math.sin(c * 1.7) * Math.cos(r * 2.1) * 0.8;
-      const tempC = Math.round((basePeakTempC - normalizedDist * 6.5 + microNoise) * 10) / 10;
+
+      // Realistic urban micro-spatial variance (asphalt, roof albedo, shade)
+      // Realistic range is within 3.5°C of the peak, never decaying to cold or negative temperatures
+      const microPattern1 = Math.sin(c * 0.8 + r * 0.5) * 1.2;
+      const microPattern2 = Math.cos(c * 0.4 - r * 0.7) * 0.9;
+      const distFromCenter = Math.sqrt(Math.pow((c - gridCols / 2) / gridCols, 2) + Math.pow((r - gridRows / 2) / gridRows, 2));
+      const urbanHeatIslandGradient = Math.max(0, 1 - distFromCenter * 0.8) * 1.8;
+
+      const tempC = Math.round((clampedBaseTempC - 2.5 + urbanHeatIslandGradient + microPattern1 * 0.6 + microPattern2 * 0.4) * 10) / 10;
       const tempF = Math.round((tempC * (9 / 5) + 32) * 10) / 10;
+
       features.push({
+        id: `${tileId}`,
         type: 'Feature',
-        properties: { temp: tempC, value: tempC, temp_f: tempF, average_temperature: tempC, max_temperature: tempC + 0.8, grid_id: `cell-${r}-${c}` },
-        geometry: { type: 'Polygon', coordinates: [[[cellMinLng,cellMinLat],[cellMaxLng,cellMinLat],[cellMaxLng,cellMaxLat],[cellMinLng,cellMaxLat],[cellMinLng,cellMinLat]]] },
+        properties: {
+          tile_id: tileId,
+          temp: tempC,
+          value: tempC,
+          temp_f: tempF,
+          average_temperature: tempF, // FortyGuard standard format
+          min_temperature: Math.round((tempF - 0.6) * 10) / 10,
+          max_temperature: Math.round((tempF + 0.6) * 10) / 10,
+          grid_id: `cell-${r}-${c}`,
+        },
+        geometry: {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [cellMinLng, cellMinLat],
+              [cellMaxLng, cellMinLat],
+              [cellMaxLng, cellMaxLat],
+              [cellMinLng, cellMaxLat],
+              [cellMinLng, cellMinLat],
+            ],
+          ],
+        },
       });
+      tileId++;
     }
   }
   return { type: 'FeatureCollection', features };
 }
+
 
 function generateIrregularHull(centerLng: number, centerLat: number, radius: number, seed: number = 1): number[][] {
   const points = 24;

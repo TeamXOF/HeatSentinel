@@ -7,8 +7,9 @@ ranked heat zones and comprehensive WHY evidence.
 import json
 import hashlib
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, Optional
+
 from fastapi import APIRouter, Request, Query, Body, HTTPException
 from pydantic import BaseModel, Field
 
@@ -20,16 +21,21 @@ from app.logging_config import logger
 router = APIRouter(prefix="/api/analysis", tags=["analysis"])
 
 
-def _default_scan_date() -> str:
-    """Returns the official FortyGuard Phoenix dataset date (2024-08-01) containing 16,568 real thermal points."""
+def _resolve_scan_date(requested_date: Optional[str] = None, time_range: Optional[str] = None) -> str:
+    """Resolves scan date dynamically. Defaults to dataset date if unspecified, or live UTC date when requested."""
+    if requested_date:
+        return requested_date
+    if time_range and time_range.lower() in ("today", "live", "forecast"):
+        return datetime.now(timezone.utc).strftime("%Y-%m-%d")
     return "2024-08-01"
 
 
 class BasicScanRequest(BaseModel):
     city: Optional[str] = Field(default="Phoenix", description="Target city name (Phoenix, Las Vegas, Miami, Houston, Los Angeles, New York)")
     polygon_aoi: Optional[Dict[str, Any]] = Field(default=None, description="GeoJSON polygon geometry override")
-    start_date: Optional[str] = Field(default=None, description="Date string YYYY-MM-DD (defaults to yesterday)")
+    start_date: Optional[str] = Field(default=None, description="Date string YYYY-MM-DD")
     start_time: Optional[str] = Field(default="14:00", description="Time string HH:MM")
+    time_range: Optional[str] = Field(default="Today", description="Temporal scope (Today, 24h Forecast, Peak Heat, Historic 7D)")
     top_n_hotspots: int = Field(default=5, ge=1, le=20, description="Max number of ranked hotspots to detect and return")
 
 
@@ -63,7 +69,7 @@ async def basic_scan(
     Target Area -> FortyGuard Scan -> DBSCAN Hotspots -> Heat Metrics -> Census Joins ->
     MAG Cooling Coverage -> Response Gap -> Ranked Zones with WHY Evidence.
     
-    Uses SQLite response caching for sub-second UI rendering.
+    Supports dynamic temporal shifts and live cache invalidation.
     """
     start_ts = time.time()
     
@@ -71,13 +77,13 @@ async def basic_scan(
     req_body = payload or BasicScanRequest()
     city = req_body.city or "Phoenix"
     polygon = req_body.polygon_aoi or load_default_city_target_area(city)
-    start_date = req_body.start_date or _default_scan_date()
+    start_date = _resolve_scan_date(req_body.start_date, req_body.time_range)
     start_time = req_body.start_time or "14:00"
     top_n = req_body.top_n_hotspots
     
     cache_key = compute_basic_scan_cache_key(polygon, city, start_date, start_time, top_n)
     
-    # 2. Check SQLite Cache
+    # 2. Check SQLite Cache (if not force refresh)
     if not force_refresh:
         with get_db_connection() as conn:
             cursor = conn.cursor()
@@ -94,6 +100,14 @@ async def basic_scan(
                 cached_data["cache_key"] = cache_key
                 cached_data["duration_ms"] = duration_ms
                 return cached_data
+    else:
+        # Clear stale cache entry on force refresh
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM pipeline_basic_scan_cache WHERE cache_key = ?", (cache_key,))
+            conn.commit()
+            logger.info(f"AnalysisRouter: Invalidation triggered for {city} cache key {cache_key}")
+
                 
     # 3. Cache Miss / Refresh - Execute Pipeline
     logger.info(f"AnalysisRouter: Executing live basic-scan pipeline for {city} ({cache_key})...")

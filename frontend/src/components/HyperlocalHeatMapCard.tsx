@@ -14,11 +14,15 @@ import {
   Flame,
   Compass,
   ArrowRight,
+  RotateCcw,
 } from 'lucide-react';
 import { MapFilterTab, HeatZoneMarker } from '../types';
 import { PHOENIX_CENTER } from '../data/mockHeatMapData';
 import { useBasicScan } from '../api';
+import { useCity } from '../context/CityContext';
+import { useQueryClient } from '@tanstack/react-query';
 import { createCustomZoneEvidence } from '../data/mockZoneEvidenceData';
+
 import {
   generateDistrictThermalGrid,
   generateDistrictHotspotPolygons,
@@ -222,19 +226,86 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
   const [mapLoaded, setMapLoaded] = useState(false);
   const [selectedDistrictId, setSelectedDistrictId] = useState<string>('downtown');
   const [customDistrict, setCustomDistrict] = useState<PhoenixDistrictPreset | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const queryClient = useQueryClient();
+  const { activeCity } = useCity();
 
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
   const customTargetMarkerRef = useRef<maplibregl.Marker | null>(null);
 
-  const activeDistrict =
-    customDistrict && selectedDistrictId === 'custom-aoi'
-      ? customDistrict
-      : PHOENIX_DISTRICT_PRESETS.find((d) => d.id === selectedDistrictId) || PHOENIX_DISTRICT_PRESETS[0];
+  const activeDistrict: PhoenixDistrictPreset = useMemo(() => {
+    if (customDistrict && selectedDistrictId === 'custom-aoi') {
+      return customDistrict;
+    }
+    if (activeCity.id !== 'phoenix') {
+      return {
+        id: activeCity.id,
+        zoneId: `zone-${activeCity.id}`,
+        name: `${activeCity.fullName} Heat Corridor`,
+        shortLabel: activeCity.name,
+        icon:
+          activeCity.id === 'las-vegas'
+            ? '🎰'
+            : activeCity.id === 'miami'
+            ? '🌴'
+            : activeCity.id === 'houston'
+            ? '🚀'
+            : activeCity.id === 'los-angeles'
+            ? '🎬'
+            : activeCity.id === 'new-york'
+            ? '🗽'
+            : '📍',
+        coordinates: activeCity.coordinates,
+        zoom: activeCity.defaultZoom,
+        pitch: 40,
+        bearing: -10,
+        peakTempF: activeCity.baselineTempF,
+        peakTempC: Math.round((((activeCity.baselineTempF - 32) * 5) / 9) * 10) / 10,
+        responseGap: activeCity.heatTier === 'CRITICAL' ? 8.4 : activeCity.heatTier === 'HIGH' ? 7.6 : 6.2,
+        tier: activeCity.heatTier,
+        population: 52000,
+        coolingCentersCount: 3,
+        description: activeCity.description,
+      };
+    }
+    return PHOENIX_DISTRICT_PRESETS.find((d) => d.id === selectedDistrictId) || PHOENIX_DISTRICT_PRESETS[0];
+  }, [customDistrict, selectedDistrictId, activeCity]);
+
+  // Fly camera to city coordinates when active city changes
+  useEffect(() => {
+    if (mapInstanceRef.current && mapLoaded) {
+      mapInstanceRef.current.flyTo({
+        center: activeCity.coordinates,
+        zoom: activeCity.defaultZoom,
+        pitch: 40,
+        bearing: -10,
+        speed: 1.2,
+        curve: 1.4,
+        essential: true,
+      });
+    }
+  }, [activeCity, mapLoaded]);
+
+  const handleForceRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await queryClient.invalidateQueries({ queryKey: ['basic-scan'] });
+      await queryClient.invalidateQueries({ queryKey: ['kpis'] });
+      await queryClient.invalidateQueries({ queryKey: ['agentStatus'] });
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 700);
+    }
+  };
 
   // React Query for Live/Cached Basic Pipeline Scan
-  const { data: scanResult, isLoading: isScanLoading } = useBasicScan();
+  const { data: scanResult, isLoading: isScanLoading } = useBasicScan({
+    city: activeCity.name,
+    startDate: selectedTimeRange === 'Today' ? undefined : undefined,
+  });
+
 
   // Dynamically generate district thermal raster and ranked polygons
   const districtThermalGrid = useMemo(() => {
@@ -772,11 +843,28 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
           </div>
         </div>
 
-        {/* Right: Time Selector & Layers Button */}
+        {/* Right: Refresh Ingestion, Time Selector & Layers Button */}
         <div className="flex items-center gap-2 self-end md:self-auto shrink-0">
+          {/* Force Live Ingestion Refresh */}
+          <button
+            type="button"
+            id="heatmap-force-refresh-btn"
+            onClick={handleForceRefresh}
+            disabled={isRefreshing}
+            title="Force live FortyGuard satellite ingestion and bypass cached results"
+            className="min-h-[38px] flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-slate-50 border border-slate-200/80 text-xs font-semibold text-slate-700 hover:text-[#0F172A] focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-colors cursor-pointer shadow-2xs disabled:opacity-60"
+          >
+            <RotateCcw
+              size={13}
+              className={`${isRefreshing ? 'animate-spin text-[#F97316]' : 'text-[#64748B]'}`}
+            />
+            <span className="hidden sm:inline">Refresh</span>
+          </button>
+
           <div className="relative">
             <button
               type="button"
+              id="heatmap-timeframe-dropdown-btn"
               aria-label="Select timeframe"
               aria-expanded={isTimeDropdownOpen}
               onClick={() => setIsTimeDropdownOpen(!isTimeDropdownOpen)}
@@ -787,7 +875,7 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
             </button>
 
             {isTimeDropdownOpen && (
-              <div className="absolute right-0 mt-1.5 w-36 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+              <div className="absolute right-0 mt-1.5 w-40 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
                 {['Today', '24h Forecast', 'Peak Heat (2PM)', 'Historic (7D)'].map((opt) => (
                   <button
                     key={opt}
@@ -808,6 +896,7 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
               </div>
             )}
           </div>
+
 
           <div className="relative">
             <button

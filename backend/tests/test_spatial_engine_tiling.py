@@ -25,11 +25,11 @@ def test_tiling_phoenix_target():
     
     stats = describe_tiling(tiles)
     assert stats["count"] == len(tiles)
-    assert stats["max_area_mi2"] <= 10.1 # Accommodate float jitter
+    assert stats["max_area_mi2"] < 10.0
     
     # Check that each tile is a valid GeoJSON
     for t in tiles:
-        assert t["area_mi2"] <= 10.1
+        assert t["area_mi2"] < 10.0
         assert "geometry" in t
         assert t["geometry"]["type"] in ["Polygon", "MultiPolygon"]
         assert "id" in t
@@ -80,3 +80,34 @@ def test_configuration_error_guard():
         tile_polygon(small_polygon, max_area_mi2=0.1)
     
     assert "exceeds max area" in str(exc.value)
+
+def test_strict_area_limit(monkeypatch):
+    """
+    Deliberately construct a tile at exactly 10.0 mi2 and 9.999 mi2 using real
+    Phoenix boundary coordinates to ensure strict < 10.0 enforcement.
+    """
+    small_coords = [
+        [-112.08, 33.44],
+        [-112.07, 33.44],
+        [-112.07, 33.43],
+        [-112.08, 33.43],
+        [-112.08, 33.44]
+    ]
+    small_polygon = {
+        "type": "Polygon",
+        "coordinates": [small_coords]
+    }
+    
+    import app.utils.spatial_engine
+    
+    # 1. Test exactly 10.0 mi2 - should fail
+    monkeypatch.setattr(app.utils.spatial_engine, "calculate_area_sqmi", lambda x: 10.0)
+    with pytest.raises(ConfigurationError) as exc:
+        tile_polygon(small_polygon, max_area_mi2=10.0)
+    assert "exceeds max area: 10.0 mi2" in str(exc.value)
+
+    # 2. Test 9.999 mi2 - should pass
+    monkeypatch.setattr(app.utils.spatial_engine, "calculate_area_sqmi", lambda x: 9.999)
+    tiles = tile_polygon(small_polygon, max_area_mi2=10.0)
+    assert len(tiles) == 1
+    assert tiles[0]["area_mi2"] == 9.999

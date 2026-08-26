@@ -12,6 +12,7 @@ from typing import Dict, Any, List, Optional
 from shapely.geometry import shape, Point
 from shapely.ops import transform
 from pyproj import CRS, Transformer
+from app.models.zone import LatLng
 
 from app.logging_config import logger
 
@@ -94,7 +95,8 @@ def get_resource_coverage_for_zone(
         if len(coords) < 2:
             continue
             
-        pt_wgs = Point(coords[0], coords[1])
+        parsed_ll = LatLng.from_geojson_coords(coords)
+        pt_wgs = Point(parsed_ll.to_geojson_coords())
         pt_az = transform(project_to_az, pt_wgs)
         
         distance_ft = zone_geom_az.distance(pt_az)

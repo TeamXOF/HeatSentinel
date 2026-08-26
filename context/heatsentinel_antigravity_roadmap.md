@@ -342,7 +342,7 @@ Report: files created, screenshot description of the resulting layout, confirmat
 **ANTIGRAVITY PROMPT**
 ```
 CONTEXT
-HeatSentinel AI depends entirely on the FortyGuard API (base URL https://api.fortyguard.com). Use the verified FortyGuard API specification in the project context. Do not invent endpoints, parameters, response fields, or capabilities. Verified endpoints are: POST /v1/system/fetch-api-key-custom-usage, POST /v1/heatmap, POST /v1/env_params, POST /v1/satellite, POST /v1/streetview, POST /v1/heat_intelligence, GET /v1/status/{activity_id}. This is a U.S.-only, Phoenix-primary, NYC-secondary project with no forecast capability, a 10 mi² Basic-tier area cap per heatmap call, 60/80/100m granularity, and an async activity_id submit→poll→retrieve workflow.
+HeatSentinel AI depends entirely on the FortyGuard API (base URL https://api.fortyguard.com). Use the verified FortyGuard API specification in the project context. Do not invent endpoints, parameters, response fields, or capabilities. Verified endpoints are: POST /v1/system/fetch-api-key-custom-usage, POST /v1/heatmap, POST /v1/env_params, POST /v1/satellite, POST /v1/streetview, POST /v1/heat_intelligence, GET /v1/status/{activity_id}. This is a U.S.-only, Phoenix-primary, NYC-secondary project with +12h forecast capability, a 10 mi² Basic-tier area cap per heatmap call, 60/80/100m granularity, and an async activity_id submit→poll→retrieve workflow.
 
 CURRENT STATE
 Config module exists and can load `FORTYGUARD_API_KEY` and `FORTYGUARD_BASE_URL`. No FortyGuard calls have been made yet.

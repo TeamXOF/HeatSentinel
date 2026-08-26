@@ -94,7 +94,7 @@ def tile_polygon(geojson_polygon: dict, max_area_mi2: float = 10.0) -> list[dict
                     
                     actual_area = calculate_area_sqmi(wgs84_geojson)
                     
-                    if actual_area > max_area_mi2 + 0.1:
+                    if actual_area >= max_area_mi2:
                         raise ConfigurationError(f"Tile {tile_idx} exceeds max area: {actual_area} mi2")
                         
                     tiles.append({

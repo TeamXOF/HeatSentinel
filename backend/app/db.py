@@ -106,4 +106,16 @@ def init_db():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS heat_intelligence_jobs (
+                job_id TEXT PRIMARY KEY,
+                zone_id TEXT NOT NULL,
+                activity_id TEXT,
+                status TEXT NOT NULL,
+                download_link TEXT,
+                error TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                expires_at TIMESTAMP
+            )
+        """)
     logger.info("Database initialized successfully.")

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Play,
@@ -162,11 +162,11 @@ export const PresenterDemoController: React.FC = () => {
           id="presenter-hud-open-btn"
           onClick={() => setIsOpen(true)}
           title="Open Judging Demo Flow Controller (Shortcut: Shift + P)"
-          className="fixed bottom-6 right-6 z-40 flex items-center gap-2 bg-[#0F172A] hover:bg-slate-800 text-white px-4 py-2.5 rounded-full shadow-2xl border border-slate-700 font-bold text-xs cursor-pointer transition-all hover:scale-105"
+          className="fixed bottom-6 right-6 z-40 flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-900 px-4 py-2.5 rounded-full shadow-2xl border border-slate-200 font-bold text-xs cursor-pointer transition-all hover:scale-105"
         >
           <Sparkles size={15} className="text-[#F97316]" />
           <span>Pitch HUD (3-Min)</span>
-          <span className="bg-slate-800 text-slate-300 text-[10px] px-1.5 py-0.5 rounded border border-slate-600">
+          <span className="bg-slate-100 text-slate-500 text-[10px] px-1.5 py-0.5 rounded border border-slate-200">
             Shift+P
           </span>
         </button>

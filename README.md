@@ -50,6 +50,7 @@ HeatSentinel is engineered as a **modular monolith** with a **deterministic anal
                     │   • MapLibre GL Interactive Contours   │
                     │   • Real-Time KPI Stat Cards           │
                     │   • 3-Pillar Empirical WHY Drawer      │
+                    │   • On-Demand Async Heat Intel PDFs    │
                     │   • Tactical Priority Registry         │
                     └────────────────────────────────────────┘
 ```

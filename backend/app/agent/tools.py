@@ -46,6 +46,10 @@ SCAN_CITY_SCHEMA: Dict[str, Any] = {
             "time_str": {
                 "type": "string",
                 "description": "Observation time in HH:MM format (24-hour). Defaults to '14:00' peak heat if omitted."
+            },
+            "forecast_hours": {
+                "type": "integer",
+                "description": "Optional number of hours (0-12) to forecast into the future from start time."
             }
         },
         "required": []
@@ -72,6 +76,10 @@ QUERY_FORTYGUARD_HEAT_SCHEMA: Dict[str, Any] = {
             "time_str": {
                 "type": "string",
                 "description": "Time in HH:MM format."
+            },
+            "forecast_hours": {
+                "type": "integer",
+                "description": "Optional number of hours (0-12) to forecast into the future."
             },
             "analytic_type": {
                 "type": "string",
@@ -353,6 +361,8 @@ async def run_scan_city(arguments: Dict[str, Any]) -> Dict[str, Any]:
     date_str = arguments.get("date_str") or "2024-08-01"
     time_str = arguments.get("time_str", "14:00")
 
+    forecast_hours = arguments.get("forecast_hours")
+
     client = FortyGuardClient()
     scan_res = await scan_area(
         polygon=target_geom,
@@ -360,6 +370,7 @@ async def run_scan_city(arguments: Dict[str, Any]) -> Dict[str, Any]:
         granularity=60,
         start_date=date_str,
         start_time=time_str,
+        forecast_hours=forecast_hours,
         client=client,
     )
     raw_cells = scan_res.get("data", {}).get("features", [])
@@ -391,10 +402,32 @@ async def run_query_fortyguard_heat(arguments: Dict[str, Any]) -> Dict[str, Any]
     date_str = arguments.get("date_str") or "2024-08-01"
     time_str = arguments.get("time_str", "14:00")
     analytic_type = arguments.get("analytic_type", "tcm")
+    forecast_hours = arguments.get("forecast_hours")
+    
+    end_date = None
+    end_time = None
+    filter_type = 1
+    
+    if forecast_hours is not None and forecast_hours > 0:
+        from datetime import datetime, timedelta
+        try:
+            dt = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
+            end_dt = dt + timedelta(hours=forecast_hours)
+            end_date = end_dt.strftime("%Y-%m-%d")
+            end_time = end_dt.strftime("%H:%M")
+            filter_type = 2
+        except Exception as e:
+            logger.error(f"Error parsing date/time for forecast: {e}")
 
     req = HeatmapRequest(
         polygon_aoi=polygon,
-        date_time={"start_date": date_str, "start_time": time_str, "filter_type": 1},
+        date_time={
+            "start_date": date_str, 
+            "start_time": time_str, 
+            "end_date": end_date,
+            "end_time": end_time,
+            "filter_type": filter_type
+        },
         analytic_type=analytic_type,
         granularity=60,
     )

@@ -201,3 +201,49 @@ async def test_tool_registry_error_handling():
     err_arg_res = await registry.execute_tool("calculate_response_gap", {})
     assert err_arg_res["status"] == "error"
     assert "error" in err_arg_res
+
+@pytest.mark.asyncio
+async def test_forecast_payload_formatting(monkeypatch):
+    """Verify a forecast request with forecast_hours > 0 sets filter_type=2 and correct end_date/end_time."""
+    registry = get_tool_registry()
+
+    # We will mock the client's run_heatmap so we can intercept the request
+    captured_request = None
+
+    class MockFortyGuardClient:
+        async def run_heatmap(self, request):
+            nonlocal captured_request
+            captured_request = request
+            return {"type": "FeatureCollection", "features": []}
+
+    # Patch the service where run_query_fortyguard_heat instantiates it
+    monkeypatch.setattr("app.services.fortyguard_client.FortyGuardClient", MockFortyGuardClient)
+
+    # 1. Test current-only payload
+    res_current = await registry.execute_tool(
+        "query_fortyguard_heat",
+        {
+            "polygon_geojson": {"type": "Polygon", "coordinates": [[[-112.0, 33.4], [-112.0, 33.5], [-111.9, 33.5], [-111.9, 33.4], [-112.0, 33.4]]]},
+            "date_str": "2024-08-01",
+            "time_str": "14:00"
+        }
+    )
+    assert res_current["status"] == "success"
+    assert captured_request.date_time.filter_type == 1
+    assert captured_request.date_time.end_time is None
+
+    # 2. Test forecast payload
+    res_forecast = await registry.execute_tool(
+        "query_fortyguard_heat",
+        {
+            "polygon_geojson": {"type": "Polygon", "coordinates": [[[-112.0, 33.4], [-112.0, 33.5], [-111.9, 33.5], [-111.9, 33.4], [-112.0, 33.4]]]},
+            "date_str": "2024-08-01",
+            "time_str": "14:00",
+            "forecast_hours": 12
+        }
+    )
+    assert res_forecast["status"] == "success"
+    assert captured_request.date_time.filter_type == 2
+    assert captured_request.date_time.end_date == "2024-08-02"
+    assert captured_request.date_time.end_time == "02:00"
+

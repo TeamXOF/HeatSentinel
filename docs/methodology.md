@@ -10,7 +10,7 @@ HeatSentinel AI calculates a "Heat Anomaly" for any given zone by comparing the 
 
 ### Core Principles
 1. **No Fabrication:** We NEVER invent or hallucinate a baseline temperature if historical data is unavailable. If FortyGuard lacks sufficient historical depth for a specific AOI and time, the anomaly calculation is safely skipped (`baseline_available: False`) rather than populated with a fabricated generic number.
-2. **No Forecasting:** We do not use predictive or forecast models to guess temperatures. The anomaly is strictly a comparison of *now* vs *recent history*.
+2. **Forecasting Support:** We do not use our own predictive models to guess temperatures, but FortyGuard's API supports forecasting up to +12 hours ahead via an `end_time` parameter. We use this native capability to assess near-future heat risk.
 
 ### Methodology
 To construct the baseline for a specific AOI polygon:

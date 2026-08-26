@@ -68,6 +68,57 @@ class FortyGuardClient:
             except Exception as e:
                 if isinstance(e, FortyGuardAPIError):
                     raise
+                if attempt < max_attempts:
+                    logger.warning(f"FortyGuard error on attempt {attempt}: {e}, retrying...")
+                    await asyncio.sleep(1.0 * attempt)
+                    continue
+                raise FortyGuardAPIError(f"FortyGuard request failed: {e}", status_code=502)
+
+    async def submit_heat_intelligence(self, latitude: float, longitude: float, temperature: float, date: str, analysis: list[str]) -> str:
+        """Submits a heat intelligence PDF request and returns the activity_id."""
+        url = f"{self.base_url}/v1/heat_intelligence"
+        payload = {
+            "latitude": float(latitude),
+            "longitude": float(longitude),
+            "temperature": float(temperature),
+            "date": date,
+            "analysis": analysis
+        }
+        
+        logger.info(f"Submitting heat intelligence request for {latitude}, {longitude}")
+        
+        retries_val = getattr(self.settings, "fortyguard_max_retries", 2)
+        max_retries = int(retries_val) if isinstance(retries_val, int) else 2
+        max_attempts = max_retries + 1
+        last_err = None
+        
+        for attempt in range(1, max_attempts + 1):
+            try:
+                resp = await self.http_client.post(url, headers=self._headers, json=payload)
+                if resp.status_code in (200, 201, 202):
+                    data = resp.json()
+                    activity_id = data.get("data", {}).get("activity_id")
+                    if not activity_id:
+                        raise FortyGuardAPIError("Missing activity_id in FortyGuard response", status_code=502)
+                    logger.info(f"Heat intelligence submitted successfully. Activity ID: {activity_id}")
+                    return activity_id
+                elif resp.status_code >= 500 and attempt < max_attempts:
+                    logger.warning(f"FortyGuard transient 5xx ({resp.status_code}), retrying attempt {attempt+1}...")
+                    await asyncio.sleep(1.0 * attempt)
+                    continue
+                else:
+                    logger.error(f"FortyGuard submission failed: HTTP {resp.status_code}", extra={"resp_body": resp.text})
+                    raise FortyGuardAPIError(f"Failed to submit heat intelligence: {resp.status_code}", status_code=resp.status_code)
+            except httpx.TimeoutException as te:
+                last_err = te
+                if attempt < max_attempts:
+                    logger.warning(f"FortyGuard timeout on attempt {attempt}, retrying...")
+                    await asyncio.sleep(1.0 * attempt)
+                    continue
+                raise FortyGuardAPIError("FortyGuard request timed out after retries", status_code=504)
+            except Exception as e:
+                if isinstance(e, FortyGuardAPIError):
+                    raise
                 last_err = e
                 if attempt < max_attempts:
                     logger.warning(f"FortyGuard error on attempt {attempt}: {e}, retrying...")

@@ -206,15 +206,17 @@ Multi-dimensional heat analysis delivered as a structured report (PDF). Combines
 
 ```json
 {
-  "point": {
-    "type": "Point",
-    "coordinates": [-112.074, 33.448]
-  },
-  "date_time": "2026-08-22T14:00:00"
+  "latitude": 33.448,
+  "longitude": -112.074,
+  "temperature": 42.3,
+  "date": "2026-08-22",
+  "analysis": ["geographic", "environmental", "urban", "events", "anthropogenic"]
 }
 ```
 
-> ✅ **Key for HeatSentinel's WHY panel:** Each high-priority zone can have a Heat Intelligence report generated. This directly powers the "WHY is this zone critical?" explanation — pairs temperature with context (urban dynamics, environmental layers). **This is a premium-only feature and we have access.**
+**Response:** Returns `200 OK` with `activity_id` immediately. Polling `/v1/status/{activity_id}` is required. Upon completion, the result contains a `download_link` to a time-limited S3 PDF report (expires in 10 minutes).
+
+> ✅ **Key for HeatSentinel's WHY panel:** Each high-priority zone can have an on-demand async Heat Intelligence report generated. This directly powers the "WHY is this zone critical?" explanation — pairs temperature with context (urban dynamics, environmental layers). **This is a premium-only feature and we have access.**
 
 ---
 

@@ -879,24 +879,24 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
       {/* 1. DISTRICT SECTOR SELECTOR RIBBON */}
       <div
         id="phoenix-district-ribbon"
-        className="bg-slate-900 px-3.5 sm:px-5 py-3 border-b border-slate-800 flex flex-col gap-2.5 text-white"
+        className="bg-slate-50 px-3.5 sm:px-5 py-3 border-b border-slate-200 flex flex-col gap-2.5 text-slate-900"
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-lg bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-[#F97316]">
               <Compass size={14} className="animate-spin-slow" />
             </div>
-            <span className="text-xs font-black uppercase tracking-wider text-slate-200">
+            <span className="text-xs font-black uppercase tracking-wider text-slate-800">
               Arizona Monitored Corridors
             </span>
           </div>
-          <span className="text-[11px] text-orange-400/90 font-medium hidden sm:inline">
+          <span className="text-[11px] text-orange-600/90 font-medium hidden sm:inline">
             📍 Click anywhere on map to inspect custom AOI
           </span>
         </div>
 
         {/* District Quick-Selection Pills Container */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent touch-pan-x">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent touch-pan-x">
           {PHOENIX_DISTRICT_PRESETS.map((district) => {
             const isSelected = selectedDistrictId === district.id;
             return (
@@ -908,7 +908,7 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
                 className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap min-h-[34px] flex items-center gap-1.5 shrink-0 ${
                   isSelected
                     ? 'bg-[#F97316] text-white shadow-md ring-2 ring-orange-300/40 scale-102 font-extrabold'
-                    : 'bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700/80'
+                    : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200'
                 }`}
               >
                 <span>{district.icon}</span>
@@ -1082,12 +1082,12 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
         {/* FLOATING DISTRICT TELEMETRY GLASS HUD (TOP-LEFT) */}
         <div
           id="floating-district-hud"
-          className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-slate-900/90 backdrop-blur-md text-white rounded-2xl p-3 sm:p-4 shadow-xl border border-slate-700/70 z-10 flex flex-col gap-2 max-w-[280px] sm:max-w-[320px] transition-all animate-in fade-in zoom-in-95 duration-200"
+          className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-white/95 backdrop-blur-md text-slate-900 rounded-2xl p-3 sm:p-4 shadow-xl border border-slate-200 z-10 flex flex-col gap-2 max-w-[280px] sm:max-w-[320px] transition-all animate-in fade-in zoom-in-95 duration-200"
         >
-          <div className="flex items-center justify-between gap-2 border-b border-slate-800 pb-2">
+          <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
             <div className="flex items-center gap-1.5">
               <span className="text-base">{activeDistrict.icon}</span>
-              <span className="text-xs font-black tracking-tight text-white truncate max-w-[170px]">
+              <span className="text-xs font-black tracking-tight text-slate-900 truncate max-w-[170px]">
                 {activeDistrict.shortLabel}
               </span>
             </div>
@@ -1101,30 +1101,30 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
           </div>
 
           <div className="grid grid-cols-2 gap-2 text-left">
-            <div className="bg-slate-800/80 rounded-xl p-2 border border-slate-700/50">
-              <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase">
+            <div className="bg-slate-50 rounded-xl p-2 border border-slate-200">
+              <div className="flex items-center gap-1 text-[10px] font-bold text-slate-500 uppercase">
                 <Flame size={11} className="text-orange-400" />
                 <span>Peak Heat</span>
               </div>
-              <p className="text-sm font-black text-white mt-0.5 tabular-nums">
+              <p className="text-sm font-black text-slate-900 mt-0.5 tabular-nums">
                 {activeDistrict.peakTempF}°F
                 <span className="text-[10px] text-slate-400 font-medium ml-1">({activeDistrict.peakTempC}°C)</span>
               </p>
             </div>
 
-            <div className="bg-slate-800/80 rounded-xl p-2 border border-slate-700/50">
-              <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase">
-                <ShieldAlert size={11} className="text-teal-400" />
+            <div className="bg-slate-50 rounded-xl p-2 border border-slate-200">
+              <div className="flex items-center gap-1 text-[10px] font-bold text-slate-500 uppercase">
+                <ShieldAlert size={11} className="text-teal-500" />
                 <span>Response Gap</span>
               </div>
-              <p className="text-sm font-black text-amber-400 mt-0.5 tabular-nums">
+              <p className="text-sm font-black text-amber-500 mt-0.5 tabular-nums">
                 {activeDistrict.responseGap.toFixed(1)}
                 <span className="text-[10px] text-slate-400 font-medium">/10</span>
               </p>
             </div>
           </div>
 
-          <p className="text-[11px] text-slate-300 leading-snug line-clamp-2">
+          <p className="text-[11px] text-slate-600 leading-snug line-clamp-2">
             {activeDistrict.description}
           </p>
 

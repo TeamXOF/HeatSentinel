@@ -7,7 +7,7 @@ failure capture, and real-time event subscription.
 import pytest
 import asyncio
 from typing import Dict, Any, Optional, Callable
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from app.agent.heat_hunt_service import (
     start_heat_hunt,
@@ -106,8 +106,10 @@ async def test_start_heat_hunt_success_lifecycle():
 
 
 @pytest.mark.asyncio
-async def test_start_heat_hunt_failure_capture():
+@patch("app.agent.heat_hunt_service.resolve_heat_hunt_fallback", new_callable=AsyncMock)
+async def test_start_heat_hunt_failure_capture(mock_fallback):
     """Verifies that orchestrator exceptions transition status to 'failed' and capture errors."""
+    mock_fallback.side_effect = RuntimeError("Fallback system unresponsive")
     mock_orch = MockOrchestrator(should_fail=True, fail_message="Thermal telemetry sensor offline")
 
     job_id = await start_heat_hunt(

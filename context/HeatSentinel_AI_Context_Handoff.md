@@ -6,7 +6,7 @@ This file is a complete working context for continuing the FortyGuard Hackathon'
 
 ## Update log
 
-**2026-08-21 revision:** demo city decision resolved (Phoenix primary, NYC secondary/validation — Section 30), FortyGuard API details verified against the official hackathon quickstart repo (Section 16), and one prior assumption corrected — FortyGuard has no forecast capability, historical + current-day only (Sections 11, 16, 18, 19, 28 updated accordingly). Treat anything marked **Update** or **Correction** below as superseding earlier text in the same section.
+**2026-08-21 revision:** demo city decision resolved (Phoenix primary, NYC secondary/validation — Section 30), FortyGuard API details verified against the official hackathon quickstart repo (Section 16), and one prior assumption corrected — FortyGuard has no forecast capability, historical + current-day only (Sections 11, 16, 18, 19, 28 updated accordingly). Treat anything marked **Update** or **Correction** below as superseding earlier text in the same section. [CORRECTED 2026-08-26: FortyGuard DOES support +12h forecasting via end_time. See context/fortyguard-api-reference.md.]
 
 ---
 
@@ -607,7 +607,7 @@ Use it much more deeply than a simple map:
    - compare many AOIs in the same city
 
 2. **Historical + current-day analysis**
-   - combine `tcm`, `exceedance`, and `persistence` over the same AOI (no forecast layer exists — corrected from earlier assumption)
+   - combine `tcm`, `exceedance`, and `persistence` over the same AOI (no forecast layer exists — corrected from earlier assumption) [CORRECTED 2026-08-26: FortyGuard DOES support +12h forecasting via end_time. See context/fortyguard-api-reference.md.]
 
 3. **Agent-driven dynamic polygon querying**
    - the agent chooses which areas deserve deeper queries
@@ -1046,7 +1046,7 @@ Confirmed:
 - Coverage is confirmed **U.S.-only** across every endpoint.
 
 Corrected:
-- **No forecast capability exists.** The temperature catalog covers 2021 through today only; future dates fail. Earlier notes describing "near-term forecast use" were wrong and have been corrected throughout this document (Sections 11, 16, 18, 19).
+- **No forecast capability exists.** The temperature catalog covers 2021 through today only; future dates fail. Earlier notes describing "near-term forecast use" were wrong and have been corrected throughout this document (Sections 11, 16, 18, 19). [CORRECTED 2026-08-26: FortyGuard DOES support +12h forecasting via end_time. See context/fortyguard-api-reference.md.]
 
 Still outstanding:
 - The quickstart repo's README is the primary documentation reviewed so far. A separate, more formal API reference (a hosted docs site or OpenAPI spec with full error codes and edge-case parameters) hasn't been confirmed to exist yet — check for one inside the hackathon's actual dev portal.
@@ -1095,7 +1095,7 @@ The next LLM/agent should continue from here rather than generating new generic 
 Verified via the official quickstart repo (`github.com/FortyGuard-Tech/temperature-api-quickstart`) — see Section 16 for full detail:
 - ✅ endpoint names and the async submit/poll pattern
 - ✅ exact POST body shape for `/v1/heatmap`
-- ✅ how temporal parameters are expressed — historical + current-day only, **no forecast** (this corrects an earlier wrong assumption)
+- ✅ how temporal parameters are expressed — historical + current-day only, **no forecast** (this corrects an earlier wrong assumption) [CORRECTED 2026-08-26: FortyGuard DOES support +12h forecasting via end_time. See context/fortyguard-api-reference.md.]
 - ✅ output structure for both `tcm` and the analysis (`exceedance`/`persistence`) response shapes
 - ✅ supported AOI granularity (60/80/100m) and Basic-tier area cap (10 mi²)
 - ✅ coverage is U.S.-only

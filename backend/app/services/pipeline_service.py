@@ -107,7 +107,8 @@ async def _process_hotspot(
         geom = hotspot["geometry"]
         poly_shape = shape(geom)
         centroid = poly_shape.centroid
-        center = LatLng(lat=round(centroid.y, 6), lng=round(centroid.x, 6))
+        center_coords = list(centroid.coords)[0]
+        center = LatLng.from_geojson_coords([round(center_coords[0], 6), round(center_coords[1], 6)])
         
         # 1. Concurrently query heat metrics, Census demographics, and MAG cooling resources
         metrics_task = compute_zone_heat_metrics(
@@ -183,7 +184,7 @@ async def _process_hotspot(
 
         
         # Coordinates in [lng, lat] format
-        raw_coords = geom.get("coordinates", [[]])[0]
+        raw_coords = [LatLng.from_geojson_coords(c).to_geojson_coords() for c in geom.get("coordinates", [[]])[0]]
         
         zone_dict = {
             "zone_id": hotspot.get("hotspot_id", f"zone-{idx+1}"),
@@ -212,6 +213,9 @@ async def run_basic_pipeline(
     city: str = "Phoenix",
     start_date: str = "2024-08-01",
     start_time: str = "14:00",
+    end_date: Optional[str] = None,
+    end_time: Optional[str] = None,
+    forecast_hours: Optional[int] = None,
     top_n_hotspots: int = 5,
     client: Optional[FortyGuardClient] = None
 ) -> BasicPipelineResult:
@@ -238,6 +242,9 @@ async def run_basic_pipeline(
         granularity=60,
         start_date=start_date,
         start_time=start_time,
+        end_date=end_date,
+        end_time=end_time,
+        forecast_hours=forecast_hours,
         client=client
     )
     

@@ -44,6 +44,10 @@
   --text-secondary: #64748B;
 }
 
+html {
+  font-size: 14px;
+}
+
 body {
   font-family: var(--font-sans);
   background-color: #F8FAFC;

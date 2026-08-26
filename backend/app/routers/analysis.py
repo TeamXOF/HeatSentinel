@@ -148,3 +148,91 @@ async def basic_scan(
     result_dict["duration_ms"] = duration_ms
     
     return result_dict
+
+
+def _find_zone_in_caches(zone_id: str) -> Optional[Dict[str, Any]]:
+    """Helper to find a zone's metrics from recent basic scans or heat hunt jobs."""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        
+        # 1. Check pipeline basic scan cache (recent 10 scans)
+        cursor.execute(
+            "SELECT response_json FROM pipeline_basic_scan_cache ORDER BY created_at DESC LIMIT 10"
+        )
+        for row in cursor.fetchall():
+            try:
+                data = json.loads(row["response_json"])
+                for zone in data.get("ranked_zones", []):
+                    if zone.get("zone_id") == zone_id:
+                        return zone
+            except Exception:
+                continue
+                
+        # 2. Check heat hunt jobs
+        cursor.execute(
+            "SELECT result_json FROM heat_hunt_jobs WHERE status = 'completed' ORDER BY created_at DESC LIMIT 10"
+        )
+        for row in cursor.fetchall():
+            if not row["result_json"]: continue
+            try:
+                data = json.loads(row["result_json"])
+                for zone in data.get("ranked_zones", []):
+                    if zone.get("zone_id") == zone_id:
+                        return zone
+            except Exception:
+                continue
+                
+    return None
+
+
+@router.post("/{zone_id}/heat-intelligence")
+async def trigger_heat_intelligence(zone_id: str, request: Request):
+    """
+    Triggers an asynchronous FortyGuard heat intelligence PDF report generation.
+    Returns a job_id immediately.
+    """
+    zone_data = _find_zone_in_caches(zone_id)
+    if not zone_data:
+        raise HTTPException(status_code=404, detail="Zone data not found in recent scans.")
+        
+    try:
+        lat = float(zone_data["center"]["lat"])
+        lng = float(zone_data["center"]["lng"])
+        temp_c = float(zone_data["mean_temp_c"])
+    except KeyError:
+        raise HTTPException(status_code=500, detail="Zone data is missing required coordinate or temperature fields.")
+        
+    # Use today's date
+    date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    
+    from app.services.heat_intelligence_service import start_heat_intelligence
+    
+    http_client = getattr(request.app.state, "http_client", None)
+    fg_client = FortyGuardClient(http_client) if http_client else FortyGuardClient()
+    
+    job_id = start_heat_intelligence(
+        zone_id=zone_id,
+        latitude=lat,
+        longitude=lng,
+        temperature=temp_c,
+        date=date_str,
+        client=fg_client
+    )
+    
+    return {"job_id": job_id, "status": "pending"}
+
+
+@router.get("/{zone_id}/heat-intelligence/{job_id}/status")
+async def get_heat_intelligence_status(zone_id: str, job_id: str):
+    """
+    Polls the status of a previously triggered heat intelligence report.
+    Returns download_link when completed.
+    """
+    from app.services.heat_intelligence_service import get_heat_intelligence_job
+    
+    job = get_heat_intelligence_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+        
+    return job.model_dump()
+

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   X,
   ThermometerSun,
@@ -11,9 +11,78 @@ import {
   Layers,
   TreePine,
   Database,
+  FileText,
+  Loader2,
+  ExternalLink,
+  RefreshCw
 } from 'lucide-react';
 import { ZoneEvidenceDetail, DataMode } from '../types';
 import { getTierConfig } from '../theme/tiers';
+import { useMutation } from '@tanstack/react-query';
+import { triggerHeatIntelligence, useHeatIntelligenceStatus } from '../api/analysis';
+
+const HeatIntelligenceSection: React.FC<{ zoneId: string }> = ({ zoneId }) => {
+  const [jobId, setJobId] = useState<string | null>(null);
+  
+  const triggerMutation = useMutation({
+    mutationFn: () => triggerHeatIntelligence(zoneId),
+    onSuccess: (data) => {
+      setJobId(data.job_id);
+    },
+  });
+
+  const { data: jobStatus } = useHeatIntelligenceStatus(zoneId, jobId);
+
+  const isCompleted = jobStatus?.status === 'completed';
+  const isExpired = jobStatus?.status === 'expired';
+  const isProcessing = jobStatus?.status === 'processing' || jobStatus?.status === 'pending' || triggerMutation.isPending;
+  const isFailed = jobStatus?.status === 'failed' || triggerMutation.isError;
+  const downloadLink = jobStatus?.download_link;
+
+  return (
+    <div className="bg-gradient-to-br from-indigo-50/70 to-slate-50/50 border border-indigo-100/70 rounded-2xl p-4 shadow-xs space-y-3 mt-4">
+      <div className="flex items-center gap-2 text-indigo-900 font-bold text-xs">
+        <FileText size={15} className="text-indigo-600" />
+        <span className="uppercase tracking-wider">FortyGuard Heat Intelligence</span>
+      </div>
+      
+      {!jobId && !isProcessing && !isCompleted && !isFailed && !isExpired && (
+         <button onClick={() => triggerMutation.mutate()} className="w-full py-2.5 bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition-colors flex justify-center items-center gap-2 shadow-sm cursor-pointer">
+           <FileText size={14} /> Generate Full Intelligence Report (PDF)
+         </button>
+      )}
+
+      {isProcessing && (
+         <div className="flex items-center justify-center gap-2 py-3 bg-white border border-indigo-100 rounded-xl text-indigo-600 text-xs font-bold shadow-sm">
+           <Loader2 size={16} className="animate-spin" />
+           Generating PDF (approx 50s)...
+         </div>
+      )}
+
+      {isCompleted && downloadLink && !isExpired && (
+         <a href={downloadLink} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white shadow-md rounded-xl text-xs font-bold transition-colors cursor-pointer">
+           <ExternalLink size={14} /> View Report (PDF)
+         </a>
+      )}
+
+      {isExpired && (
+         <div className="flex flex-col gap-2">
+           <span className="text-[11px] text-slate-500 text-center font-medium">Report link expired (10m limit)</span>
+           <button onClick={() => triggerMutation.mutate()} className="flex items-center justify-center gap-2 w-full py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition-colors cursor-pointer">
+             <RefreshCw size={14} /> Regenerate Report
+           </button>
+         </div>
+      )}
+
+      {isFailed && (
+         <div className="text-red-600 bg-red-50 border border-red-100 rounded-xl text-xs font-bold text-center py-3 flex flex-col items-center gap-1">
+           <span>Failed to generate report.</span>
+           <button onClick={() => triggerMutation.mutate()} className="underline text-red-700 hover:text-red-800 cursor-pointer">Try again</button>
+         </div>
+      )}
+    </div>
+  );
+};
 
 interface WhyPanelProps {
   isOpen: boolean;
@@ -373,6 +442,9 @@ export const WhyPanel: React.FC<WhyPanelProps> = ({
               </span>
             </div>
           </div>
+
+          {/* SECTION 3: HEAT INTELLIGENCE REPORT */}
+          <HeatIntelligenceSection zoneId={evidence.zoneId} />
         </div>
 
         {/* PANEL FOOTER ACTIONS */}

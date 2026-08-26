@@ -35,7 +35,7 @@ The single sentence version: **FortyGuard supplies the eyes, the deterministic e
 
 ## 3. Non-Goals
 
-- Not building a forecasting system (FortyGuard has no forecast data; none will be simulated).
+- We utilize FortyGuard's native forecasting support (up to +12 hours ahead via `end_time`) to assess proactive risk, but we do not build our own custom ML forecasting models.
 - Not building a general-purpose GIS platform — only the AOIs, joins, and aggregations HeatSentinel needs.
 - Not training or fine-tuning any ML model. All "intelligence" is either FortyGuard's native analytics, deterministic formulas, or LLM reasoning over structured data.
 - Not building an official public-health index. Response Gap is explicitly a decision-support heuristic, not a medical/epidemiological instrument.

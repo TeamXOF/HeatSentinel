@@ -11,6 +11,12 @@ class LatLng(BaseModel):
     lat: float
     lng: float
 
+    def to_geojson_coords(self) -> List[float]:
+        return [self.lng, self.lat]
+
+    @classmethod
+    def from_geojson_coords(cls, coords: List[float]) -> "LatLng":
+        return cls(lng=coords[0], lat=coords[1])
 
 class ZoneEvidence(BaseModel):
     primary_driver: str = Field(default="Thermal Intensity", description="Dominant factor driving heat risk")

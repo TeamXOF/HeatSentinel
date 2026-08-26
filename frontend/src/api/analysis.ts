@@ -559,4 +559,36 @@ export function useKpis() {
   });
 }
 
+export async function triggerHeatIntelligence(zoneId: string): Promise<{ job_id: string; status: string }> {
+  const url = `${API_BASE_URL}/api/analysis/${zoneId}/heat-intelligence`;
+  const res = await fetch(url, { method: 'POST' });
+  if (!res.ok) {
+    throw new Error(`Failed to trigger heat intelligence: ${res.statusText}`);
+  }
+  return res.json();
+}
+
+export async function fetchHeatIntelligenceStatus(zoneId: string, jobId: string): Promise<any> {
+  const url = `${API_BASE_URL}/api/analysis/${zoneId}/heat-intelligence/${jobId}/status`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch heat intelligence status: ${res.statusText}`);
+  }
+  return res.json();
+}
+
+export function useHeatIntelligenceStatus(zoneId: string, jobId: string | null) {
+  return useQuery({
+    queryKey: ['heatIntelligenceStatus', zoneId, jobId],
+    queryFn: () => fetchHeatIntelligenceStatus(zoneId, jobId!),
+    enabled: Boolean(jobId),
+    refetchInterval: (query) => {
+      // Keep polling every 3s if still pending/processing
+      const status = query.state.data?.status;
+      if (status === 'pending' || status === 'processing') return 3000;
+      return false;
+    },
+  });
+}
+
 export { PHOENIX_CENTER };

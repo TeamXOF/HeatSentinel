@@ -8,6 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import httpx
 import asyncio
 from app.config import get_settings
+from app.services.fortyguard_client import FortyGuardClient
 
 async def verify_api():
     settings = get_settings()
@@ -16,33 +17,28 @@ async def verify_api():
         print("ERROR: FORTYGUARD_API_KEY is missing from environment/config.")
         sys.exit(1)
         
-    url = "https://api.fortyguard.com/v1/system/fetch-api-key-usage"
-    
-    headers = {
-        "api-key": settings.fortyguard_api_key,
-        "accept": "application/json"
-    }
+    client = FortyGuardClient()
+    url = f"{client.base_url}/v1/system/fetch-api-key-usage"
     
     print(f"Connecting to: {url}")
     print("Sending POST request to fetch usage...")
     
-    async with httpx.AsyncClient() as client:
-        try:
-            payload = {"api_key": settings.fortyguard_api_key}
-            response = await client.post(url, headers=headers, json=payload)
-            print(f"Status Code: {response.status_code}")
+    try:
+        payload = {"api_key": settings.fortyguard_api_key}
+        response = await client.http_client.post(url, headers=client._headers, json=payload)
+        print(f"Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            print("SUCCESS! API Key is valid.")
+            print("Response Body:")
+            print(response.json())
+        else:
+            print("FAILED.")
+            print("Response Body:")
+            print(response.text)
             
-            if response.status_code == 200:
-                print("SUCCESS! API Key is valid.")
-                print("Response Body:")
-                print(response.json())
-            else:
-                print("FAILED.")
-                print("Response Body:")
-                print(response.text)
-                
-        except httpx.RequestError as e:
-            print(f"HTTP Request failed: {e}")
+    except httpx.RequestError as e:
+        print(f"HTTP Request failed: {e}")
 
 if __name__ == "__main__":
     asyncio.run(verify_api())

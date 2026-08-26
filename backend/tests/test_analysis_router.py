@@ -16,8 +16,8 @@ from app.services.priority_engine import DISCLAIMER_TEXT
 def test_compute_basic_scan_cache_key():
     """Verify deterministic hash key generation."""
     poly = {"type": "Polygon", "coordinates": [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]]}
-    k1 = compute_basic_scan_cache_key(poly, "2024-08-01", "14:00", 5)
-    k2 = compute_basic_scan_cache_key(poly, "2024-08-01", "14:00", 5)
+    k1 = compute_basic_scan_cache_key(poly, "Phoenix", "2024-08-01", "14:00", 5)
+    k2 = compute_basic_scan_cache_key(poly, "Phoenix", "2024-08-01", "14:00", 5)
     assert k1 == k2
     assert len(k1) == 64
 

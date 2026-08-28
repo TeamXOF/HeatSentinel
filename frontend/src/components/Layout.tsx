@@ -98,10 +98,10 @@ export const Layout: React.FC = () => {
           onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
         />
 
-        {/* Scrollable Page Body with bottom padding on mobile for the tab bar */}
+        {/* Scrollable Page Body with bottom padding for comfortable scrolling */}
         <main
           id="main-scrollable-content"
-          className="flex-1 overflow-y-auto bg-[#F8FAFC] pb-20 lg:pb-0"
+          className="flex-1 overflow-y-auto bg-[#F8FAFC] pb-24 lg:pb-12"
         >
           <Outlet />
         </main>

@@ -1,17 +1,22 @@
 import React, { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import {
   MapPin,
   Search,
   ArrowUpDown,
   ChevronRight,
+  Radar,
+  Sparkles,
+  ShieldCheck,
 } from 'lucide-react';
 import { WhyPanel } from '../components/WhyPanel';
 import { ZoneEvidenceDetail } from '../types';
-import { useZones, ZoneData } from '../api';
+import { useZones, ZoneData, useHeatHunt } from '../api';
 import { getTierConfig, TIER_CONFIG } from '../theme/tiers';
 
 export const RiskZonesPage: React.FC = () => {
   const { data: zones = [], isLoading } = useZones();
+  const { runHeatHunt, status: huntStatus } = useHeatHunt();
   const [selectedZone, setSelectedZone] = useState<ZoneEvidenceDetail | null>(null);
   const [isWhyPanelOpen, setIsWhyPanelOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -135,148 +140,185 @@ export const RiskZonesPage: React.FC = () => {
 
       {/* Data Table Card with Horizontal Scroll Affordance on Mobile */}
       <div className="bg-white border border-[#F1F5F9] rounded-3xl overflow-hidden shadow-xs relative">
-        <div className="overflow-x-auto scrollbar-thin">
-          <table className="w-full text-left border-collapse min-w-[560px] sm:min-w-full">
-            <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                <th
-                  className="py-3.5 px-4 sm:px-5 cursor-pointer hover:text-slate-800 transition-colors"
-                  onClick={() => handleSort('zoneNumber')}
-                >
-                  <button type="button" className="flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-[#F97316] rounded px-1 -mx-1">
-                    <span>Zone ID & Name</span>
-                    <ArrowUpDown size={12} />
-                  </button>
-                </th>
-                <th
-                  className="py-3.5 px-3 sm:px-4 cursor-pointer hover:text-slate-800 transition-colors"
-                  onClick={() => handleSort('tier')}
-                >
-                  <button type="button" className="flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-[#F97316] rounded px-1 -mx-1">
-                    <span>Risk Tier</span>
-                    <ArrowUpDown size={12} />
-                  </button>
-                </th>
-                <th
-                  className="py-3.5 px-3 sm:px-4 cursor-pointer hover:text-slate-800 transition-colors"
-                  onClick={() => handleSort('responseGapScore')}
-                >
-                  <button type="button" className="flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-[#F97316] rounded px-1 -mx-1">
-                    <span>Response Gap</span>
-                    <ArrowUpDown size={12} />
-                  </button>
-                </th>
-                <th
-                  className="py-3.5 px-3 sm:px-4 cursor-pointer hover:text-slate-800 transition-colors hidden sm:table-cell"
-                  onClick={() => handleSort('peakTempF')}
-                >
-                  <button type="button" className="flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-[#F97316] rounded px-1 -mx-1">
-                    <span>Peak Temp</span>
-                    <ArrowUpDown size={12} />
-                  </button>
-                </th>
-                <th
-                  className="py-3.5 px-3 sm:px-4 cursor-pointer hover:text-slate-800 transition-colors hidden md:table-cell"
-                  onClick={() => handleSort('population')}
-                >
-                  <button type="button" className="flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-[#F97316] rounded px-1 -mx-1">
-                    <span>Population</span>
-                    <ArrowUpDown size={12} />
-                  </button>
-                </th>
-                <th className="py-3.5 px-4 hidden lg:table-cell">Priority Recommended Action</th>
-                <th className="py-3.5 px-4 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-xs">
-              {filteredAndSortedZones.map((zone) => (
-                <tr
-                  key={zone.id}
-                  id={`risk-zone-row-${zone.id}`}
-                  onClick={() => handleRowClick(zone.id)}
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      handleRowClick(zone.id);
-                    }
-                  }}
-                  className="hover:bg-slate-50/80 focus-visible:bg-orange-50/40 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#F97316] focus-visible:outline-none transition-colors cursor-pointer group"
-                >
-                  <td className="py-3.5 px-4 sm:px-5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-7 h-7 rounded-xl bg-slate-100 text-slate-800 font-bold flex items-center justify-center text-xs group-hover:bg-[#0D9488] group-hover:text-white transition-colors shrink-0">
-                        {zone.zoneNumber}
-                      </div>
-                      <div>
-                        <div className="font-bold text-slate-900 group-hover:text-[#0D9488] transition-colors">
-                          {zone.name}
-                        </div>
-                        <div className="text-[11px] text-slate-400 font-mono">
-                          Zone {zone.zoneNumber} • Updated {zone.lastUpdated}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-
-                  <td className="py-3.5 px-3 sm:px-4">
-                    {renderTierBadge(zone.tier)}
-                  </td>
-
-                  <td className="py-3.5 px-3 sm:px-4">
-                    <div className="flex items-center gap-2">
-                      <span className="font-black text-slate-900 tabular-nums">
-                        {zone.responseGapScore.toFixed(1)}
-                      </span>
-                      <span className="text-[10px] text-slate-400">/ 10</span>
-                      <div className="w-14 h-1.5 rounded-full bg-slate-100 overflow-hidden hidden sm:block">
-                        <div
-                          className={`h-full rounded-full ${
-                            zone.responseGapScore >= 8
-                              ? TIER_CONFIG.CRITICAL.solidBg
-                              : zone.responseGapScore >= 6
-                              ? TIER_CONFIG.HIGH.solidBg
-                              : zone.responseGapScore >= 4
-                              ? TIER_CONFIG.MODERATE.solidBg
-                              : TIER_CONFIG.LOW.solidBg
-                          }`}
-                          style={{ width: `${(zone.responseGapScore / 10) * 100}%` }}
-                        />
-                      </div>
-                    </div>
-                  </td>
-
-                  <td className="py-3.5 px-3 sm:px-4 font-semibold text-slate-700 hidden sm:table-cell">
-                    {zone.peakTempF}
-                  </td>
-
-                  <td className="py-3.5 px-3 sm:px-4 text-slate-600 hidden md:table-cell">
-                    {zone.population}
-                  </td>
-
-                  <td className="py-3.5 px-4 text-slate-600 hidden lg:table-cell max-w-xs truncate">
-                    {zone.priorityAction}
-                  </td>
-
-                  <td className="py-3.5 px-4 text-right">
-                    <button
-                      type="button"
-                      aria-label={`View evidence for Zone ${zone.zoneNumber} ${zone.name}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRowClick(zone.id);
-                      }}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-slate-100 group-hover:bg-[#0D9488] text-slate-700 group-hover:text-white focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none text-[11px] font-bold transition-colors cursor-pointer min-h-[32px]"
-                    >
-                      <span>WHY</span>
-                      <ChevronRight size={12} />
+        {zones.length === 0 ? (
+          <div className="p-8 sm:p-14 text-center flex flex-col items-center justify-center max-w-xl mx-auto">
+            <div className="w-14 h-14 rounded-2xl bg-orange-50 border border-orange-100 flex items-center justify-center text-[#F97316] mb-3.5 shadow-2xs">
+              <ShieldCheck size={28} strokeWidth={2} />
+            </div>
+            <h3 className="text-base sm:text-lg font-bold text-slate-800 tracking-tight">
+              No Active Risk Clusters Identified
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1 leading-relaxed text-center">
+              Current live telemetry shows standard ambient baselines. Click <strong>"Run Heat Hunt"</strong> to trigger multi-source anomaly scanning, or switch to a historical / demo scenario.
+            </p>
+            <div className="flex items-center gap-3 mt-5 flex-wrap justify-center">
+              <button
+                type="button"
+                onClick={runHeatHunt}
+                disabled={huntStatus === 'running'}
+                className="min-h-[40px] inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#F97316] hover:bg-[#ea580c] text-white text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95 disabled:opacity-50"
+              >
+                <Radar size={15} strokeWidth={2.4} />
+                <span>{huntStatus === 'running' ? 'Scanning Corridor...' : 'Run Heat Hunt Scan'}</span>
+              </button>
+              <Link
+                to="/agent-insights"
+                className="min-h-[40px] inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
+              >
+                <Sparkles size={14} className="text-[#F97316]" />
+                <span>Load Demo / Historic 7D</span>
+              </Link>
+            </div>
+          </div>
+        ) : filteredAndSortedZones.length === 0 ? (
+          <div className="p-10 sm:p-12 text-center text-slate-400">
+            <p className="text-sm font-bold text-slate-700">No zones matching filter</p>
+            <p className="text-xs text-slate-400 mt-1">Adjust your search query or tier filter above.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto scrollbar-thin">
+            <table className="w-full text-left border-collapse min-w-[560px] sm:min-w-full">
+              <thead>
+                <tr className="bg-slate-50/80 border-b border-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                  <th
+                    className="py-3.5 px-4 sm:px-5 cursor-pointer hover:text-slate-800 transition-colors"
+                    onClick={() => handleSort('zoneNumber')}
+                  >
+                    <button type="button" className="flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-[#F97316] rounded px-1 -mx-1">
+                      <span>Zone ID & Name</span>
+                      <ArrowUpDown size={12} />
                     </button>
-                  </td>
+                  </th>
+                  <th
+                    className="py-3.5 px-3 sm:px-4 cursor-pointer hover:text-slate-800 transition-colors"
+                    onClick={() => handleSort('tier')}
+                  >
+                    <button type="button" className="flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-[#F97316] rounded px-1 -mx-1">
+                      <span>Risk Tier</span>
+                      <ArrowUpDown size={12} />
+                    </button>
+                  </th>
+                  <th
+                    className="py-3.5 px-3 sm:px-4 cursor-pointer hover:text-slate-800 transition-colors"
+                    onClick={() => handleSort('responseGapScore')}
+                  >
+                    <button type="button" className="flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-[#F97316] rounded px-1 -mx-1">
+                      <span>Response Gap</span>
+                      <ArrowUpDown size={12} />
+                    </button>
+                  </th>
+                  <th
+                    className="py-3.5 px-3 sm:px-4 cursor-pointer hover:text-slate-800 transition-colors hidden sm:table-cell"
+                    onClick={() => handleSort('peakTempF')}
+                  >
+                    <button type="button" className="flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-[#F97316] rounded px-1 -mx-1">
+                      <span>Peak Temp</span>
+                      <ArrowUpDown size={12} />
+                    </button>
+                  </th>
+                  <th
+                    className="py-3.5 px-3 sm:px-4 cursor-pointer hover:text-slate-800 transition-colors hidden md:table-cell"
+                    onClick={() => handleSort('population')}
+                  >
+                    <button type="button" className="flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-[#F97316] rounded px-1 -mx-1">
+                      <span>Population</span>
+                      <ArrowUpDown size={12} />
+                    </button>
+                  </th>
+                  <th className="py-3.5 px-4 hidden lg:table-cell">Priority Recommended Action</th>
+                  <th className="py-3.5 px-4 text-right">Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-xs">
+                {filteredAndSortedZones.map((zone) => (
+                  <tr
+                    key={zone.id}
+                    id={`risk-zone-row-${zone.id}`}
+                    onClick={() => handleRowClick(zone.id)}
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleRowClick(zone.id);
+                      }
+                    }}
+                    className="hover:bg-slate-50/80 focus-visible:bg-orange-50/40 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#F97316] focus-visible:outline-none transition-colors cursor-pointer group"
+                  >
+                    <td className="py-3.5 px-4 sm:px-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-7 h-7 rounded-xl bg-slate-100 text-slate-800 font-bold flex items-center justify-center text-xs group-hover:bg-[#0D9488] group-hover:text-white transition-colors shrink-0">
+                          {zone.zoneNumber}
+                        </div>
+                        <div>
+                          <div className="font-bold text-slate-900 group-hover:text-[#0D9488] transition-colors">
+                            {zone.name}
+                          </div>
+                          <div className="text-[11px] text-slate-400 font-mono">
+                            Zone {zone.zoneNumber} • Updated {zone.lastUpdated}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td className="py-3.5 px-3 sm:px-4">
+                      {renderTierBadge(zone.tier)}
+                    </td>
+
+                    <td className="py-3.5 px-3 sm:px-4">
+                      <div className="flex items-center gap-2">
+                        <span className="font-black text-slate-900 tabular-nums">
+                          {zone.responseGapScore.toFixed(1)}
+                        </span>
+                        <span className="text-[10px] text-slate-400">/ 10</span>
+                        <div className="w-14 h-1.5 rounded-full bg-slate-100 overflow-hidden hidden sm:block">
+                          <div
+                            className={`h-full rounded-full ${
+                              zone.responseGapScore >= 8
+                                ? TIER_CONFIG.CRITICAL.solidBg
+                                : zone.responseGapScore >= 6
+                                ? TIER_CONFIG.HIGH.solidBg
+                                : zone.responseGapScore >= 4
+                                ? TIER_CONFIG.MODERATE.solidBg
+                                : TIER_CONFIG.LOW.solidBg
+                            }`}
+                            style={{ width: `${(zone.responseGapScore / 10) * 100}%` }}
+                          />
+                        </div>
+                      </div>
+                    </td>
+
+                    <td className="py-3.5 px-3 sm:px-4 font-semibold text-slate-700 hidden sm:table-cell">
+                      {zone.peakTempF}
+                    </td>
+
+                    <td className="py-3.5 px-3 sm:px-4 text-slate-600 hidden md:table-cell">
+                      {zone.population}
+                    </td>
+
+                    <td className="py-3.5 px-4 text-slate-600 hidden lg:table-cell max-w-xs truncate">
+                      {zone.priorityAction}
+                    </td>
+
+                    <td className="py-3.5 px-4 text-right">
+                      <button
+                        type="button"
+                        aria-label={`View evidence for Zone ${zone.zoneNumber} ${zone.name}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRowClick(zone.id);
+                        }}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-slate-100 group-hover:bg-[#0D9488] text-slate-700 group-hover:text-white focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none text-[11px] font-bold transition-colors cursor-pointer min-h-[32px]"
+                      >
+                        <span>WHY</span>
+                        <ChevronRight size={12} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* WHY Evidence Drawer */}

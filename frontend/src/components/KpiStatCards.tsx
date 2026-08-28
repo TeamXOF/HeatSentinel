@@ -67,30 +67,32 @@ export const KpiCardItem: React.FC<{ card: StatCard }> = ({ card }) => {
   return (
     <div
       id={`stat-card-${card.id}`}
-      className={`min-w-[240px] sm:min-w-0 snap-start flex-1 rounded-2xl ${style.cardBg} border ${style.cardBorder} p-4 shadow-xs hover:shadow-sm transition-all duration-200 flex items-center gap-3.5`}
+      className={`min-w-[240px] sm:min-w-0 snap-start flex-1 rounded-2xl ${style.cardBg} border ${style.cardBorder} p-3.5 sm:p-4 shadow-xs hover:shadow-sm transition-all duration-200 flex items-center gap-3`}
     >
       {/* Icon Badge */}
       <div
-        className={`w-11 h-11 rounded-full ${style.iconBg} ${style.iconColor} flex items-center justify-center shrink-0 shadow-2xs`}
+        className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full ${style.iconBg} ${style.iconColor} flex items-center justify-center shrink-0 shadow-2xs`}
       >
-        <Icon size={20} strokeWidth={2} />
+        <Icon size={19} strokeWidth={2} />
       </div>
 
       {/* Content */}
       <div className="flex flex-col min-w-0 flex-1">
         {/* Label */}
-        <span className="text-[10px] font-bold tracking-wider text-[#64748B] uppercase truncate leading-tight">
+        <span className="text-[9.5px] sm:text-[10px] font-bold tracking-wider text-[#64748B] uppercase truncate leading-tight">
           {card.label}
         </span>
 
         {/* Value + Status */}
-        <div className="flex items-baseline gap-2 mt-0.5">
-          <span className="text-[22px] font-bold text-[#0F172A] tabular-nums tracking-tight leading-none">
+        <div className="flex items-baseline gap-1.5 mt-0.5 flex-wrap">
+          <span className="text-xl sm:text-[22px] font-bold text-[#0F172A] tabular-nums tracking-tight leading-none">
             {card.value}
           </span>
-          <span className={`text-[11.5px] truncate leading-none ${statusColorClass}`}>
-            {card.status}
-          </span>
+          {card.status && (
+            <span className={`text-[11px] font-semibold leading-none ${statusColorClass}`}>
+              {card.status}
+            </span>
+          )}
         </div>
 
         {/* Subtext with trend indicator */}
@@ -109,8 +111,8 @@ export const KpiStatCards: React.FC<KpiStatCardsProps> = ({ cards }) => {
       aria-label="Key Performance Indicators"
       className="w-full"
     >
-      {/* Horizontally scrollable on mobile with snap, 2-cols on tablet, 5-cols on desktop */}
-      <div className="flex overflow-x-auto pb-3 pt-0.5 -mx-4 px-4 sm:mx-0 sm:px-0 sm:pb-0 sm:grid sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 snap-x snap-mandatory scrollbar-none overscroll-x-contain touch-pan-x">
+      {/* Horizontally scrollable on mobile with snap, 2-cols on sm, 3-cols on md/lg, 5-cols on xl */}
+      <div className="flex overflow-x-auto pb-3 pt-0.5 -mx-4 px-4 sm:mx-0 sm:px-0 sm:pb-0 sm:grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 snap-x snap-mandatory scrollbar-none overscroll-x-contain touch-pan-x">
         {cards.map((card) => (
           <div key={card.id} className="min-w-[245px] xs:min-w-[260px] sm:min-w-0 snap-start flex-1 shrink-0">
             <KpiCardItem card={card} />

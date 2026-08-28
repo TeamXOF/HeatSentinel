@@ -31,7 +31,7 @@ export const ResponsePlannerPage: React.FC = () => {
     const cfg = getTierConfig(tierKey);
     const Icon = cfg.icon;
     return (
-      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${cfg.tintBg} ${cfg.tintText} ${cfg.tintBorder} border uppercase tracking-wider`}>
+      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold ${cfg.tintBg} ${cfg.tintText} ${cfg.tintBorder} border uppercase tracking-wider`}>
         <Icon size={11} strokeWidth={2.5} />
         <span>{priority} Priority</span>
       </span>
@@ -91,13 +91,13 @@ export const ResponsePlannerPage: React.FC = () => {
               <div className="flex flex-col gap-1.5 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   {getPriorityBadge(act.priority)}
-                  <span className="text-xs font-bold text-slate-700 flex items-center gap-1">
-                    <MapPin size={13} className="text-[#EA580C]" />
-                    {act.zoneName}
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 bg-slate-50 px-2.5 py-0.5 rounded-full border border-slate-200">
+                    <MapPin size={12} className="text-[#EA580C]" />
+                    <span>{act.zoneName}</span>
                   </span>
-                  <span className="text-xs text-slate-500 font-mono flex items-center gap-1">
-                    <Clock size={12} />
-                    {act.eta}
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[11px] font-medium">
+                    <Clock size={11} className="text-slate-400" />
+                    <span>{act.eta}</span>
                   </span>
                 </div>
 
@@ -110,13 +110,13 @@ export const ResponsePlannerPage: React.FC = () => {
                 </p>
 
                 {/* Metadata tags */}
-                <div className="flex items-center gap-3 sm:gap-4 text-xs text-slate-600 mt-2 flex-wrap">
-                  <span className="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100">
-                    <Users size={13} className="text-slate-500" />
-                    <span>Assigned: <strong>{act.assignedTeam}</strong></span>
+                <div className="flex items-center gap-2.5 sm:gap-3 text-xs text-slate-600 mt-2 flex-wrap">
+                  <span className="inline-flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-200 text-slate-600 font-medium">
+                    <Users size={13} className="text-slate-400" />
+                    <span>Assigned: <strong className="text-slate-800 font-semibold">{act.assignedTeam}</strong></span>
                   </span>
-                  <span className="flex items-center gap-1.5 bg-teal-50 px-2.5 py-1 rounded-lg border border-teal-100 text-[#0f766e]">
-                    <span>Impact: <strong>{act.impactScore}</strong></span>
+                  <span className="inline-flex items-center gap-1.5 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200 text-[#0f766e] font-medium">
+                    <span>Impact: <strong className="text-teal-900 font-semibold">{act.impactScore}</strong></span>
                   </span>
                 </div>
               </div>

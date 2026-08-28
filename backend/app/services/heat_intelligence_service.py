@@ -93,8 +93,8 @@ async def _execute_heat_intelligence_background(
                 (activity_id, job_id)
             )
             
-        # Poll for completion with a 90s timeout (since we saw it take ~52s)
-        final_status = await client.poll_until_complete(activity_id, timeout_seconds=90, interval_seconds=2.0)
+        # Poll for completion with a 150s timeout (since we saw it take ~52s)
+        final_status = await client.poll_until_complete(activity_id, timeout_seconds=150, interval_seconds=2.0)
         
         # Extract download_link
         download_link = None

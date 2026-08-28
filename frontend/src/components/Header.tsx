@@ -55,7 +55,7 @@ export const Header: React.FC<HeaderProps> = ({
       className="h-16 sm:h-20 bg-white border-b border-[#F1F5F9] px-3 sm:px-6 lg:px-8 flex items-center justify-between flex-shrink-0 select-none sticky top-0 z-20"
     >
       {/* Left: Mobile Hamburger + Greeting & Subtitle */}
-      <div id="header-greeting-section" className="flex items-center gap-2 sm:gap-3.5 min-w-0">
+      <div id="header-greeting-section" className="flex items-center gap-2 sm:gap-3.5 min-w-0 flex-1 mr-2 sm:mr-4">
         {/* Mobile Drawer Trigger */}
         <button
           type="button"
@@ -75,16 +75,16 @@ export const Header: React.FC<HeaderProps> = ({
           <Sun className="w-5 h-5 sm:w-6 sm:h-6 text-[#F97316]" strokeWidth={2} />
         </div>
 
-        <div className="flex flex-col min-w-0">
+        <div className="flex flex-col min-w-0 flex-1">
           <h2
             id="header-greeting-text"
-            className="text-[#0F172A] font-bold text-sm sm:text-base lg:text-xl tracking-tight truncate max-w-[130px] xs:max-w-[180px] sm:max-w-[320px] md:max-w-none leading-tight"
+            className="text-[#0F172A] font-bold text-sm sm:text-base lg:text-xl tracking-tight leading-tight max-md:truncate max-md:max-w-[200px]"
           >
             {greeting}
           </h2>
           <p
             id="header-subtitle-text"
-            className="hidden md:block text-xs sm:text-sm text-[#64748B] tracking-tight truncate leading-tight mt-0.5"
+            className="hidden md:block text-xs sm:text-sm text-[#64748B] tracking-tight leading-tight mt-0.5 truncate max-w-2xl"
           >
             {subtitle}
           </p>
@@ -327,7 +327,7 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
               className="min-w-[44px] min-h-[44px] flex items-center gap-2 text-left cursor-pointer group rounded-full hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none p-1"
             >
-              <div className="text-right hidden sm:block">
+              <div className="text-right hidden xl:block">
                 <p className="text-xs sm:text-sm font-bold text-[#0F172A] group-hover:text-[#F97316] transition-colors">
                   {userName}
                 </p>
@@ -339,7 +339,7 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 HS
               </div>
-              <ChevronDown size={13} className="text-[#64748B] group-hover:text-[#0F172A] transition-colors hidden sm:block" />
+              <ChevronDown size={13} className="text-[#64748B] group-hover:text-[#0F172A] transition-colors hidden xl:block" />
             </button>
           </div>
 

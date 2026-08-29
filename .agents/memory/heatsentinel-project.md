@@ -279,9 +279,40 @@ feature/backend-phase1-foundation
 - Executed full 55-test manual testing suite across all 10 pages using Playwright MCP — 55/55 passed (100%).
 - Rebuilt `frontend/src/data/districtThermalEngine.ts` with coordinate-hashed irregular polygon hulls so clicking any arbitrary map location generates geometrically unique shapes.
 - Replaced static `DEMO MODE` labels with `LIVE DATA` in `mockZoneEvidenceData.ts` and refined Header telemetry zone badges.
-- Authored master Project Intelligence Report in `context/heatsentinel_project_report.md`.
-- Cleaned up temporary screenshots and intermediate step files.
-- What's next: Multi-City Selector & Live Date Ingestion / Phase 14 Step 44 Security Audit.
+### Session 2026-08-28 & 2026-08-29 (Historic 7D Implementation Audit & FortyGuard Heat Intelligence PDF Verification)
+- Completed exhaustive Implementation Audit & Live FortyGuard Heat Intelligence PDF Verification:
+  - **Root Cause & Fix for PDF Polling**:
+    - Discovered that Pydantic's `StatusResponse` model in `backend/app/models/fortyguard.py` strictly required `map_data` & `stats_data` (heatmap raster keys), causing a validation crash when FortyGuard returned the completed PDF payload containing `{"download_link": "https://..."}`. Fixed `HeatmapResult` and `StatusData` to make raster fields optional, add `download_link`, and allow extra keys.
+    - Extended FortyGuard polling timeout from 150s to **600s** (10m) with 3.0s intervals in `backend/app/services/heat_intelligence_service.py` to accommodate FortyGuard cloud queue rendering during heavy multi-page GIS synthesis.
+    - Restored all 5 required FortyGuard analysis keys `["geographic", "environmental", "urban", "events", "anthropogenic"]`.
+    - Added resilient socket/connection retry logic (up to 5 consecutive attempts) in `backend/app/services/fortyguard_client.py`.
+    - Implemented self-healing live sync in `backend/app/routers/analysis.py` (`get_heat_intelligence_status`) to query FortyGuard directly if SQLite is not yet updated.
+  - **Timezone & Traceability Audit**:
+    - Traced Historic 7D date override (`2024-08-01 14:00 MST`) across 5 backend and frontend files.
+    - Verified Mountain Standard Time (MST / UTC-7, no DST) alignment with FortyGuard's local observation raster indexing.
+    - Confirmed full pipeline parity between "Today" and "Historic 7D" with deterministic SHA-256 session isolation.
+  - **FortyGuard 429 Rate Limit Audit**:
+    - Inspected live HTTP response headers: `x-ratelimit-limit: 100` (submit) and `200` (status polling). Confirmed **zero risk** of hitting 429 during live demo recordings.
+  - **Dual Consecutive Live Run Verification**:
+    - Successfully completed two full consecutive live end-to-end runs (Today empty state $\rightarrow$ Historic 7D live scan $\rightarrow$ Autonomous Heat Hunt Agent $\rightarrow$ Heat Intelligence PDF $\rightarrow$ S3 validation).
+    - **Run 1 S3 PDF**: 1,078,297 bytes (1.08 MB), HTTP 200, `%PDF-1.4` valid signature.
+    - **Run 2 S3 PDF**: 1,023,079 bytes (1.02 MB), HTTP 200, `%PDF-1.4` valid signature.
+  - Authored comprehensive procedure and audit documentation in `context/HeatSentinel_Demo_Recording_Procedure.md` and `context/walkthrough.md`.
+
+### Session 2026-08-29 (UI Typography, Triadic Palette Harmonization & Branch Merge to Main)
+- **Label Typography & Spacing Optimization**:
+  - Reduced font sizes by 1–2px across all component labels (KPI Stat Cards, District Sector Ribbon, Floating Telemetry HUD, Map Legend, Right Rail Cards, Analytics Cards, and Footer Status Bar).
+  - Ensured all card containers use flexible padding (`p-3 sm:p-4.5`) and `min-w-0 overflow-hidden` so components never overlap or overflow their boundaries on any viewport.
+- **Triadic Color Scheme Harmonization (Orange, Aqua Teal, Cream)**:
+  - Eliminated all out-of-place dark blue / indigo shades (`indigo-50/600/900`) from the Heat Intelligence WHY drawer, replacing with **Aqua Blue** (`#0D9488` / `#0F766E`) and soft **Cream / Emerald** tints (`#F0FDFA` / `#CCFBF1` / `#FFFDF9`).
+  - Standardized cached pipeline indicators and active alert badges across Header, Modal, and Agent Insights to Aqua Teal (`#0D9488`).
+  - Styled district sector ribbon and card headers with soft warm **Cream** backgrounds (`#FFFDF9` with `border-orange-100/70`).
+- **Logo Slogan Visibility**:
+  - Refined `frontend/src/components/Logo.tsx` tagline to `text-[8.5px] font-extrabold uppercase text-[#0D9488] whitespace-normal leading-tight mt-0.5` so `"Autonomous Heat Intelligence"` wraps cleanly onto the next line without truncation in the sidebar.
+- **Build Verification & Branch Merge**:
+  - Verified production frontend build (`npm run build` passing with 0 TypeScript/JSX errors).
+  - Fast-forward merged branch `currently-working-nafees` into `main` and pushed to `origin/main`.
+  - Cleaned up and deleted the temporary working branch locally and on remote origin.
 
 ---
 
@@ -291,10 +322,15 @@ To resume in a new session:
 ```
 Read .agents/memory/heatsentinel-project.md first.
 We are on branch main.
-All 10 pages and 55/55 Playwright live test cases are verified passing.
+All backend services, frontend UI, FortyGuard PDF integration, and test suites are 100% verified.
+Current State:
+  - Live FortyGuard integration & Heat Intelligence PDF generation verified with live S3 downloads.
+  - UI refined with triadic palette (Orange, Aqua Teal, Cream), compact typography, and responsive layout.
+  - Merged and pushed to origin/main.
 Next tasks:
   1. Multi-City Selector Engine (Dynamic US City Bounding Boxes + Live Date Ingestion).
   2. Phase 14 / Step 44 — Secrets, .env, and Security Audit.
+  3. Video recording of the live HeatSentinel demo scenario.
 Context Handoff + System Design + Roadmap are in context/ folder.
 ```
 

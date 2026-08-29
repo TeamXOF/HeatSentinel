@@ -172,9 +172,9 @@ export const OverviewPage: React.FC = () => {
       <KpiStatCards cards={dynamicKpiCards} />
 
       {/* Main Mid Section: 2/3 Heat Map + 1/3 Right Rail (stacked on mobile/tablet) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8 items-start">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 sm:gap-6 lg:gap-8 items-start">
         {/* Left 2/3: Hyperlocal Heat Risk Map Card */}
-        <div className="lg:col-span-2 w-full">
+        <div className="xl:col-span-2 w-full">
           <HyperlocalHeatMapCard
             onZoneSelect={handleZoneSelect}
             onDistrictChange={(d) => setActiveDistrict(d)}
@@ -182,7 +182,7 @@ export const OverviewPage: React.FC = () => {
         </div>
 
         {/* Right 1/3: Active Alerts & Top Priority Actions Stack */}
-        <div className="lg:col-span-1 flex flex-col gap-5 sm:gap-6 w-full">
+        <div className="xl:col-span-1 flex flex-col gap-5 sm:gap-6 w-full">
           {/* Card 1: Active Alerts */}
           <ActiveAlertsCard alerts={dynamicAlerts} />
 

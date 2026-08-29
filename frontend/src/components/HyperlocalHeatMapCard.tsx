@@ -935,31 +935,126 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
       {/* 2. CARD HEADER: Title & Filter Tabs */}
       <div
         id="heat-map-header"
-        className="p-3 sm:p-4 border-b border-[#F1F5F9] flex flex-col md:flex-row md:items-center justify-between gap-2.5 bg-white"
+        className="p-3 sm:p-4 border-b border-[#F1F5F9] flex flex-col gap-3 bg-white"
       >
-        {/* Left: Title + Filter Pill Tabs */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 min-w-0">
-          <div className="flex items-center gap-1.5 shrink-0">
+        {/* Top Row: District Title & Action Controls */}
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
+          {/* Left: District Title + Info + Status Badges */}
+          <div className="flex items-center gap-1.5 flex-wrap min-w-0">
             <h2 className="text-sm sm:text-base font-black text-[#0F172A] tracking-tight flex items-center gap-1.5">
-              <MapPin size={15} className="text-[#F97316]" />
+              <MapPin size={15} className="text-[#F97316] shrink-0" />
               <span>{activeDistrict.name}</span>
             </h2>
             <button
               type="button"
               aria-label="More information about the heat risk map"
-              className="text-[#94A3B8] hover:text-[#64748B] focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-colors p-1 rounded-full min-w-[28px] min-h-[28px] flex items-center justify-center cursor-pointer"
+              className="text-[#94A3B8] hover:text-[#64748B] focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-colors p-1 rounded-full min-w-[28px] min-h-[28px] flex items-center justify-center cursor-pointer shrink-0"
               title="Autonomous thermal layer aggregated from urban sensors and surface telemetry"
             >
               <Info size={14} strokeWidth={2} />
             </button>
             {/* Status Badges */}
-            {isScanLoading && <span className="text-[9px] font-bold bg-teal-100 text-teal-800 px-2 py-0.5 rounded animate-pulse">SCANNING</span>}
-            {scanResult?.mode === 'live' && <span className="text-[9px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">LIVE PIPELINE</span>}
-            {scanResult?.mode === 'cached' && <span className="text-[9px] font-bold bg-teal-50 text-teal-800 border border-teal-200/80 px-2 py-0.5 rounded">CACHED ({scanResult.duration_ms}ms)</span>}
+            {isScanLoading && <span className="text-[9px] font-bold bg-teal-100 text-teal-800 px-2 py-0.5 rounded animate-pulse shrink-0">SCANNING</span>}
+            {scanResult?.mode === 'live' && <span className="text-[9px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded shrink-0">LIVE PIPELINE</span>}
+            {scanResult?.mode === 'cached' && <span className="text-[9px] font-bold bg-teal-50 text-teal-800 border border-teal-200/80 px-2 py-0.5 rounded shrink-0">CACHED ({scanResult.duration_ms}ms)</span>}
           </div>
 
-          {/* Filter Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 sm:pb-0 scrollbar-none touch-pan-x" role="tablist" aria-label="Map Layer Filters">
+          {/* Right: Refresh Ingestion, Time Selector & Layers Button */}
+          <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
+            {/* Force Live Ingestion Refresh */}
+            <button
+              type="button"
+              id="heatmap-force-refresh-btn"
+              onClick={handleForceRefresh}
+              disabled={isRefreshing}
+              title="Force live FortyGuard satellite ingestion and bypass cached results"
+              className="min-h-[32px] flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white hover:bg-slate-50 border border-slate-200/80 text-[11px] font-semibold text-slate-700 hover:text-[#0F172A] focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-colors cursor-pointer shadow-2xs disabled:opacity-60"
+            >
+              <RotateCcw
+                size={12}
+                className={`${isRefreshing ? 'animate-spin text-[#F97316]' : 'text-[#64748B]'}`}
+              />
+              <span className="hidden sm:inline">Refresh</span>
+            </button>
+
+            <div className="relative">
+              <button
+                type="button"
+                id="heatmap-timeframe-dropdown-btn"
+                aria-label="Select timeframe"
+                aria-expanded={isTimeDropdownOpen}
+                onClick={() => setIsTimeDropdownOpen(!isTimeDropdownOpen)}
+                className="min-h-[32px] flex items-center gap-1.5 px-3 py-1 rounded-full bg-white hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none border border-slate-200/80 text-[11px] font-semibold text-[#0F172A] transition-colors cursor-pointer shadow-2xs"
+              >
+                <span>{selectedTimeRange}</span>
+                <ChevronDown size={12} className="text-[#64748B]" />
+              </button>
+
+              {isTimeDropdownOpen && (
+                <div className="absolute right-0 mt-1.5 w-40 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+                  {['Today', '24h Forecast', 'Peak Heat (2PM)', 'Historic (7D)'].map((opt) => (
+                    <button
+                      key={opt}
+                      type="button"
+                      onClick={() => {
+                        setSelectedTimeRange(opt);
+                        setIsTimeDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-1.5 text-[11px] font-medium focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-colors ${
+                        selectedTimeRange === opt
+                          ? 'text-[#F97316] bg-orange-50/60 font-semibold'
+                          : 'text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="relative">
+              <button
+                type="button"
+                aria-label="Toggle map layers menu"
+                aria-expanded={isLayersOpen}
+                onClick={() => setIsLayersOpen(!isLayersOpen)}
+                className="min-h-[32px] flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0D9488] hover:bg-[#0f766e] focus-visible:ring-2 focus-visible:ring-[#0D9488] focus-visible:outline-none text-white text-[11px] font-semibold transition-colors cursor-pointer shadow-2xs"
+              >
+                <Layers size={13} strokeWidth={2.2} />
+                <span>Layers</span>
+                <ChevronDown size={11} />
+              </button>
+
+              {isLayersOpen && (
+                <div className="absolute right-0 mt-1.5 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+                  <div className="text-[9px] font-bold uppercase tracking-wider text-slate-400 px-2 py-1">
+                    Active Layers
+                  </div>
+                  <label className="flex items-center gap-2 px-2 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 rounded-lg cursor-pointer">
+                    <input type="checkbox" defaultChecked className="accent-[#0D9488] rounded w-3.5 h-3.5" />
+                    <span>Ranked Hotspot Hulls</span>
+                  </label>
+                  <label className="flex items-center gap-2 px-2 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 rounded-lg cursor-pointer">
+                    <input type="checkbox" defaultChecked className="accent-[#0D9488] rounded w-3.5 h-3.5" />
+                    <span>Thermal Grid (60m)</span>
+                  </label>
+                  <label className="flex items-center gap-2 px-2 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 rounded-lg cursor-pointer">
+                    <input type="checkbox" defaultChecked className="accent-[#0D9488] rounded w-3.5 h-3.5" />
+                    <span>MAG Cooling Network</span>
+                  </label>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Row: Layer Filter Tabs */}
+        <div className="flex items-center justify-between pt-2 border-t border-slate-100 gap-2">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-none touch-pan-x w-full" role="tablist" aria-label="Map Layer Filters">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mr-1 shrink-0 hidden xs:inline">
+              Layer:
+            </span>
             {filterTabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
@@ -970,106 +1065,16 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
                   role="tab"
                   aria-selected={isActive}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-2.5 py-1 rounded-full text-[11px] font-semibold focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-all cursor-pointer whitespace-nowrap min-h-[32px] flex items-center shrink-0 ${
+                  className={`px-3 py-1 rounded-full text-[11px] font-semibold focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-all cursor-pointer whitespace-nowrap min-h-[28px] flex items-center shrink-0 ${
                     isActive
-                      ? 'bg-[#0D9488] text-white shadow-2xs'
-                      : 'bg-white text-[#64748B] hover:text-[#0F172A] border border-slate-200/80 hover:bg-slate-50'
+                      ? 'bg-[#0D9488] text-white shadow-2xs font-bold'
+                      : 'bg-slate-50 text-[#64748B] hover:text-[#0F172A] border border-slate-200/70 hover:bg-slate-100'
                   }`}
                 >
                   {tab.label}
                 </button>
               );
             })}
-          </div>
-        </div>
-
-        {/* Right: Refresh Ingestion, Time Selector & Layers Button */}
-        <div className="flex items-center gap-1.5 self-end md:self-auto shrink-0">
-          {/* Force Live Ingestion Refresh */}
-          <button
-            type="button"
-            id="heatmap-force-refresh-btn"
-            onClick={handleForceRefresh}
-            disabled={isRefreshing}
-            title="Force live FortyGuard satellite ingestion and bypass cached results"
-            className="min-h-[34px] flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white hover:bg-slate-50 border border-slate-200/80 text-[11px] font-semibold text-slate-700 hover:text-[#0F172A] focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-colors cursor-pointer shadow-2xs disabled:opacity-60"
-          >
-            <RotateCcw
-              size={12}
-              className={`${isRefreshing ? 'animate-spin text-[#F97316]' : 'text-[#64748B]'}`}
-            />
-            <span className="hidden sm:inline">Refresh</span>
-          </button>
-
-          <div className="relative">
-            <button
-              type="button"
-              id="heatmap-timeframe-dropdown-btn"
-              aria-label="Select timeframe"
-              aria-expanded={isTimeDropdownOpen}
-              onClick={() => setIsTimeDropdownOpen(!isTimeDropdownOpen)}
-              className="min-h-[34px] flex items-center gap-1.5 px-3 py-1 rounded-full bg-white hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none border border-slate-200/80 text-[11px] font-semibold text-[#0F172A] transition-colors cursor-pointer shadow-2xs"
-            >
-              <span>{selectedTimeRange}</span>
-              <ChevronDown size={12} className="text-[#64748B]" />
-            </button>
-
-            {isTimeDropdownOpen && (
-              <div className="absolute right-0 mt-1.5 w-40 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
-                {['Today', '24h Forecast', 'Peak Heat (2PM)', 'Historic (7D)'].map((opt) => (
-                  <button
-                    key={opt}
-                    type="button"
-                    onClick={() => {
-                      setSelectedTimeRange(opt);
-                      setIsTimeDropdownOpen(false);
-                    }}
-                    className={`w-full text-left px-3 py-1.5 text-[11px] font-medium focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-colors ${
-                      selectedTimeRange === opt
-                        ? 'text-[#F97316] bg-orange-50/60 font-semibold'
-                        : 'text-slate-600 hover:bg-slate-50'
-                    }`}
-                  >
-                    {opt}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-
-          <div className="relative">
-            <button
-              type="button"
-              aria-label="Toggle map layers menu"
-              aria-expanded={isLayersOpen}
-              onClick={() => setIsLayersOpen(!isLayersOpen)}
-              className="min-h-[34px] flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0D9488] hover:bg-[#0f766e] focus-visible:ring-2 focus-visible:ring-[#0D9488] focus-visible:outline-none text-white text-[11px] font-semibold transition-colors cursor-pointer shadow-2xs"
-            >
-              <Layers size={13} strokeWidth={2.2} />
-              <span>Layers</span>
-              <ChevronDown size={11} />
-            </button>
-
-            {isLayersOpen && (
-              <div className="absolute right-0 mt-1.5 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-2 z-50 animate-in fade-in zoom-in-95 duration-100">
-                <div className="text-[9px] font-bold uppercase tracking-wider text-slate-400 px-2 py-1">
-                  Active Layers
-                </div>
-                <label className="flex items-center gap-2 px-2 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 rounded-lg cursor-pointer">
-                  <input type="checkbox" defaultChecked className="accent-[#0D9488] rounded w-3.5 h-3.5" />
-                  <span>Ranked Hotspot Hulls</span>
-                </label>
-                <label className="flex items-center gap-2 px-2 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 rounded-lg cursor-pointer">
-                  <input type="checkbox" defaultChecked className="accent-[#0D9488] rounded w-3.5 h-3.5" />
-                  <span>Thermal Grid (60m)</span>
-                </label>
-                <label className="flex items-center gap-2 px-2 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 rounded-lg cursor-pointer">
-                  <input type="checkbox" defaultChecked className="accent-[#0D9488] rounded w-3.5 h-3.5" />
-                  <span>MAG Cooling Network</span>
-                </label>
-              </div>
-            )}
           </div>
         </div>
       </div>

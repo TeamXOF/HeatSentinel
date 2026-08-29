@@ -1,7 +1,12 @@
-from fastapi import FastAPI, Request
+import os
+
+from fastapi import FastAPI, Request, Depends, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 from app.errors import HeatSentinelError
 from app.logging_config import logger
@@ -10,6 +15,20 @@ from app.routers import health, heat_hunt, fortyguard, analysis
 
 
 import httpx
+
+
+# ==========================================
+# API Key Authentication Gate (HSA-03)
+# ==========================================
+_INTERNAL_API_KEY = os.environ.get("HEATSENTINEL_API_KEY", "")
+
+
+async def verify_api_key(x_api_key: str = Header(default="")):
+    """Rejects requests without a valid API key. Bypassed when HEATSENTINEL_API_KEY is not set (dev mode)."""
+    if not _INTERNAL_API_KEY:
+        return  # No key configured — allow (dev mode)
+    if x_api_key != _INTERNAL_API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid or missing API key.")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -27,12 +46,19 @@ async def lifespan(app: FastAPI):
     logger.info("Global HTTP client closed.")
 
 
+# ==========================================
+# Rate Limiter (HSA-04)
+# ==========================================
+limiter = Limiter(key_func=get_remote_address)
+
 app = FastAPI(
     title="HeatSentinel AI API",
     description="Autonomous Hyperlocal Heat Response Intelligence Backend (FortyGuard Hackathon '26)",
     version="1.0.0",
     lifespan=lifespan
 )
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Global Security Headers Middleware
 @app.middleware("http")
@@ -77,7 +103,9 @@ app.add_middleware(
 
 
 # Include routers
+# Health endpoint stays unauthenticated (load balancer probes, uptime checks)
 app.include_router(health.router)
-app.include_router(heat_hunt.router)
-app.include_router(fortyguard.router)
-app.include_router(analysis.router)
+# All other routers require API key authentication (HSA-03)
+app.include_router(heat_hunt.router, dependencies=[Depends(verify_api_key)])
+app.include_router(fortyguard.router, dependencies=[Depends(verify_api_key)])
+app.include_router(analysis.router, dependencies=[Depends(verify_api_key)])

@@ -46,7 +46,7 @@ class ConfigurationError(HeatSentinelError):
 
 def redact_sensitive_headers(headers: Dict[str, str]) -> Dict[str, str]:
     """Redacts secret keys from request/response headers for safe logging."""
-    sensitive_keys = {"api-key", "authorization", "x-api-key", "gemini-api-key", "anthropic-api-key"}
+    sensitive_keys = {"api-key", "authorization", "x-api-key", "x-goog-api-key", "gemini-api-key", "anthropic-api-key"}
     redacted = {}
     for k, v in headers.items():
         if k.lower() in sensitive_keys:

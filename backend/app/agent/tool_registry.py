@@ -10,6 +10,7 @@ import inspect
 from typing import Dict, Any, List, Callable, Optional
 
 from app.logging_config import logger
+from jsonschema import validate, ValidationError as JsonSchemaValidationError
 from app.agent.tools import (
     ALL_TOOL_SCHEMAS,
     SCAN_CITY_SCHEMA,
@@ -116,6 +117,21 @@ class ToolRegistry:
         handler = self._handlers[tool_name]
         logger.info(f"Agent executing tool '{tool_name}' with arguments: {list(args.keys())}")
 
+        # HSA-06: Validate arguments against declared input_schema before dispatch
+        schema_def = self._schemas.get(tool_name, {})
+        input_schema = schema_def.get("input_schema")
+        if input_schema:
+            try:
+                validate(instance=args, schema=input_schema)
+            except JsonSchemaValidationError as ve:
+                logger.warning(f"Tool '{tool_name}' argument validation failed: {ve.message}")
+                return {
+                    "status": "error",
+                    "tool": tool_name,
+                    "error": f"Invalid arguments: {ve.message}",
+                }
+        else:
+            logger.warning(f"Tool '{tool_name}' has no input_schema defined — skipping validation.")
         try:
             if inspect.iscoroutinefunction(handler):
                 result = await handler(args)

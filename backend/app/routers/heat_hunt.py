@@ -11,9 +11,11 @@ streaming endpoints:
 
 import json
 from typing import Dict, Any, Optional, List
-from fastapi import APIRouter, HTTPException, Query, Body
+from fastapi import APIRouter, HTTPException, Query, Body, Request
 from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel, Field
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 from app.agent.heat_hunt_service import (
     start_heat_hunt as service_start_heat_hunt,
@@ -27,6 +29,7 @@ from app.services.fallback_service import load_demo_scenario
 from app.logging_config import logger
 
 router = APIRouter(prefix="/api/heat-hunt", tags=["Heat Hunt"])
+limiter = Limiter(key_func=get_remote_address)
 
 
 # ==========================================
@@ -99,14 +102,16 @@ async def get_demo_scenario():
         raise HTTPException(status_code=500, detail=f"Failed to load demo scenario: {str(exc)}")
 
 @router.post("/start", response_model=JobStartResponse)
+@limiter.limit("5/minute")
 async def start_heat_hunt(
-    request: Optional[StartHeatHuntRequest] = Body(default=None)
+    request: Request,
+    payload: Optional[StartHeatHuntRequest] = Body(default=None)
 ):
     """
     Launches an asynchronous autonomous Heat Hunt investigation for Phoenix.
     Spawns background tool-calling loop and immediately returns a trackable job_id (<10ms latency).
     """
-    req = request or StartHeatHuntRequest()
+    req = payload or StartHeatHuntRequest()
     try:
         job_id = await service_start_heat_hunt(
             target_area=req.polygon_aoi,
@@ -203,7 +208,7 @@ async def get_results(job_id: str):
 @router.get("/{job_id}/stream")
 async def stream_job_events(
     job_id: str,
-    timeout_seconds: float = Query(180.0, description="Max streaming duration in seconds")
+    timeout_seconds: float = Query(180.0, ge=1.0, le=300.0, description="Max streaming duration in seconds (max 300)")
 ):
     """
     Streams live agent tool calls and progress updates as Server-Sent Events (SSE).

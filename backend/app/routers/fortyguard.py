@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 from fastapi import APIRouter, Request, Query, Body, HTTPException
 from pydantic import BaseModel
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 from app.db import get_db_connection
 from app.models.fortyguard import HeatmapRequest
@@ -15,6 +17,7 @@ import os
 from pathlib import Path
 
 router = APIRouter(prefix="/api/fortyguard", tags=["fortyguard"])
+limiter = Limiter(key_func=get_remote_address)
 
 # Path to the pre-computed Phoenix polygon
 DEFAULT_POLYGON_PATH = Path(__file__).resolve().parent.parent / "data" / "phoenix_target_area.geojson"
@@ -45,6 +48,7 @@ def compute_request_hash(request: HeatmapRequest) -> str:
 
 
 @router.post("/test-scan")
+@limiter.limit("30/minute")
 async def test_scan(
     request: Request,
     payload: TestScanRequest = Body(...),

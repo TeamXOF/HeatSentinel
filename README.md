@@ -218,5 +218,21 @@ python -m pytest tests/
 
 ---
 
+## 🔐 Security Notice
+
+> **⚠️ API Key Rotation Required Before Deployment**
+>
+> During a security audit (2026-08-29), the following API keys stored in `backend/.env` were identified as potentially exposed in plaintext on disk. **These keys MUST be rotated** through their respective provider dashboards before this code is deployed anywhere beyond a local development machine:
+>
+> 1. **FORTYGUARD_API_KEY** — Rotate via the FortyGuard developer portal.
+> 2. **GEMINI_API_KEY** — Rotate via Google AI Studio / Google Cloud Console.
+> 3. **CENSUS_API_KEY** — Rotate via the US Census Bureau API key management page.
+>
+> The `.env` file is excluded from version control via `.gitignore`. Never commit real API keys. The `.env.example` files contain placeholder values only.
+>
+> For production deployments, use a secrets manager (e.g., Google Secret Manager, AWS Secrets Manager, HashiCorp Vault) instead of plaintext `.env` files.
+
+---
+
 ## ⚖️ License
 Distributed under the **MIT License**. See [`LICENSE`](file:///d:/[Project]/HeatSentinel/LICENSE) for more information.

@@ -5,7 +5,7 @@ from typing import Dict, Any, Optional
 from app.config import get_settings
 from app.models.fortyguard import HeatmapRequest, StatusResponse
 from app.logging_config import logger
-from app.errors import FortyGuardAPIError
+from app.errors import FortyGuardAPIError, redact_sensitive_headers
 
 class FortyGuardClient:
     """
@@ -29,6 +29,11 @@ class FortyGuardClient:
             "accept": "application/json",
             "content-type": "application/json"
         }
+
+    @property
+    def _safe_headers(self) -> Dict[str, str]:
+        """Returns redacted headers safe for logging."""
+        return redact_sensitive_headers(self._headers)
 
     async def submit_heatmap(self, request: HeatmapRequest) -> str:
         """Submits a heatmap request with bounded retry and returns the activity_id."""

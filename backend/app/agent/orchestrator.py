@@ -69,6 +69,26 @@ Step 10: tool=finalize_heat_hunt(ranked_zones=[...], executive_briefing="...", r
 """
 
 
+def _sanitize_geojson_for_prompt(geojson: Optional[Dict[str, Any]]) -> str:
+    """Strips non-GeoJSON content from target area before prompt interpolation (HSA-05).
+    Prevents prompt injection payloads embedded in geojson fields from reaching the LLM."""
+    if not geojson:
+        return "Default Phoenix Corridor"
+    ALLOWED_KEYS = {"type", "coordinates", "features", "geometry", "properties", "bbox", "id"}
+
+    def _filter(obj: Any) -> Any:
+        if isinstance(obj, dict):
+            return {k: _filter(v) for k, v in obj.items() if k in ALLOWED_KEYS or isinstance(v, (int, float, list))}
+        if isinstance(obj, list):
+            return [_filter(i) for i in obj]
+        if isinstance(obj, (int, float)):
+            return obj
+        if isinstance(obj, str) and len(obj) < 50 and not any(c in obj for c in ['\n', '\r', '{', '}']):
+            return obj
+        return None
+    return json.dumps(_filter(geojson))
+
+
 SUPPORTED_GEMINI_MODELS: Dict[str, str] = {
     "gemini-3.5-flash-lite": "Ultra-fast, cost-efficient flagship model for high-throughput autonomous agents (Default Recommended)",
     "gemini-3.5-flash": "Next-generation balanced multimodal model with advanced tool calling",
@@ -443,7 +463,7 @@ class HeatHuntOrchestrator:
                 "content": (
                     f"Initiate an autonomous heat vulnerability investigation for the Phoenix target area. "
                     f"Date: {date_str or 'latest'}, Time: {time_str or '14:00'}. "
-                    f"Target Area: {json.dumps(target_area_geojson) if target_area_geojson else 'Default Phoenix Corridor'}. "
+                    f"Target Area: {_sanitize_geojson_for_prompt(target_area_geojson)}. "
                     f"Follow your 3-step investigation workflow: scan the corridor, analyze identified hotspots, "
                     f"and terminate with finalize_heat_hunt."
                 ),
@@ -517,7 +537,7 @@ class HeatHuntOrchestrator:
         schemas = self.tool_registry.get_all_schemas(schema_format="gemini")
         gemini_tools = [{"function_declarations": schemas}]
 
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model_name}:generateContent?key={gemini_key}"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model_name}:generateContent"
 
         contents = [
             {
@@ -527,7 +547,7 @@ class HeatHuntOrchestrator:
                         "text": (
                             f"Initiate an autonomous heat vulnerability investigation for the Phoenix target area. "
                             f"Date: {date_str or 'latest'}, Time: {time_str or '14:00'}. "
-                            f"Target Area: {json.dumps(target_area_geojson) if target_area_geojson else 'Default Phoenix Corridor'}. "
+                            f"Target Area: {_sanitize_geojson_for_prompt(target_area_geojson)}. "
                             f"Follow your 3-step investigation workflow: scan the corridor, analyze identified hotspots, "
                             f"and terminate with finalize_heat_hunt."
                         )
@@ -545,7 +565,7 @@ class HeatHuntOrchestrator:
                     "tools": gemini_tools,
                 }
 
-                resp = await client.post(url, json=payload)
+                resp = await client.post(url, json=payload, headers={"x-goog-api-key": gemini_key, "Content-Type": "application/json"})
                 if resp.status_code != 200:
                     logger.error(f"Gemini API returned status {resp.status_code}: {resp.text}")
                     break

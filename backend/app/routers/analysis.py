@@ -12,6 +12,8 @@ from typing import Dict, Any, Optional
 
 from fastapi import APIRouter, Request, Query, Body, HTTPException
 from pydantic import BaseModel, Field
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 from app.db import get_db_connection
 from app.services.fortyguard_client import FortyGuardClient
@@ -19,6 +21,7 @@ from app.services.pipeline_service import run_basic_pipeline, load_default_city_
 from app.logging_config import logger
 
 router = APIRouter(prefix="/api/analysis", tags=["analysis"])
+limiter = Limiter(key_func=get_remote_address)
 
 
 def _resolve_scan_date(requested_date: Optional[str] = None, time_range: Optional[str] = None) -> str:
@@ -59,6 +62,7 @@ def compute_basic_scan_cache_key(
 
 
 @router.post("/basic-scan")
+@limiter.limit("30/minute")
 async def basic_scan(
     request: Request,
     payload: Optional[BasicScanRequest] = Body(default=None),

@@ -162,7 +162,7 @@ export const PresenterDemoController: React.FC = () => {
           id="presenter-hud-open-btn"
           onClick={() => setIsOpen(true)}
           title="Open Judging Demo Flow Controller (Shortcut: Shift + P)"
-          className="fixed bottom-6 right-6 z-40 flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-900 px-4 py-2.5 rounded-full shadow-2xl border border-slate-200 font-bold text-xs cursor-pointer transition-all hover:scale-105"
+          className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-900 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full shadow-2xl border border-slate-200 font-bold text-xs cursor-pointer transition-all hover:scale-105"
         >
           <Sparkles size={15} className="text-[#F97316]" />
           <span>Pitch HUD (3-Min)</span>
@@ -176,7 +176,7 @@ export const PresenterDemoController: React.FC = () => {
       {isOpen && (
         <div
           id="presenter-hud-drawer"
-          className="fixed bottom-4 right-4 sm:right-6 w-[94vw] sm:w-[480px] max-w-[520px] bg-[#0F172A] text-slate-100 rounded-3xl shadow-2xl border border-slate-700/80 p-4 sm:p-5 z-50 animate-in fade-in slide-in-from-bottom-5 duration-200"
+          className="fixed bottom-20 right-3 sm:bottom-4 sm:right-6 w-[94vw] sm:w-[480px] max-w-[520px] bg-[#0F172A] text-slate-100 rounded-3xl shadow-2xl border border-slate-700/80 p-4 sm:p-5 z-50 animate-in fade-in slide-in-from-bottom-5 duration-200"
         >
           {/* Header with Title, Timer & Close */}
           <div className="flex items-center justify-between pb-3 border-b border-slate-800">

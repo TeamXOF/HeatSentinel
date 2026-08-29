@@ -879,24 +879,24 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
       {/* 1. DISTRICT SECTOR SELECTOR RIBBON */}
       <div
         id="phoenix-district-ribbon"
-        className="bg-slate-50 px-3.5 sm:px-5 py-3 border-b border-slate-200 flex flex-col gap-2.5 text-slate-900"
+        className="bg-[#FFFDF9] px-3 sm:px-4 py-2.5 border-b border-orange-100/70 flex flex-col gap-2 text-slate-900"
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-[#F97316]">
-              <Compass size={14} className="animate-spin-slow" />
+          <div className="flex items-center gap-1.5">
+            <div className="w-5 h-5 rounded-md bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-[#F97316]">
+              <Compass size={12} className="animate-spin-slow" />
             </div>
-            <span className="text-xs font-black uppercase tracking-wider text-slate-800">
+            <span className="text-[10px] sm:text-[10.5px] font-black uppercase tracking-wider text-slate-800">
               Arizona Monitored Corridors
             </span>
           </div>
-          <span className="text-[11px] text-orange-600/90 font-medium hidden sm:inline">
+          <span className="text-[9.5px] text-orange-600/90 font-medium hidden sm:inline">
             📍 Click anywhere on map to inspect custom AOI
           </span>
         </div>
 
         {/* District Quick-Selection Pills Container */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent touch-pan-x">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent touch-pan-x">
           {PHOENIX_DISTRICT_PRESETS.map((district) => {
             const isSelected = selectedDistrictId === district.id;
             return (
@@ -905,10 +905,10 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
                 id={`district-preset-btn-${district.id}`}
                 type="button"
                 onClick={() => handleSelectDistrict(district)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap min-h-[34px] flex items-center gap-1.5 shrink-0 ${
+                className={`px-3 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer whitespace-nowrap min-h-[30px] flex items-center gap-1 shrink-0 ${
                   isSelected
-                    ? 'bg-[#F97316] text-white shadow-md ring-2 ring-orange-300/40 scale-102 font-extrabold'
-                    : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200'
+                    ? 'bg-[#F97316] text-white shadow-sm ring-2 ring-orange-300/40 scale-102 font-extrabold'
+                    : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/80'
                 }`}
               >
                 <span>{district.icon}</span>
@@ -922,7 +922,7 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
             <button
               id="district-preset-btn-custom"
               type="button"
-              className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-amber-500 text-white shadow-md ring-2 ring-amber-300/40 whitespace-nowrap min-h-[34px] flex items-center gap-1.5 shrink-0 animate-pulse font-extrabold"
+              className="px-3 py-1 rounded-full text-[11px] font-bold bg-amber-500 text-white shadow-sm ring-2 ring-amber-300/40 whitespace-nowrap min-h-[30px] flex items-center gap-1 shrink-0 animate-pulse font-extrabold"
             >
               <span>🎯</span>
               <span>{customDistrict.shortLabel}</span>
@@ -935,31 +935,31 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
       {/* 2. CARD HEADER: Title & Filter Tabs */}
       <div
         id="heat-map-header"
-        className="p-3.5 sm:p-5 border-b border-[#F1F5F9] flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white"
+        className="p-3 sm:p-4 border-b border-[#F1F5F9] flex flex-col md:flex-row md:items-center justify-between gap-2.5 bg-white"
       >
         {/* Left: Title + Filter Pill Tabs */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-4 min-w-0">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 min-w-0">
           <div className="flex items-center gap-1.5 shrink-0">
-            <h2 className="text-[15px] sm:text-[17px] font-black text-[#0F172A] tracking-tight flex items-center gap-2">
-              <MapPin size={16} className="text-[#F97316]" />
+            <h2 className="text-sm sm:text-base font-black text-[#0F172A] tracking-tight flex items-center gap-1.5">
+              <MapPin size={15} className="text-[#F97316]" />
               <span>{activeDistrict.name}</span>
             </h2>
             <button
               type="button"
               aria-label="More information about the heat risk map"
-              className="text-[#94A3B8] hover:text-[#64748B] focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-colors p-1 rounded-full min-w-[32px] min-h-[32px] flex items-center justify-center cursor-pointer"
+              className="text-[#94A3B8] hover:text-[#64748B] focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-colors p-1 rounded-full min-w-[28px] min-h-[28px] flex items-center justify-center cursor-pointer"
               title="Autonomous thermal layer aggregated from urban sensors and surface telemetry"
             >
-              <Info size={15} strokeWidth={2} />
+              <Info size={14} strokeWidth={2} />
             </button>
             {/* Status Badges */}
-            {isScanLoading && <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded animate-pulse">SCANNING</span>}
-            {scanResult?.mode === 'live' && <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">LIVE PIPELINE</span>}
-            {scanResult?.mode === 'cached' && <span className="text-[10px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded">CACHED ({scanResult.duration_ms}ms)</span>}
+            {isScanLoading && <span className="text-[9px] font-bold bg-teal-100 text-teal-800 px-2 py-0.5 rounded animate-pulse">SCANNING</span>}
+            {scanResult?.mode === 'live' && <span className="text-[9px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">LIVE PIPELINE</span>}
+            {scanResult?.mode === 'cached' && <span className="text-[9px] font-bold bg-teal-50 text-teal-800 border border-teal-200/80 px-2 py-0.5 rounded">CACHED ({scanResult.duration_ms}ms)</span>}
           </div>
 
           {/* Filter Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none touch-pan-x" role="tablist" aria-label="Map Layer Filters">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 sm:pb-0 scrollbar-none touch-pan-x" role="tablist" aria-label="Map Layer Filters">
             {filterTabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
@@ -970,7 +970,7 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
                   role="tab"
                   aria-selected={isActive}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-all cursor-pointer whitespace-nowrap min-h-[36px] flex items-center shrink-0 ${
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-semibold focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-all cursor-pointer whitespace-nowrap min-h-[32px] flex items-center shrink-0 ${
                     isActive
                       ? 'bg-[#0D9488] text-white shadow-2xs'
                       : 'bg-white text-[#64748B] hover:text-[#0F172A] border border-slate-200/80 hover:bg-slate-50'
@@ -984,7 +984,7 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
         </div>
 
         {/* Right: Refresh Ingestion, Time Selector & Layers Button */}
-        <div className="flex items-center gap-2 self-end md:self-auto shrink-0">
+        <div className="flex items-center gap-1.5 self-end md:self-auto shrink-0">
           {/* Force Live Ingestion Refresh */}
           <button
             type="button"
@@ -992,10 +992,10 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
             onClick={handleForceRefresh}
             disabled={isRefreshing}
             title="Force live FortyGuard satellite ingestion and bypass cached results"
-            className="min-h-[38px] flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-slate-50 border border-slate-200/80 text-xs font-semibold text-slate-700 hover:text-[#0F172A] focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-colors cursor-pointer shadow-2xs disabled:opacity-60"
+            className="min-h-[34px] flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white hover:bg-slate-50 border border-slate-200/80 text-[11px] font-semibold text-slate-700 hover:text-[#0F172A] focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-colors cursor-pointer shadow-2xs disabled:opacity-60"
           >
             <RotateCcw
-              size={13}
+              size={12}
               className={`${isRefreshing ? 'animate-spin text-[#F97316]' : 'text-[#64748B]'}`}
             />
             <span className="hidden sm:inline">Refresh</span>
@@ -1008,10 +1008,10 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
               aria-label="Select timeframe"
               aria-expanded={isTimeDropdownOpen}
               onClick={() => setIsTimeDropdownOpen(!isTimeDropdownOpen)}
-              className="min-h-[38px] flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none border border-slate-200/80 text-xs font-semibold text-[#0F172A] transition-colors cursor-pointer shadow-2xs"
+              className="min-h-[34px] flex items-center gap-1.5 px-3 py-1 rounded-full bg-white hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none border border-slate-200/80 text-[11px] font-semibold text-[#0F172A] transition-colors cursor-pointer shadow-2xs"
             >
               <span>{selectedTimeRange}</span>
-              <ChevronDown size={13} className="text-[#64748B]" />
+              <ChevronDown size={12} className="text-[#64748B]" />
             </button>
 
             {isTimeDropdownOpen && (
@@ -1024,7 +1024,7 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
                       setSelectedTimeRange(opt);
                       setIsTimeDropdownOpen(false);
                     }}
-                    className={`w-full text-left px-3 py-2 text-xs font-medium focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-colors ${
+                    className={`w-full text-left px-3 py-1.5 text-[11px] font-medium focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-colors ${
                       selectedTimeRange === opt
                         ? 'text-[#F97316] bg-orange-50/60 font-semibold'
                         : 'text-slate-600 hover:bg-slate-50'
@@ -1044,28 +1044,28 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
               aria-label="Toggle map layers menu"
               aria-expanded={isLayersOpen}
               onClick={() => setIsLayersOpen(!isLayersOpen)}
-              className="min-h-[38px] flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#0D9488] hover:bg-[#0f766e] focus-visible:ring-2 focus-visible:ring-[#0D9488] focus-visible:outline-none text-white text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
+              className="min-h-[34px] flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0D9488] hover:bg-[#0f766e] focus-visible:ring-2 focus-visible:ring-[#0D9488] focus-visible:outline-none text-white text-[11px] font-semibold transition-colors cursor-pointer shadow-2xs"
             >
-              <Layers size={14} strokeWidth={2.2} />
+              <Layers size={13} strokeWidth={2.2} />
               <span>Layers</span>
-              <ChevronDown size={12} />
+              <ChevronDown size={11} />
             </button>
 
             {isLayersOpen && (
               <div className="absolute right-0 mt-1.5 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-2 z-50 animate-in fade-in zoom-in-95 duration-100">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-2 py-1">
+                <div className="text-[9px] font-bold uppercase tracking-wider text-slate-400 px-2 py-1">
                   Active Layers
                 </div>
-                <label className="flex items-center gap-2 px-2 py-2 text-xs text-slate-700 hover:bg-slate-50 rounded-lg cursor-pointer">
-                  <input type="checkbox" defaultChecked className="accent-[#0D9488] rounded w-4 h-4" />
+                <label className="flex items-center gap-2 px-2 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 rounded-lg cursor-pointer">
+                  <input type="checkbox" defaultChecked className="accent-[#0D9488] rounded w-3.5 h-3.5" />
                   <span>Ranked Hotspot Hulls</span>
                 </label>
-                <label className="flex items-center gap-2 px-2 py-2 text-xs text-slate-700 hover:bg-slate-50 rounded-lg cursor-pointer">
-                  <input type="checkbox" defaultChecked className="accent-[#0D9488] rounded w-4 h-4" />
+                <label className="flex items-center gap-2 px-2 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 rounded-lg cursor-pointer">
+                  <input type="checkbox" defaultChecked className="accent-[#0D9488] rounded w-3.5 h-3.5" />
                   <span>Thermal Grid (60m)</span>
                 </label>
-                <label className="flex items-center gap-2 px-2 py-2 text-xs text-slate-700 hover:bg-slate-50 rounded-lg cursor-pointer">
-                  <input type="checkbox" defaultChecked className="accent-[#0D9488] rounded w-4 h-4" />
+                <label className="flex items-center gap-2 px-2 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 rounded-lg cursor-pointer">
+                  <input type="checkbox" defaultChecked className="accent-[#0D9488] rounded w-3.5 h-3.5" />
                   <span>MAG Cooling Network</span>
                 </label>
               </div>
@@ -1082,17 +1082,17 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
         {/* FLOATING DISTRICT TELEMETRY GLASS HUD (TOP-LEFT) */}
         <div
           id="floating-district-hud"
-          className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-white/95 backdrop-blur-md text-slate-900 rounded-2xl p-3 sm:p-4 shadow-xl border border-slate-200 z-10 flex flex-col gap-2 max-w-[280px] sm:max-w-[320px] transition-all animate-in fade-in zoom-in-95 duration-200"
+          className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-white/95 backdrop-blur-md text-slate-900 rounded-2xl p-3 shadow-xl border border-slate-200 z-10 flex flex-col gap-1.5 max-w-[270px] sm:max-w-[300px] transition-all animate-in fade-in zoom-in-95 duration-200"
         >
-          <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
+          <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-1.5">
             <div className="flex items-center gap-1.5">
-              <span className="text-base">{activeDistrict.icon}</span>
-              <span className="text-xs font-black tracking-tight text-slate-900 truncate max-w-[170px]">
+              <span className="text-sm">{activeDistrict.icon}</span>
+              <span className="text-[11px] sm:text-xs font-black tracking-tight text-slate-900 truncate max-w-[160px]">
                 {activeDistrict.shortLabel}
               </span>
             </div>
             <span
-              className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full border shadow-2xs ${getTierBadgeStyle(
+              className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border shadow-2xs ${getTierBadgeStyle(
                 activeDistrict.tier
               )}`}
             >
@@ -1100,31 +1100,31 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 text-left">
-            <div className="bg-slate-50 rounded-xl p-2 border border-slate-200">
-              <div className="flex items-center gap-1 text-[10px] font-bold text-slate-500 uppercase">
-                <Flame size={11} className="text-orange-400" />
+          <div className="grid grid-cols-2 gap-1.5 text-left">
+            <div className="bg-slate-50 rounded-xl p-1.5 border border-slate-200">
+              <div className="flex items-center gap-1 text-[8.5px] sm:text-[9px] font-bold text-slate-500 uppercase">
+                <Flame size={10} className="text-orange-400" />
                 <span>Peak Heat</span>
               </div>
-              <p className="text-sm font-black text-slate-900 mt-0.5 tabular-nums">
+              <p className="text-[12px] sm:text-[13px] font-black text-slate-900 mt-0.5 tabular-nums">
                 {activeDistrict.peakTempF}°F
-                <span className="text-[10px] text-slate-400 font-medium ml-1">({activeDistrict.peakTempC}°C)</span>
+                <span className="text-[9px] text-slate-400 font-medium ml-1">({activeDistrict.peakTempC}°C)</span>
               </p>
             </div>
 
-            <div className="bg-slate-50 rounded-xl p-2 border border-slate-200">
-              <div className="flex items-center gap-1 text-[10px] font-bold text-slate-500 uppercase">
-                <ShieldAlert size={11} className="text-teal-500" />
+            <div className="bg-slate-50 rounded-xl p-1.5 border border-slate-200">
+              <div className="flex items-center gap-1 text-[8.5px] sm:text-[9px] font-bold text-slate-500 uppercase">
+                <ShieldAlert size={10} className="text-teal-500" />
                 <span>Response Gap</span>
               </div>
-              <p className="text-sm font-black text-amber-500 mt-0.5 tabular-nums">
+              <p className="text-[12px] sm:text-[13px] font-black text-amber-500 mt-0.5 tabular-nums">
                 {activeDistrict.responseGap.toFixed(1)}
-                <span className="text-[10px] text-slate-400 font-medium">/10</span>
+                <span className="text-[9px] text-slate-400 font-medium">/10</span>
               </p>
             </div>
           </div>
 
-          <p className="text-[11px] text-slate-600 leading-snug line-clamp-2">
+          <p className="text-[10px] text-slate-600 leading-snug line-clamp-2">
             {activeDistrict.description}
           </p>
 
@@ -1132,11 +1132,11 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
             id={`inspect-district-why-btn-${activeDistrict.id}`}
             type="button"
             onClick={() => onZoneSelect(activeDistrict.zoneId)}
-            className="w-full mt-1 min-h-[32px] inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F97316] hover:bg-[#ea580c] text-white text-xs font-bold transition-all shadow-md cursor-pointer hover:shadow-orange-500/20"
+            className="w-full mt-0.5 min-h-[30px] inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-xl bg-[#F97316] hover:bg-[#ea580c] text-white text-[10.5px] font-bold transition-all shadow-md cursor-pointer hover:shadow-orange-500/20"
           >
-            <Sparkles size={12} />
+            <Sparkles size={11} />
             <span>Inspect Empirical WHY Breakdown</span>
-            <ArrowRight size={12} />
+            <ArrowRight size={11} />
           </button>
         </div>
 
@@ -1149,41 +1149,41 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
             type="button"
             onClick={handleZoomIn}
             aria-label="Zoom in"
-            className="w-9 h-9 sm:w-8 sm:h-8 flex items-center justify-center text-[#0F172A] hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-colors border-b border-slate-100 cursor-pointer"
+            className="w-8 h-8 flex items-center justify-center text-[#0F172A] hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-colors border-b border-slate-100 cursor-pointer"
           >
-            <Plus size={16} strokeWidth={2.2} />
+            <Plus size={15} strokeWidth={2.2} />
           </button>
           <button
             type="button"
             onClick={handleZoomOut}
             aria-label="Zoom out"
-            className="w-9 h-9 sm:w-8 sm:h-8 flex items-center justify-center text-[#0F172A] hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-colors border-b border-slate-100 cursor-pointer"
+            className="w-8 h-8 flex items-center justify-center text-[#0F172A] hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-colors border-b border-slate-100 cursor-pointer"
           >
-            <Minus size={16} strokeWidth={2.2} />
+            <Minus size={15} strokeWidth={2.2} />
           </button>
           <button
             type="button"
             onClick={handleRecenter}
             aria-label="Recenter on Phoenix"
             title="Recenter Map"
-            className="w-9 h-9 sm:w-8 sm:h-8 flex items-center justify-center text-[#0F172A] hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-colors cursor-pointer"
+            className="w-8 h-8 flex items-center justify-center text-[#0F172A] hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-colors cursor-pointer"
           >
-            <Navigation size={14} strokeWidth={2.2} className="rotate-45" />
+            <Navigation size={13} strokeWidth={2.2} className="rotate-45" />
           </button>
         </div>
 
         {/* BOTTOM-LEFT FLOATING LEGEND */}
         <div
           id="map-floating-legend"
-          className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 bg-white/95 backdrop-blur-xs rounded-xl p-2.5 sm:p-3 shadow-md border border-slate-200/80 z-10 flex flex-col gap-1 sm:gap-1.5 min-w-[150px] sm:min-w-[200px]"
+          className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 bg-white/95 backdrop-blur-xs rounded-xl p-2 sm:p-2.5 shadow-md border border-slate-200/80 z-10 flex flex-col gap-1 min-w-[140px] sm:min-w-[180px]"
         >
-          <span className="text-[10px] sm:text-[11px] font-bold text-[#0F172A] tracking-tight">
+          <span className="text-[9px] sm:text-[9.5px] font-bold text-[#0F172A] tracking-tight">
             Priority Risk Tier
           </span>
 
-          <div className="w-full h-2 sm:h-2.5 rounded-full bg-gradient-to-r from-[#0D9488] via-[#F59E0B] via-[#F97316] to-[#EF4444] shadow-inner" />
+          <div className="w-full h-1.5 sm:h-2 rounded-full bg-gradient-to-r from-[#0D9488] via-[#F59E0B] via-[#F97316] to-[#EF4444] shadow-inner" />
 
-          <div className="flex items-center justify-between text-[9px] sm:text-[10px] font-semibold text-[#64748B] pt-0.5">
+          <div className="flex items-center justify-between text-[8px] sm:text-[8.5px] font-semibold text-[#64748B] pt-0.5">
             <span>Low</span>
             <span>Mod</span>
             <span>High</span>
@@ -1197,9 +1197,9 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
             type="button"
             aria-label="Expand map view"
             onClick={handleRecenter}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-white/95 backdrop-blur-xs hover:bg-white text-[#0F172A] rounded-full shadow-md border border-slate-200/80 text-[11px] sm:text-xs font-semibold focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-all cursor-pointer hover:shadow-lg min-h-[34px]"
+            className="flex items-center gap-1.5 px-2.5 py-1 bg-white/95 backdrop-blur-xs hover:bg-white text-[#0F172A] rounded-full shadow-md border border-slate-200/80 text-[10px] sm:text-[11px] font-semibold focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none transition-all cursor-pointer hover:shadow-lg min-h-[30px]"
           >
-            <Maximize2 size={13} strokeWidth={2} />
+            <Maximize2 size={12} strokeWidth={2} />
             <span className="hidden xs:inline">Reset Extent</span>
           </button>
         </div>

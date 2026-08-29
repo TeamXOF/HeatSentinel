@@ -284,13 +284,13 @@ export const HeatHuntConfigModal: React.FC<HeatHuntConfigModalProps> = ({
                 onClick={() => setSelectedMode('cached')}
                 className={`p-3 rounded-2xl border text-left cursor-pointer transition-all ${
                   selectedMode === 'cached'
-                    ? 'border-blue-500 bg-blue-50/60 shadow-xs'
+                    ? 'border-[#0D9488] bg-teal-50/60 shadow-xs'
                     : 'border-slate-200 hover:border-slate-300 bg-white'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-blue-900">🔵 Replay Cache</span>
-                  {selectedMode === 'cached' && <CheckCircle2 size={14} className="text-blue-600" />}
+                  <span className="text-xs font-bold text-teal-900">🌊 Replay Cache</span>
+                  {selectedMode === 'cached' && <CheckCircle2 size={14} className="text-[#0D9488]" />}
                 </div>
                 <p className="text-[10px] text-slate-500 mt-1">Replay verified recent investigation run (&lt;24h)</p>
               </button>

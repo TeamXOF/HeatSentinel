@@ -143,12 +143,12 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Mode / Status Tag */}
           <div
             id="pipeline-status-badge"
-            className={`hidden xl:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border ${
+            className={`hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9.5px] sm:text-[10px] font-bold uppercase tracking-wider border ${
               currentMode === 'live'
                 ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                 : currentMode === 'cached'
-                ? 'bg-blue-50 text-blue-800 border-blue-200'
-                : 'bg-purple-50 text-purple-800 border-purple-200'
+                ? 'bg-teal-50 text-teal-800 border-teal-200'
+                : 'bg-orange-50 text-orange-800 border-orange-200'
             }`}
           >
             <span
@@ -156,8 +156,8 @@ export const Header: React.FC<HeaderProps> = ({
                 currentMode === 'live'
                   ? 'bg-emerald-500 animate-ping'
                   : currentMode === 'cached'
-                  ? 'bg-blue-500'
-                  : 'bg-purple-500'
+                  ? 'bg-[#0D9488]'
+                  : 'bg-[#F97316]'
               }`}
             />
             <span>

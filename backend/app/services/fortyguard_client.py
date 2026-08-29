@@ -142,12 +142,13 @@ class FortyGuardClient:
     async def poll_until_complete(
         self, activity_id: str, timeout_seconds: Optional[int] = None, interval_seconds: float = 2.0
     ) -> StatusResponse:
-        """Polls the status endpoint until it succeeds or fails, with a timeout."""
+        """Polls the status endpoint until it succeeds or fails, with resilient retry against transient network blips."""
         timeout = timeout_seconds or int(self.settings.fortyguard_poll_timeout_seconds)
         logger.info(f"Starting polling for activity_id: {activity_id} (timeout={timeout}s)")
         
         start_time = asyncio.get_running_loop().time()
         attempt = 1
+        consecutive_errors = 0
         
         while True:
             current_time = asyncio.get_running_loop().time()
@@ -155,7 +156,19 @@ class FortyGuardClient:
                 logger.error(f"Polling timed out for {activity_id} after {timeout}s")
                 raise FortyGuardAPIError(f"Polling timeout for {activity_id}", status_code=504)
                 
-            status_resp = await self.get_status(activity_id)
+            try:
+                status_resp = await self.get_status(activity_id)
+                consecutive_errors = 0
+            except Exception as poll_err:
+                consecutive_errors += 1
+                if consecutive_errors >= 5:
+                    logger.error(f"Failed to poll status after 5 consecutive errors: {poll_err}")
+                    raise
+                logger.warning(f"Transient error polling {activity_id} (attempt {attempt}): {poll_err}. Retrying...")
+                await asyncio.sleep(interval_seconds)
+                attempt += 1
+                continue
+                
             status = status_resp.data.status.lower() if status_resp.data.status else None
             
             logger.debug(f"Poll attempt {attempt} for {activity_id}: {status}")

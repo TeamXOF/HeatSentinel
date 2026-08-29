@@ -62,8 +62,8 @@ export const Logo: React.FC<LogoProps> = ({
           </span>
         </div>
         {showTagline && (
-          <p className="text-[10px] font-bold text-[#0D9488] uppercase tracking-wider mt-1 truncate">
-            Autonomous Intelligence
+          <p className="text-[8.5px] font-extrabold text-[#0D9488] uppercase tracking-wider mt-0.5 leading-tight whitespace-normal">
+            Autonomous Heat Intelligence
           </p>
         )}
       </div>

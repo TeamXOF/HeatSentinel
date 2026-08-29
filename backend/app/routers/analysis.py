@@ -223,16 +223,47 @@ async def trigger_heat_intelligence(zone_id: str, request: Request):
 
 
 @router.get("/{zone_id}/heat-intelligence/{job_id}/status")
-async def get_heat_intelligence_status(zone_id: str, job_id: str):
+async def get_heat_intelligence_status(zone_id: str, job_id: str, request: Request):
     """
     Polls the status of a previously triggered heat intelligence report.
-    Returns download_link when completed.
+    Returns download_link when completed with self-healing live sync.
     """
     from app.services.heat_intelligence_service import get_heat_intelligence_job
     
     job = get_heat_intelligence_job(job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
+        
+    # Self-healing check: if not marked completed in DB yet but activity_id exists, check FortyGuard directly
+    if job.status != "completed" and job.activity_id:
+        try:
+            http_client = getattr(request.app.state, "http_client", None)
+            fg_client = FortyGuardClient(http_client) if http_client else FortyGuardClient()
+            fg_status = await fg_client.get_status(job.activity_id)
+            if fg_status.data and fg_status.data.status and fg_status.data.status.lower() in ("completed", "succeeded"):
+                res_obj = fg_status.data.result
+                dl_link = None
+                if isinstance(res_obj, dict):
+                    dl_link = res_obj.get("download_link")
+                elif res_obj and hasattr(res_obj, "download_link"):
+                    dl_link = res_obj.download_link
+                elif res_obj and hasattr(res_obj, "model_dump"):
+                    dl_link = res_obj.model_dump(exclude_unset=True).get("download_link")
+                    
+                if dl_link:
+                    expires_at = (datetime.now(timezone.utc) + timedelta(seconds=580)).isoformat()
+                    with get_db_connection() as conn:
+                        cursor = conn.cursor()
+                        cursor.execute(
+                            "UPDATE heat_intelligence_jobs SET status = 'completed', download_link = ?, expires_at = ?, error = NULL WHERE job_id = ?",
+                            (dl_link, expires_at, job_id)
+                        )
+                    job.status = "completed"
+                    job.download_link = dl_link
+                    job.expires_at = expires_at
+                    job.error = None
+        except Exception as sync_err:
+            logger.debug(f"Live status sync check error for job {job_id}: {sync_err}")
         
     return job.model_dump()
 

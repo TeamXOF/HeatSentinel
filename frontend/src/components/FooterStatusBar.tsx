@@ -81,27 +81,27 @@ export const FooterStatusBar: React.FC<FooterStatusBarProps> = ({
       className={`w-full bg-white border border-[#F1F5F9] rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4 ${className}`}
     >
       {/* Left side: Logo + Agent Name + ACTIVE badge + Data points */}
-      <div className="flex flex-wrap items-center gap-3 sm:gap-4 min-w-0">
+      <div className="flex flex-wrap items-center gap-3 sm:gap-3.5 min-w-0">
         {/* Geometric Mark Logo Icon */}
-        <LogoIcon size={38} />
+        <LogoIcon size={34} />
 
-        <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 min-w-0">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2.5 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-[14px] font-bold text-[#0F172A] tracking-tight">
+            <span className="text-[13px] font-bold text-[#0F172A] tracking-tight">
               {data.agentName}
             </span>
             {getStatusBadge()}
           </div>
 
-          <span className="text-xs text-[#64748B] tracking-tight truncate">
+          <span className="text-[11px] text-[#64748B] tracking-tight truncate">
             Monitoring <strong className="text-[#0F172A] font-semibold">{data.dataPointsCount.toLocaleString()}</strong> data points across {data.location}
           </span>
         </div>
       </div>
 
       {/* Right side: Last updated + Refresh button + Agent Insights button */}
-      <div className="flex items-center gap-3 sm:gap-4 shrink-0 self-end md:self-auto">
-        <div className="flex items-center gap-1.5 text-xs text-[#64748B]">
+      <div className="flex items-center gap-2.5 sm:gap-3.5 shrink-0 self-end md:self-auto">
+        <div className="flex items-center gap-1.5 text-[11px] text-[#64748B]">
           <span>Last updated: <strong className="text-[#0F172A] font-medium">{data.lastUpdated}</strong></span>
           <button
             type="button"
@@ -111,7 +111,7 @@ export const FooterStatusBar: React.FC<FooterStatusBarProps> = ({
             className="p-1 rounded-full text-[#64748B] hover:text-[#0F172A] hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <RefreshCw
-              size={14}
+              size={13}
               strokeWidth={2}
               className={`${isRefreshing || status === 'running' ? 'animate-spin text-[#0D9488]' : ''}`}
             />
@@ -121,10 +121,10 @@ export const FooterStatusBar: React.FC<FooterStatusBarProps> = ({
         <Link
           to="/agent-insights"
           id="footer-agent-insights-btn"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0D9488] hover:bg-[#0f766e] text-white text-xs font-semibold transition-all shadow-xs hover:shadow-sm"
+          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#0D9488] hover:bg-[#0f766e] text-white text-[11.5px] font-semibold transition-all shadow-xs hover:shadow-sm"
         >
           <span>Agent Insights</span>
-          <ArrowRight size={14} strokeWidth={2.2} />
+          <ArrowRight size={13} strokeWidth={2.2} />
         </Link>
       </div>
     </footer>

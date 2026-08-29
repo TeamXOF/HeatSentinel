@@ -53,7 +53,7 @@ export const Sidebar: React.FC = () => {
                 to={item.path}
                 aria-current={({ isActive }) => (isActive ? 'page' : undefined)}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3.5 py-2 rounded-full font-medium transition-all duration-150 group text-sm focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none ${
+                  `flex items-center gap-3 px-3.5 py-2 rounded-full font-medium transition-all duration-150 group text-[13px] focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:outline-none ${
                     isActive
                       ? 'bg-[#F97316] text-white shadow-sm font-semibold'
                       : 'text-[#64748B] hover:text-[#0F172A] hover:bg-slate-50'

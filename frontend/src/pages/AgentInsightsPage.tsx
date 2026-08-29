@@ -80,11 +80,11 @@ export const AgentInsightsPage: React.FC = () => {
                   (result?.mode || activeMode) === 'live'
                     ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                     : (result?.mode || activeMode) === 'cached'
-                    ? 'bg-blue-50 text-blue-800 border-blue-200'
-                    : 'bg-purple-50 text-purple-800 border-purple-200'
+                    ? 'bg-teal-50 text-teal-800 border-teal-200'
+                    : 'bg-orange-50 text-orange-800 border-orange-200'
                 }`}>
                   <span className={`w-1.5 h-1.5 rounded-full ${
-                    (result?.mode || activeMode) === 'live' ? 'bg-emerald-500 animate-ping' : (result?.mode || activeMode) === 'cached' ? 'bg-blue-500' : 'bg-purple-500'
+                    (result?.mode || activeMode) === 'live' ? 'bg-emerald-500 animate-ping' : (result?.mode || activeMode) === 'cached' ? 'bg-[#0D9488]' : 'bg-[#F97316]'
                   }`} />
                   {(result?.mode || activeMode) === 'live' ? 'LIVE DATA' : (result?.mode || activeMode) === 'cached' ? 'CACHED' : 'DEMO MODE'}
                 </span>

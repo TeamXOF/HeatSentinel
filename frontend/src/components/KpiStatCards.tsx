@@ -67,37 +67,37 @@ export const KpiCardItem: React.FC<{ card: StatCard }> = ({ card }) => {
   return (
     <div
       id={`stat-card-${card.id}`}
-      className={`min-w-[240px] sm:min-w-0 snap-start flex-1 rounded-2xl ${style.cardBg} border ${style.cardBorder} p-3.5 sm:p-4 shadow-xs hover:shadow-sm transition-all duration-200 flex items-center gap-3`}
+      className={`min-w-[230px] sm:min-w-0 snap-start flex-1 rounded-2xl ${style.cardBg} border ${style.cardBorder} p-3 sm:p-3.5 shadow-xs hover:shadow-sm transition-all duration-200 flex items-center gap-2.5 min-w-0 overflow-hidden`}
     >
       {/* Icon Badge */}
       <div
-        className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full ${style.iconBg} ${style.iconColor} flex items-center justify-center shrink-0 shadow-2xs`}
+        className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full ${style.iconBg} ${style.iconColor} flex items-center justify-center shrink-0 shadow-2xs`}
       >
-        <Icon size={19} strokeWidth={2} />
+        <Icon size={18} strokeWidth={2} />
       </div>
 
       {/* Content */}
       <div className="flex flex-col min-w-0 flex-1">
         {/* Label */}
-        <span className="text-[9.5px] sm:text-[10px] font-bold tracking-wider text-[#64748B] uppercase truncate leading-tight">
+        <span className="text-[8px] sm:text-[9px] font-bold tracking-wider text-[#64748B] uppercase truncate leading-tight">
           {card.label}
         </span>
 
         {/* Value + Status */}
         <div className="flex items-baseline gap-1.5 mt-0.5 flex-wrap">
-          <span className="text-xl sm:text-[22px] font-bold text-[#0F172A] tabular-nums tracking-tight leading-none">
+          <span className="text-lg sm:text-xl font-bold text-[#0F172A] tabular-nums tracking-tight leading-none">
             {card.value}
           </span>
           {card.status && (
-            <span className={`text-[11px] font-semibold leading-none ${statusColorClass}`}>
+            <span className={`text-[9.5px] sm:text-[10px] font-semibold leading-none ${statusColorClass} truncate max-w-full`}>
               {card.status}
             </span>
           )}
         </div>
 
         {/* Subtext with trend indicator */}
-        <div className="mt-1 text-[11px] text-[#64748B] font-medium truncate flex items-center gap-1">
-          <span>{card.subtext}</span>
+        <div className="mt-0.5 text-[9.5px] sm:text-[10px] text-[#64748B] font-medium truncate flex items-center gap-1">
+          <span className="truncate">{card.subtext}</span>
         </div>
       </div>
     </div>

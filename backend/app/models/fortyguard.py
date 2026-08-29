@@ -66,14 +66,19 @@ class HeatmapResultStats(BaseModel):
     temperature_stats: Optional[Dict[str, Any]] = None
 
 class HeatmapResult(BaseModel):
-    # Using Any for map_data to avoid heavily specifying GeoJSON types if we don't need to parse them strictly yet
-    map_data: Dict[str, Any]
-    stats_data: HeatmapResultStats
+    # Support both raster heatmap results and Heat Intelligence PDF results
+    map_data: Optional[Dict[str, Any]] = None
+    stats_data: Optional[HeatmapResultStats] = None
+    download_link: Optional[str] = None
+    
+    model_config = {"extra": "allow"}
 
 class StatusData(BaseModel):
     activity_id: str
     status: str  # E.g., 'Processing', 'Completed', 'Failed'
-    result: Optional[HeatmapResult] = None
+    result: Optional[Union[HeatmapResult, Dict[str, Any]]] = None
+    
+    model_config = {"extra": "allow"}
 
 class StatusResponse(BaseModel):
     error: bool

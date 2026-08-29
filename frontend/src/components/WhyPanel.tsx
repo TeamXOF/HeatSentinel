@@ -40,27 +40,27 @@ const HeatIntelligenceSection: React.FC<{ zoneId: string }> = ({ zoneId }) => {
   const downloadLink = jobStatus?.download_link;
 
   return (
-    <div className="bg-gradient-to-br from-indigo-50/70 to-slate-50/50 border border-indigo-100/70 rounded-2xl p-4 shadow-xs space-y-3 mt-4">
-      <div className="flex items-center gap-2 text-indigo-900 font-bold text-xs">
-        <FileText size={15} className="text-indigo-600" />
+    <div className="bg-gradient-to-br from-teal-50/80 via-white to-orange-50/40 border border-teal-200/80 rounded-2xl p-4 shadow-xs space-y-3 mt-4">
+      <div className="flex items-center gap-2 text-[#0D9488] font-bold text-xs">
+        <FileText size={15} className="text-[#0D9488]" />
         <span className="uppercase tracking-wider">FortyGuard Heat Intelligence</span>
       </div>
       
       {!jobId && !isProcessing && !isCompleted && !isFailed && !isExpired && (
-         <button onClick={() => triggerMutation.mutate()} className="w-full py-2.5 bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition-colors flex justify-center items-center gap-2 shadow-sm cursor-pointer">
+         <button onClick={() => triggerMutation.mutate()} className="w-full py-2.5 bg-white hover:bg-teal-50 text-[#0D9488] border border-teal-200 rounded-xl text-xs font-bold transition-colors flex justify-center items-center gap-2 shadow-sm cursor-pointer">
            <FileText size={14} /> Generate Full Intelligence Report (PDF)
          </button>
       )}
 
       {isProcessing && (
-         <div className="flex items-center justify-center gap-2 py-3 bg-white border border-indigo-100 rounded-xl text-indigo-600 text-xs font-bold shadow-sm">
+         <div className="flex items-center justify-center gap-2 py-3 bg-white border border-teal-100 rounded-xl text-[#0D9488] text-xs font-bold shadow-sm">
            <Loader2 size={16} className="animate-spin" />
            Generating PDF (approx 50s)...
          </div>
       )}
 
       {isCompleted && downloadLink && !isExpired && (
-         <a href={downloadLink} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white shadow-md rounded-xl text-xs font-bold transition-colors cursor-pointer">
+         <a href={downloadLink} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#0D9488] hover:bg-[#0f766e] text-white shadow-md rounded-xl text-xs font-bold transition-colors cursor-pointer">
            <ExternalLink size={14} /> View Report (PDF)
          </a>
       )}
@@ -137,7 +137,7 @@ export const WhyPanel: React.FC<WhyPanelProps> = ({
       case 'LIVE DATA':
         return 'bg-emerald-50 text-emerald-800 border-emerald-300';
       case 'CACHED':
-        return 'bg-blue-50 text-blue-800 border-blue-300';
+        return 'bg-teal-50 text-teal-800 border-teal-300';
       case 'DEMO MODE':
       default:
         return 'bg-amber-50 text-amber-800 border-amber-300';
@@ -363,7 +363,7 @@ export const WhyPanel: React.FC<WhyPanelProps> = ({
             <div className="bg-slate-50/70 border border-slate-200/70 rounded-2xl p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-slate-900 font-bold text-xs">
-                  <Droplets size={15} className="text-[#0284C7]" />
+                  <Droplets size={15} className="text-[#0D9488]" />
                   <span>Resource Proximity & Deficit</span>
                 </div>
                 <span className="text-[10px] text-slate-400 font-medium italic">

@@ -15,6 +15,10 @@ class Settings(BaseSettings):
     # Comma-separated list of allowed CORS origins. Use "*" for dev, specific domains for production.
     allowed_origins: str = "*"
 
+    fortyguard_mode: Literal["mock", "live"] = "mock"
+    fortyguard_max_calls_per_run: int = 12
+    app_env: str = "dev"
+
     # Standardized Timeout & Retry Policy (Step 42)
     fortyguard_request_timeout_seconds: float = 30.0
     fortyguard_poll_timeout_seconds: float = 60.0

@@ -89,8 +89,31 @@ export const HeatHuntProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         });
         setStatus('completed');
 
-        // Instantly refresh all React Query caches across the dashboard
-        queryClient.invalidateQueries({ queryKey: ['basic-scan'] });
+        // Directly hydrate basic-scan cache with the agent's investigated zones so the Overview and Maps sync instantly
+        queryClient.setQueriesData<any>(
+          { queryKey: ['basic-scan'] },
+          (oldData: any) => {
+            if (!oldData) {
+              return {
+                status: 'success',
+                city: res.result?.city || 'Phoenix',
+                ranked_zones: ranked,
+                hotspots: [],
+                scan_summary: res.result?.scan_summary || { total_cells: 16568 },
+                computed_at: new Date().toISOString(),
+                mode: resMode,
+              };
+            }
+            return {
+              ...oldData,
+              ranked_zones: ranked.length > 0 ? ranked : oldData.ranked_zones,
+              mode: resMode,
+              computed_at: new Date().toISOString(),
+            };
+          }
+        );
+
+        // Selectively refresh reactive UI derived queries
         queryClient.invalidateQueries({ queryKey: ['zones'] });
         queryClient.invalidateQueries({ queryKey: ['heatmapMarkers'] });
         queryClient.invalidateQueries({ queryKey: ['heatmapGeoJSON'] });

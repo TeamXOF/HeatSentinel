@@ -100,7 +100,8 @@ async def _process_hotspot(
     start_time: str,
     client: FortyGuardClient,
     semaphore: asyncio.Semaphore,
-    city: str = "Phoenix"
+    city: str = "Phoenix",
+    pre_scanned_features: Optional[List[Dict[str, Any]]] = None
 ) -> Dict[str, Any]:
     """Processes a single hotspot through metrics, vulnerability, resources, and scoring."""
     async with semaphore:
@@ -115,7 +116,8 @@ async def _process_hotspot(
             zone_polygon=geom,
             start_date=start_date,
             start_time=start_time,
-            client=client
+            client=client,
+            pre_scanned_features=pre_scanned_features
         )
         # Vulnerability and resource coverage are sync spatial queries, ran safely
         vuln_data = get_vulnerability_for_zone(geom)
@@ -228,6 +230,9 @@ async def run_basic_pipeline(
     5. Return unified BasicPipelineResult
     """
     start_ts = time.time()
+    from app.services.fortyguard_client import reset_run_budget
+    reset_run_budget()
+
     if client is None:
         client = FortyGuardClient()
         
@@ -257,6 +262,7 @@ async def run_basic_pipeline(
     
     # 4. Concurrently process detected hotspots with bounded semaphore
     semaphore = asyncio.Semaphore(3)
+    corridor_features = scan_res.get("data", {}).get("features", [])
     tasks = [
         _process_hotspot(
             hotspot=hs,
@@ -265,7 +271,8 @@ async def run_basic_pipeline(
             start_time=start_time,
             client=client,
             semaphore=semaphore,
-            city=city
+            city=city,
+            pre_scanned_features=corridor_features
         )
         for i, hs in enumerate(hotspots)
     ]

@@ -175,7 +175,6 @@ class HeatHuntOrchestrator:
                 "timestamp": datetime.now().isoformat() + "Z",
                 "elapsed_ms": round((time.time() - start_time) * 1000, 1),
             }
-            logger.info(f"[Step {step_idx}] [{tool_name}] {status}")
             if on_step:
                 try:
                     res = on_step(event)
@@ -183,6 +182,9 @@ class HeatHuntOrchestrator:
                         await res
                 except Exception as cb_err:
                     logger.warning(f"Error in on_step callback: {cb_err}")
+
+        from app.services.fortyguard_client import reset_run_budget
+        reset_run_budget()
 
         await emit_step(0, "orchestrator_init", f"Initializing HeatSentinel autonomous agent ({self.model_name})...")
 
@@ -242,6 +244,7 @@ class HeatHuntOrchestrator:
         step += 1
 
         hotspots = scan_result.get("data", {}).get("hotspots", [])
+        raw_cells = scan_result.get("data", {}).get("features", [])
         total_cells = scan_result.get("data", {}).get("total_cells", 0)
         tiles = scan_result.get("data", {}).get("tiles_analyzed", 0)
 
@@ -309,11 +312,16 @@ class HeatHuntOrchestrator:
                 ]
             }
 
-            # Localized thermal layer query at refined geometry scale
+            # Localized thermal layer query at refined geometry scale (with spatial grid slicing)
             await emit_step(step, "query_fortyguard_heat", f"Querying localized FortyGuard thermal layers for refined {zone_id}...")
             await self.tool_registry.execute_tool(
                 "query_fortyguard_heat",
-                {"polygon_geojson": zone_poly, "date_str": date_str, "time_str": time_str}
+                {
+                    "polygon_geojson": zone_poly,
+                    "date_str": date_str,
+                    "time_str": time_str,
+                    "pre_scanned_features": raw_cells,
+                }
             )
             step += 1
 
@@ -329,7 +337,7 @@ class HeatHuntOrchestrator:
             res_data = res_res.get("data", {})
             step += 1
 
-            # Calculate Thermal Risk Metrics
+            # Calculate Thermal Risk Metrics (with spatial grid slicing)
             await emit_step(step, "calculate_risk_metrics", f"Computing thermal persistence and threshold exceedance for {zone_id}...")
             heat_res = await self.tool_registry.execute_tool(
                 "calculate_risk_metrics",
@@ -338,6 +346,7 @@ class HeatHuntOrchestrator:
                     "current_temp_c": peak_temp,
                     "persistence_hours": 1.0,
                     "exceedance_hours": 1.0,
+                    "pre_scanned_features": raw_cells,
                 }
             )
             heat_data = heat_res.get("data", {})

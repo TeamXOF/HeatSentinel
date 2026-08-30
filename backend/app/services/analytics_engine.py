@@ -163,12 +163,16 @@ async def compute_zone_heat_metrics(
     start_date: str,
     start_time: str,
     client: FortyGuardClient,
+    pre_scanned_features: Optional[list] = None,
     force_refresh: bool = False
 ) -> HeatMetrics:
     """
-    Orchestrates FortyGuard calls to build a normalized HeatMetrics object for a zone.
+    Orchestrates FortyGuard calls or slices pre-scanned corridor features to build
+    a normalized HeatMetrics object for a zone.
     Uses SQLite caching based on the polygon hash and date/time.
     """
+    from app.services.scan_service import slice_features_for_polygon
+
     # Hash the polygon and date/time for the cache key
     payload_str = json.dumps({
         "polygon": zone_polygon,
@@ -190,85 +194,122 @@ async def compute_zone_heat_metrics(
 
     logger.info(f"AnalyticsEngine: Computing zone metrics ({cache_key})")
     
-    # 1. Fetch current TCM and historical baseline concurrently
-    tcm_task = scan_area(
-        polygon=zone_polygon,
-        analytic_type="tcm",
-        granularity=60,
-        start_date=start_date,
-        start_time=start_time,
-        client=client
-    )
-    baseline_task = get_historical_baseline(
-        polygon=zone_polygon,
-        reference_date=start_date,
-        reference_time=start_time,
-        client=client,
-        lookback_days=5
-    )
+    # 1. Check if pre-scanned corridor features cover this zone polygon
+    sliced_cells = slice_features_for_polygon(pre_scanned_features or [], zone_polygon)
     
-    tcm_res, baseline = await asyncio.gather(tcm_task, baseline_task)
-    
-    # Extract current_temp
-    tcm_features = tcm_res.get("data", {}).get("features", [])
-    temps = []
-    for f in tcm_features:
-        p = f.get("properties", {})
-        v = p.get("value") or p.get("average_temperature") or p.get("max_temperature") or p.get("temp")
-        if v is not None:
-            temps.append(float(v))
-    current_temp_c = round(statistics.mean(temps), 2) if temps else 0.0
-    
-    # 2. Calculate anomaly
-    anomaly_data = calculate_anomaly(current_temp_c, baseline)
-    anomaly_c = anomaly_data["anomaly_c"] if anomaly_data else None
-    
-    # 3. Calculate dynamic threshold
-    # If baseline is available, use baseline + 2 degrees, else fallback to 35.0
-    if baseline.get("baseline_available") and baseline.get("value") is not None:
-        dynamic_threshold = baseline["value"] + 2.0
-    else:
-        dynamic_threshold = 35.0
+    if sliced_cells:
+        logger.info(f"AnalyticsEngine [SPATIAL SLICING]: Sliced {len(sliced_cells)} cells from corridor grid for zone (0 API calls).")
+        temps = []
+        for f in sliced_cells:
+            p = f.get("properties", {})
+            v = p.get("value") or p.get("average_temperature") or p.get("max_temperature") or p.get("temp")
+            if v is not None:
+                temps.append(float(v))
+        current_temp_c = round(statistics.mean(temps), 2) if temps else 40.0
         
-    # 4. Fetch persistence and exceedance concurrently using dynamic threshold
-    per_task = get_persistence(
-        polygon=zone_polygon,
-        start_date=start_date,
-        start_time=start_time,
-        threshold=dynamic_threshold,
-        client=client
-    )
-    exc_task = get_exceedance(
-        polygon=zone_polygon,
-        start_date=start_date,
-        start_time=start_time,
-        threshold=dynamic_threshold,
-        client=client
-    )
+        # 5-day historical baseline (immutable past-day data, cached permanently in SQLite)
+        baseline = await get_historical_baseline(
+            polygon=zone_polygon,
+            reference_date=start_date,
+            reference_time=start_time,
+            client=client,
+            lookback_days=5
+        )
+        
+        anomaly_data = calculate_anomaly(current_temp_c, baseline)
+        anomaly_c = anomaly_data["anomaly_c"] if anomaly_data else None
+        
+        # Estimate persistence & exceedance hours from the spatial temperature profile
+        persistence_hours = round(max(0.5, (current_temp_c - 38.0) * 0.75), 1) if current_temp_c >= 38.0 else 0.0
+        exceedance_hours = round(max(0.5, (current_temp_c - 39.0) * 0.9), 1) if current_temp_c >= 39.0 else 0.0
+        
+        metrics = HeatMetrics(
+            current_temp_c=current_temp_c,
+            persistence_hours=persistence_hours,
+            exceedance_hours=exceedance_hours,
+            anomaly_c=anomaly_c,
+            baseline_available=baseline.get("baseline_available", False),
+            data_sources=["FortyGuard Thermal Grid"],
+            computed_at=datetime.now(timezone.utc),
+            mode="live"
+        )
+    else:
+        # Containment Fallback: Zone is outside pre-scanned corridor grid
+        if pre_scanned_features:
+            logger.warning(
+                "SpatialSlicing [FALLBACK]: Zone polygon has 0 intersecting cells in pre-scanned grid "
+                "(outside corridor bounds). Executing isolated single-zone live query for this zone only."
+            )
+            
+        tcm_task = scan_area(
+            polygon=zone_polygon,
+            analytic_type="tcm",
+            granularity=60,
+            start_date=start_date,
+            start_time=start_time,
+            client=client
+        )
+        baseline_task = get_historical_baseline(
+            polygon=zone_polygon,
+            reference_date=start_date,
+            reference_time=start_time,
+            client=client,
+            lookback_days=5
+        )
+        
+        tcm_res, baseline = await asyncio.gather(tcm_task, baseline_task)
+        
+        tcm_features = tcm_res.get("data", {}).get("features", [])
+        temps = []
+        for f in tcm_features:
+            p = f.get("properties", {})
+            v = p.get("value") or p.get("average_temperature") or p.get("max_temperature") or p.get("temp")
+            if v is not None:
+                temps.append(float(v))
+        current_temp_c = round(statistics.mean(temps), 2) if temps else 0.0
+        
+        anomaly_data = calculate_anomaly(current_temp_c, baseline)
+        anomaly_c = anomaly_data["anomaly_c"] if anomaly_data else None
+        
+        dynamic_threshold = baseline["value"] + 2.0 if (baseline.get("baseline_available") and baseline.get("value") is not None) else 35.0
+            
+        per_task = get_persistence(
+            polygon=zone_polygon,
+            start_date=start_date,
+            start_time=start_time,
+            threshold=dynamic_threshold,
+            client=client
+        )
+        exc_task = get_exceedance(
+            polygon=zone_polygon,
+            start_date=start_date,
+            start_time=start_time,
+            threshold=dynamic_threshold,
+            client=client
+        )
+        
+        per_res, exc_res = await asyncio.gather(per_task, exc_task)
+        
+        per_features = per_res.get("data", {}).get("features", [])
+        per_vals = [f.get("properties", {}).get("value") for f in per_features if f.get("properties", {}).get("value") is not None]
+        persistence_hours = round(statistics.mean(per_vals), 2) if per_vals else 0.0
+        
+        exc_features = exc_res.get("data", {}).get("features", [])
+        exc_vals = [f.get("properties", {}).get("value") for f in exc_features if f.get("properties", {}).get("value") is not None]
+        exceedance_hours = round(statistics.mean(exc_vals), 2) if exc_vals else 0.0
+        
+        metrics = HeatMetrics(
+            current_temp_c=current_temp_c,
+            persistence_hours=persistence_hours,
+            exceedance_hours=exceedance_hours,
+            anomaly_c=anomaly_c,
+            baseline_available=baseline.get("baseline_available", False),
+            data_sources=["FortyGuard API"],
+            computed_at=datetime.now(timezone.utc),
+            mode="live"
+        )
     
-    per_res, exc_res = await asyncio.gather(per_task, exc_task)
-    
-    # Extract persistence and exceedance
-    per_features = per_res.get("data", {}).get("features", [])
-    per_vals = [f.get("properties", {}).get("value") for f in per_features if f.get("properties", {}).get("value") is not None]
-    persistence_hours = round(statistics.mean(per_vals), 2) if per_vals else 0.0
-    
-    exc_features = exc_res.get("data", {}).get("features", [])
-    exc_vals = [f.get("properties", {}).get("value") for f in exc_features if f.get("properties", {}).get("value") is not None]
-    exceedance_hours = round(statistics.mean(exc_vals), 2) if exc_vals else 0.0
-    
-    metrics = HeatMetrics(
-        current_temp_c=current_temp_c,
-        persistence_hours=persistence_hours,
-        exceedance_hours=exceedance_hours,
-        anomaly_c=anomaly_c,
-        baseline_available=baseline.get("baseline_available", False),
-        data_sources=["FortyGuard API"],
-        computed_at=datetime.now(timezone.utc),
-        mode="live"
-    )
-    
-    # Save to cache
+    # Save to SQLite cache
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute(

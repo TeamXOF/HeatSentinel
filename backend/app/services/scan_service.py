@@ -202,3 +202,34 @@ async def scan_area(
             "features": master_features
         }
     }
+
+
+def slice_features_for_polygon(
+    master_features: list[dict],
+    zone_polygon: dict
+) -> list[dict]:
+    """
+    Spatially extracts features from a pre-scanned FeatureCollection that intersect
+    with the given zone_polygon geometry.
+    Returns an empty list if 0 cells intersect (containment check).
+    """
+    from shapely.geometry import shape
+
+    if not master_features or not zone_polygon:
+        return []
+
+    try:
+        zone_shape = shape(zone_polygon)
+        matched = []
+        for f in master_features:
+            geom = f.get("geometry")
+            if not geom:
+                continue
+            f_shape = shape(geom)
+            if zone_shape.intersects(f_shape):
+                matched.append(f)
+        return matched
+    except Exception as e:
+        logger.warning(f"SpatialSlicing: Error during geometric intersection calculation: {e}")
+        return []
+

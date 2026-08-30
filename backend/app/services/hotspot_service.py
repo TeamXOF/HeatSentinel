@@ -100,9 +100,11 @@ def detect_hotspots(
         hotspots.append({
             "hotspot_id": f"hs_{uuid.uuid4().hex[:8]}",
             "geometry": hull_geojson,
+            "centroid": [round(hull.centroid.x, 6), round(hull.centroid.y, 6)],
             "mean_temp": round(mean_val, 2),
             "max_temp": round(max_val, 2),
             "cell_count": len(cluster_features),
+            "cells": cluster_features,
             "tile_ids": tile_ids
         })
         

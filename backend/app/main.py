@@ -40,6 +40,30 @@ async def lifespan(app: FastAPI):
     app.state.http_client = httpx.AsyncClient(timeout=30.0)
     logger.info("Global HTTP client initialized.")
     
+    # Startup Environment & FortyGuard Mode Check (Issue 1)
+    cfg = get_settings()
+    is_deployed = (
+        cfg.environment.lower() in ("prod", "production")
+        or cfg.app_env.lower() in ("prod", "production")
+        or os.environ.get("APP_ENV", "").lower() == "production"
+        or bool(os.environ.get("RENDER"))
+        or bool(os.environ.get("RAILWAY_ENVIRONMENT"))
+        or bool(os.environ.get("VERCEL"))
+        or bool(os.environ.get("FASTAPI_CLOUD"))
+    )
+    if is_deployed and cfg.fortyguard_mode == "mock":
+        logger.warning(
+            "\n" + "=" * 80 + "\n"
+            "⚠️  CRITICAL CONFIGURATION NOTICE: FORTYGUARD_MODE is set to 'mock' in a DEPLOYED/PRODUCTION environment.\n"
+            "The application will serve deterministic mock fixture data instead of live FortyGuard API data.\n"
+            "To enable live FortyGuard API calls in production, set FORTYGUARD_MODE=live in your cloud deployment dashboard.\n"
+            + "=" * 80 + "\n"
+        )
+    elif cfg.fortyguard_mode == "mock":
+        logger.info("FortyGuard Client operating in MOCK mode (zero credit consumption for local dev/testing).")
+    else:
+        logger.info("FortyGuard Client operating in LIVE mode (real API credits will be consumed).")
+
     yield
     
     logger.info("Shutting down HeatSentinel AI backend...")
@@ -70,6 +94,7 @@ async def add_security_headers(request: Request, call_next):
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["Content-Security-Policy"] = "default-src 'self'; frame-ancestors 'none';"
     return response
 
 

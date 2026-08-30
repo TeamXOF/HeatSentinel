@@ -36,7 +36,7 @@ SCAN_CITY_SCHEMA: Dict[str, Any] = {
         "type": "object",
         "properties": {
             "target_area_geojson": {
-                "type": "object",
+                "type": ["object", "null"],
                 "description": "Optional GeoJSON Polygon / MultiPolygon target bounding area. Defaults to Phoenix target corridor if omitted."
             },
             "date_str": {
@@ -85,6 +85,11 @@ QUERY_FORTYGUARD_HEAT_SCHEMA: Dict[str, Any] = {
                 "type": "string",
                 "enum": ["tcm", "persistence", "exceedance"],
                 "description": "FortyGuard analytic endpoint type. Defaults to 'tcm'."
+            },
+            "pre_scanned_features": {
+                "type": "array",
+                "items": {"type": "object"},
+                "description": "Optional pre-scanned corridor thermal features for spatial grid slicing."
             }
         },
         "required": ["polygon_geojson"]
@@ -184,6 +189,11 @@ CALCULATE_RISK_METRICS_SCHEMA: Dict[str, Any] = {
             "anomaly_c": {
                 "type": "number",
                 "description": "Temperature anomaly vs 5-day historical baseline in degrees Celsius (optional)."
+            },
+            "pre_scanned_features": {
+                "type": "array",
+                "items": {"type": "object"},
+                "description": "Optional pre-scanned corridor grid features for zero-call spatial slicing."
             }
         },
         "required": ["zone_polygon", "current_temp_c"]
@@ -383,6 +393,7 @@ async def run_scan_city(arguments: Dict[str, Any]) -> Dict[str, Any]:
         "status": "success",
         "tiles_analyzed": total_tiles,
         "total_cells": len(raw_cells),
+        "features": raw_cells,
         "hotspot_clusters_detected": len(hotspots),
         "hotspots": hotspots,
         "summary": {
@@ -394,48 +405,37 @@ async def run_scan_city(arguments: Dict[str, Any]) -> Dict[str, Any]:
 
 
 async def run_query_fortyguard_heat(arguments: Dict[str, Any]) -> Dict[str, Any]:
-    """Wraps FortyGuardClient.run_heatmap for single AOI query."""
+    """Wraps scan_service.scan_area with caching and spatial grid slicing."""
+    from app.services.scan_service import scan_area, slice_features_for_polygon
     from app.services.fortyguard_client import FortyGuardClient
-    from app.models.fortyguard import HeatmapRequest
 
     polygon = arguments["polygon_geojson"]
     date_str = arguments.get("date_str") or "2024-08-01"
     time_str = arguments.get("time_str", "14:00")
     analytic_type = arguments.get("analytic_type", "tcm")
     forecast_hours = arguments.get("forecast_hours")
-    
-    end_date = None
-    end_time = None
-    filter_type = 1
-    
-    if forecast_hours is not None and forecast_hours > 0:
-        from datetime import datetime, timedelta
-        try:
-            dt = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
-            end_dt = dt + timedelta(hours=forecast_hours)
-            end_date = end_dt.strftime("%Y-%m-%d")
-            end_time = end_dt.strftime("%H:%M")
-            filter_type = 2
-        except Exception as e:
-            logger.error(f"Error parsing date/time for forecast: {e}")
+    pre_scanned = arguments.get("pre_scanned_features") or []
 
-    req = HeatmapRequest(
-        polygon_aoi=polygon,
-        date_time={
-            "start_date": date_str, 
-            "start_time": time_str, 
-            "end_date": end_date,
-            "end_time": end_time,
-            "filter_type": filter_type
-        },
-        analytic_type=analytic_type,
-        granularity=60,
-    )
+    # 1. Spatial Slicing: Check if corridor grid already contains this polygon
+    if pre_scanned:
+        sliced = slice_features_for_polygon(pre_scanned, polygon)
+        if sliced:
+            logger.info(f"run_query_fortyguard_heat: Spatial slicing satisfied query ({len(sliced)} cells, 0 API calls).")
+            return {"status": "success", "type": "FeatureCollection", "features": sliced}
 
+    # 2. Live / Cached scan fallback
     client = FortyGuardClient()
     try:
-        res = await client.run_heatmap(req)
-        return res
+        res = await scan_area(
+            polygon=polygon,
+            analytic_type=analytic_type,
+            granularity=60,
+            start_date=date_str,
+            start_time=time_str,
+            forecast_hours=forecast_hours,
+            client=client
+        )
+        return res.get("data", {"type": "FeatureCollection", "features": []})
     except Exception as e:
         logger.warning(f"run_query_fortyguard_heat fallback due to API status: {e}")
         return {"status": "success", "type": "FeatureCollection", "features": [], "note": str(e)}
@@ -497,13 +497,14 @@ async def run_get_resources(arguments: Dict[str, Any]) -> Dict[str, Any]:
 
 
 async def run_calculate_risk_metrics(arguments: Dict[str, Any]) -> Dict[str, Any]:
-    """Wraps analytics_engine.compute_zone_heat_metrics."""
+    """Wraps analytics_engine.compute_zone_heat_metrics with pre_scanned_features support."""
     from app.services.analytics_engine import compute_zone_heat_metrics
     from app.services.fortyguard_client import FortyGuardClient
 
     zone_polygon = arguments["zone_polygon"]
     date_str = arguments.get("date_str") or "2024-08-01"
     time_str = arguments.get("time_str") or "14:00"
+    pre_scanned_features = arguments.get("pre_scanned_features")
 
     client = FortyGuardClient()
     metrics = await compute_zone_heat_metrics(
@@ -511,6 +512,7 @@ async def run_calculate_risk_metrics(arguments: Dict[str, Any]) -> Dict[str, Any
         start_date=date_str,
         start_time=time_str,
         client=client,
+        pre_scanned_features=pre_scanned_features,
     )
     return metrics.model_dump()
 

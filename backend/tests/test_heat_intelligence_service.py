@@ -33,6 +33,7 @@ class MockAsyncClient:
 @pytest.fixture
 def mock_client():
     client = FortyGuardClient()
+    client.settings.fortyguard_mode = "live"
     client.http_client = MockAsyncClient()
     return client
 

@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://127.0.0.1:8000/api";
+import { API_BASE_URL } from "./config";
 
 export interface HeatmapResponse {
   mode: "live" | "cached";
@@ -9,7 +9,8 @@ export interface HeatmapResponse {
 }
 
 export const fetchTestScan = async (forceRefresh: boolean = false): Promise<HeatmapResponse> => {
-  const url = `${API_BASE_URL}/fortyguard/test-scan${forceRefresh ? "?force_refresh=true" : ""}`;
+  const base = API_BASE_URL.replace(/\/$/, "");
+  const url = `${base}/api/fortyguard/test-scan${forceRefresh ? "?force_refresh=true" : ""}`;
   
   const response = await fetch(url, {
     method: "POST",

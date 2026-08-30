@@ -42,6 +42,8 @@ out/
 .env.production.local
 .env.*
 !.env.example
+.fastapicloud/
+.vercel/
 backend/.env
 backend/.env.*
 !backend/.env.example

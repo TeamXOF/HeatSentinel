@@ -92,10 +92,11 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
     )
 
 
-# CORS middleware for React frontend (Vite dev server default 5173, custom 3000)
+# CORS middleware for React frontend (Vite dev server and production Vercel)
+# TEMPORARY: allow_origins=["*"] during deployment; tighten to specific Vercel domain later
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:3000", "http://127.0.0.1:5173"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

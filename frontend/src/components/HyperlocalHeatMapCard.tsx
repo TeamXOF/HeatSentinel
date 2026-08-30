@@ -424,22 +424,18 @@ export const HyperlocalHeatMapCard: React.FC<HyperlocalHeatMapCardProps> = ({
     const style: maplibregl.StyleSpecification = {
       version: 8,
       sources: {
-        'osm-tiles': {
+        osm: {
           type: 'raster',
-          tiles: [
-            'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
-            'https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
-            'https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
-          ],
+          tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
           tileSize: 256,
-          attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; OpenStreetMap',
+          attribution: '&copy; OpenStreetMap contributors',
         },
       },
       layers: [
         {
-          id: 'osm-tiles-layer',
+          id: 'osm-tiles',
           type: 'raster',
-          source: 'osm-tiles',
+          source: 'osm',
           minzoom: 0,
           maxzoom: 19,
         },

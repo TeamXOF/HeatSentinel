@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     census_api_key: str = ""
     database_url: str = "sqlite:///./heatsentinel.db"
     environment: str = "dev"
+    # Comma-separated list of allowed CORS origins. Use "*" for dev, specific domains for production.
+    allowed_origins: str = "*"
 
     # Standardized Timeout & Retry Policy (Step 42)
     fortyguard_request_timeout_seconds: float = 30.0

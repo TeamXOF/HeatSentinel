@@ -12,6 +12,7 @@ from app.errors import HeatSentinelError
 from app.logging_config import logger
 from app.db import init_db
 from app.routers import health, heat_hunt, fortyguard, analysis
+from app.config import get_settings
 
 
 import httpx
@@ -69,7 +70,6 @@ async def add_security_headers(request: Request, call_next):
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-    response.headers["Content-Security-Policy"] = "default-src 'self'; frame-ancestors 'none';"
     return response
 
 
@@ -92,11 +92,13 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
     )
 
 
-# CORS middleware for React frontend (Vite dev server and production Vercel)
-# TEMPORARY: allow_origins=["*"] during deployment; tighten to specific Vercel domain later
+# CORS middleware — reads ALLOWED_ORIGINS env var (comma-separated).
+# Set to "*" for local dev, or the specific Vercel domain for production.
+_settings = get_settings()
+_allowed_origins = [o.strip() for o in _settings.allowed_origins.split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

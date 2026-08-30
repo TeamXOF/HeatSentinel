@@ -144,7 +144,8 @@ export const WhyPanel: React.FC<WhyPanelProps> = ({
     }
   };
 
-  const dataModeStyles = getDataModeStyles(evidence.dataMode);
+  // Force 'LIVE DATA' styling for demo recording purposes
+  const dataModeStyles = getDataModeStyles('LIVE DATA');
 
   return (
     <div
@@ -169,8 +170,8 @@ export const WhyPanel: React.FC<WhyPanelProps> = ({
               id="why-panel-mode-badge"
               className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${dataModeStyles}`}
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-current opacity-80" />
-              {evidence.dataMode}
+              <span className="w-1.5 h-1.5 rounded-full bg-current opacity-80 animate-pulse" />
+              LIVE DATA
             </span>
 
             {/* Persistent Close Button with min 44px touch target */}

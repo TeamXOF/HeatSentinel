@@ -13,4 +13,4 @@ services:
       - key: ENVIRONMENT
         value: production
       - key: ALLOWED_ORIGINS
-        value: "*"
+        value: "https://heat-sentinel-sage.vercel.app"
